@@ -1,0 +1,9 @@
+# Lower numbers have higher priority (must be positive, 0 = highest priority)
+# 	The autorally_chassis receives all of these messages and selects the highest priority valid command for each actuator. 
+#   This design allows different programs to control different actuators at the same time such as independent steering and throttle controllers
+'mppi_controller': 1
+'constantSpeedController': 2
+'waypointFollower': 3
+'joystick': 4
+'OCS': 5
+'RC': 7
