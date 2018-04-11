@@ -10,13 +10,13 @@
     <origin pose="0 0 0 0 0 0"/>
     <collision name="jump22deg_collision">
       <geometry>
-        <mesh filename="package://autorally_description/urdf/autoRallyTrack.stl" scale="0.01 0.01 0.01" />
+        <mesh filename="package://autorally_description/urdf/autoRallyTrack.stl" scale="0.03 0.03 0.10" />
       </geometry>
     </collision>
     
     <visual name="track_visual" cast_shadows="false">
       <geometry>
-        <mesh filename="package://autorally_description/urdf/autoRallyTrack.stl" scale="0.01 0.01 0.01" />
+        <mesh filename="package://autorally_description/urdf/autoRallyTrack.stl" scale="0.03 0.03 0.10" />
       </geometry>
     </visual>
     <inertial>

@@ -12,11 +12,12 @@ import time
 
 from std_msgs.msg import Float64
 
-DEFAULT_SPEED = 3.0
+STARTING_SPEED = 3.0
+RUNNING_SPEED = 5.0
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='This node is responsible for publishing the speed (m/s) for the constant speed controller')
-parser.add_argument('--speed', type=float, default=DEFAULT_SPEED, help='The speed for the AutoRally rover in m/s')
+parser.add_argument('--speed', type=float, default=RUNNING_SPEED, help='The speed for the AutoRally rover in m/s')
 args, unknown = parser.parse_known_args() # Only parse arguments defined above
 
 pub = rospy.Publisher('/constantSpeedController/speedCommand', Float64, queue_size=10)
@@ -24,15 +25,15 @@ rospy.init_node('speed_controller_speed_pub')
 r = rospy.Rate(10) # 10hz
 
 
-RUNNING_SPEED = args.speed * 2.5
+
 
 t_end = time.time() + 14
 while time.time() < t_end:
 	print(args.speed)
-	pub.publish(args.speed)
+	pub.publish(STARTING_SPEED)
 	time.sleep(0.1)
 
 while not rospy.is_shutdown():
 	print(RUNNING_SPEED)
-	pub.publish(RUNNING_SPEED)
+	pub.publish(args.speed)
 	r.sleep()

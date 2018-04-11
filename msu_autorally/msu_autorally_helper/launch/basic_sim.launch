@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 
 <launch>
+	<!-- <node name = "lidar_obstacle_avoidance_controller" pkg="msu_autorally_helper" type="lidar_obstacle_avoidance_controller.py" output="screen"/> -->
+	
 	<include file="$(find autorally_gazebo)/launch/autoRallyTrackGazeboSim_MSU.launch" />
 	<include file="$(find autorally_core)/launch/stateEstimator.launch" />
 	<include file="$(find autorally_control)/launch/waypointFollower.launch" />
 	<include file="$(find autorally_control)/launch/constantSpeedController.launch" />
+	
 
 	<group ns="msu_autorally_helper">
 		<node name = "runstopMotionEnabled_pub" pkg="msu_autorally_helper" type="runstopMotionEnabled_pub.py"/>
@@ -21,5 +24,13 @@
 	<group ns="msu_autorally_goal_model_nodes">
 		<node name = "goal_model_node" pkg="msu_autorally_helper" type="goal_model_monitor.py" output="screen"/>
 	</group>
+	
+	<group ns="msu_tf_helpers">
+		<node name="hokuyo_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/>
+	</group>
+	
+	
+	
+	
 	
 </launch>
