@@ -14,6 +14,7 @@ from std_msgs.msg import Bool
 from std_msgs.msg import String
 from copy import deepcopy
 import json
+import time
 
 
 class CollisionEvent():
@@ -38,7 +39,8 @@ class ContactMonitorNode():
 		
 		# Configure Publishers
 		self.collision_events_pub = rospy.Publisher('/util_comms/collision_events', String, queue_size=10)
-
+		
+		time.sleep(5)
 
 		# Configure Subscribers
 		self.chassis_contact_sub = rospy.Subscriber("/autorally_platform/chassis_contact_sensor_state", ContactsState,self.chassis_contact_test)
