@@ -7,12 +7,12 @@
 	<include file="$(find autorally_core)/launch/stateEstimator.launch" />
 	<include file="$(find autorally_control)/launch/waypointFollower.launch" />
 	<include file="$(find autorally_control)/launch/constantSpeedController.launch" />
-	
+	<!-- <include file="$(find msu_autorally_helper)/launch/msu_gmapping.launch"/> -->
+	 <include file="$(find msu_autorally_helper)/launch/msu_hector_mapping.launch"/>
 
 	<group ns="msu_autorally_helper">
 		<node name = "runstopMotionEnabled_pub" pkg="msu_autorally_helper" type="runstopMotionEnabled_pub.py"/>
 		<node name = "speed_controller_speed_pub" pkg="msu_autorally_helper" type="constant_speed_controller_speed_pub.py"/>
-	
 	</group>
 	
 		
@@ -27,9 +27,11 @@
 	
 	<group ns="msu_tf_helpers">
 		<node name="hokuyo_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/>
+		<node name="odom_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="odom_to_baselink_tf_broadcaster.py"/>
 	</group>
 	
 	
+
 	
 	
 	
