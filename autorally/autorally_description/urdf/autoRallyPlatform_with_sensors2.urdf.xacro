@@ -627,6 +627,21 @@ limitations under the License.
 
   <!--  MSU Sensors -->
   
+  
+  <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+    <alwaysOn>true</alwaysOn>
+    <updateRate>50.0</updateRate>
+    <bodyName>chassis</bodyName>
+    <topicName>odom</topicName>
+    <gaussianNoise>0.01</gaussianNoise>
+    <frameName>world</frameName>
+    <xyzOffsets>0 0 0</xyzOffsets>
+    <rpyOffsets>0 0 0</rpyOffsets>
+  </plugin>
+  
+  
+  
+  
   <!-- Contact sensor on the chassis of the rover -->
   <gazebo reference="chassis">
     <sensor name="chassis_sensor" type="contact">
