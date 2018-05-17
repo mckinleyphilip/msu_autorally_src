@@ -1,0 +1,9 @@
+obstacle_range: 18.5
+raytrace_range: 19.5
+footprint: [[0.125,0.45], [0.125,-0.45], [-0.125,-0.45], [-0.125,0.45]]
+#robot_radius: ir_of_robot
+inflation_radius: 0.55
+
+observation_sources: laser_scan_sensor
+
+laser_scan_sensor: {sensor_frame: autorally_platform/hokuyo, data_type: LaserScan, topic: lidar_front, marking: true, clearing: true}

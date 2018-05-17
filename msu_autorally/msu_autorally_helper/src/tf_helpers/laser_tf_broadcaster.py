@@ -10,7 +10,7 @@ if __name__ == '__main__':
 	br = tf.TransformBroadcaster()
 	rate = rospy.Rate(10.0)
 	while not rospy.is_shutdown():
-		br.sendTransform((0.14, 0.0, 0.2),
+		br.sendTransform((0.17, 0.0, 0.2),
 						(0.0, 0.0, 0.0, 1.0),
 						rospy.Time.now(),
 						"autorally_platform/hokuyo",

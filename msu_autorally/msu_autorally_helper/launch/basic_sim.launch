@@ -3,13 +3,47 @@
 <launch>
 	<!-- <node name = "lidar_obstacle_avoidance_controller" pkg="msu_autorally_helper" type="lidar_obstacle_avoidance_controller.py" output="screen"/> -->
 	
+	<!-- Autorally base launch files -->
 	<include file="$(find autorally_gazebo)/launch/autoRallyTrackGazeboSim_MSU.launch" />
 	<include file="$(find autorally_core)/launch/stateEstimator.launch" />
+	
 	<include file="$(find autorally_control)/launch/waypointFollower.launch" />
 	<include file="$(find autorally_control)/launch/constantSpeedController.launch" />
+	
+	
+	<!-- Possible Mapping launch files -->
 	<!-- <include file="$(find msu_autorally_helper)/launch/msu_gmapping.launch"/> -->
-	 <include file="$(find msu_autorally_helper)/launch/msu_hector_mapping.launch"/>
+	<!-- <include file="$(find msu_autorally_helper)/launch/msu_hector_mapping.launch"/> -->
 
+
+	<!-- <node name="rviz" pkg="rviz" type="rviz"></node> -->
+
+	<node name="autorally_amcl_node" pkg="amcl" type="amcl">
+		<remap from="scan" to="lidar_front"/>
+		<param name="initial_pose_x" value="0"/>
+		<param name="initial_pose_y" value="-25"/>
+		<param name="initial_pose_a" value="0.75"/>
+	</node>
+	
+	
+	<node name="autorally_move_base" pkg="move_base" type="move_base">
+		<remap from="scan" to="lidar_front"/>
+		<rosparam file="$(find msu_autorally_helper)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find msu_autorally_helper)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find msu_autorally_helper)/config/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find msu_autorally_helper)/config/global_costmap_params.yaml" command="load" />
+		<rosparam file="$(find msu_autorally_helper)/config/base_local_planner_params.yaml" command="load" />
+	</node>
+	
+	
+
+
+	<!-- groups of MSU additional launch files -->
+
+	<arg name="map_file" default="$(find msu_autorally_helper)/maps/base_oval_track_map.yaml"/>
+	<!-- Run the map server -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+	
 	<group ns="msu_autorally_helper">
 		<node name = "runstopMotionEnabled_pub" pkg="msu_autorally_helper" type="runstopMotionEnabled_pub.py"/>
 		<node name = "speed_controller_speed_pub" pkg="msu_autorally_helper" type="constant_speed_controller_speed_pub.py"/>
@@ -27,7 +61,12 @@
 	
 	<group ns="msu_tf_helpers">
 		<node name="hokuyo_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/>
-		<node name="odom_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="odom_to_baselink_tf_broadcaster.py"/>
+		
+		<!-- odom_to_base.. uses info derived from sensors on the platform. gazebo_model state uses information from simulation enviroment.
+					have to use odom_to_base.. for the physical platform.
+					gazebo_model states gets better performance in simulation. -->
+		<!-- <node name="odom_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="odom_to_baselink_tf_broadcaster.py"/> -->
+		<node name="gazebo_model_states_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="gazebo_model_state_to_baselink_tf_broadcaster.py"/>
 	</group>
 	
 	
