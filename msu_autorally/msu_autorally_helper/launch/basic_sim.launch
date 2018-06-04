@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 
 <launch>
+	
+	<!-- Load the throttle calibration file in as a ROS param -->
+	<arg name="throttle_calib_file" value="$(find autorally_util)/config/throttlePositionCalibration.yaml"/>
+	<rosparam param="throttle_calib_file" subst_value="True">$(arg throttle_calib_file)</rosparam>
+	
+	
+	
 	<!-- <node name = "lidar_obstacle_avoidance_controller" pkg="msu_autorally_helper" type="lidar_obstacle_avoidance_controller.py" output="screen"/> -->
 	
 	<!-- Autorally base launch files -->
@@ -8,7 +15,7 @@
 	<include file="$(find autorally_core)/launch/stateEstimator.launch" />
 	
 	<include file="$(find autorally_control)/launch/waypointFollower.launch" />
-	<!-- <include file="$(find autorally_control)/launch/constantSpeedController.launch" /> -->
+	<include file="$(find autorally_control)/launch/constantSpeedController.launch" />
 	
 	<!-- <node name = "BaseController" pkg="msu_autorally_helper" type="base_controller.py"/> -->
 	
@@ -20,6 +27,7 @@
 
 	<!-- <node name="rviz" pkg="rviz" type="rviz"></node> -->
 
+	
 	<node name="autorally_amcl_node" pkg="amcl" type="amcl">
 		<remap from="scan" to="lidar_front"/>
 		<param name="initial_pose_x" value="0"/>
@@ -39,6 +47,8 @@
 		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
 		<param name="controller_frequency" value="20.0" />
 	</node>
+	
+	
 	
 	
 
