@@ -84,7 +84,7 @@ limitations under the License.
 
     <!-- Control the steering, axle, and shock absorber joints. -->
     <node name="autorally_controller" pkg="autorally_gazebo"
-          type="autorally_controller.py" output="screen">
+          type="autorally_controller_reverse.py" output="screen">
       <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
       <rosparam file="$(find autorally_gazebo)/config/autoRallyPlatformCtrlrParams.yaml" command="load"/>
       <rosparam param="chassisCommandProirities" command="load" file="$(env AR_CONFIG_PATH)/chassisCommandPriorities.yaml" />
