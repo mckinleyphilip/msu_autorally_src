@@ -388,7 +388,7 @@ class AutoRallyCtrlr(object):
 
         # Publish the steering and axle joint commands.'
         #rospy.loginfo(2*2)
-        #
+        
         chassisSt.header.stamp = rospy.Time.now()
         self.chassisStatePub.publish(chassisSt)
 		
