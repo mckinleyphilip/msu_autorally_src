@@ -3,8 +3,9 @@
 #   This design allows different programs to control different actuators at the same time such as independent steering and throttle controllers
 'mppi_controller': 1
 'BaseController': 2
-'constantSpeedController': 3
-'waypointFollower': 3
-'joystick': 4
-'OCS': 5
+'constantSpeedController': 4
+'tele_op_PID_speed_controller': 3
+'waypointFollower': 4
+'joystick': 5
+'OCS': 6
 'RC': 7
