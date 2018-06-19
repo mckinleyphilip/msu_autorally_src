@@ -36,7 +36,7 @@ class keyboard_tele_op_node():
 		
 		
 		# Configure Publishers
-		self.speed_cmd_pub = rospy.Publisher('/constantSpeedController/speedCommand', Float64, queue_size=10)
+		self.speed_cmd_pub = rospy.Publisher('/tele_op_PID_speed_controller/speedCommand', Float64, queue_size=10)
 
 
 		# Configure Subscribers

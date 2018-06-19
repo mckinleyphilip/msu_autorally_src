@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find autorally_core)/launch/hardware.machine" />
 
-  <node pkg="nodelet" type="nodelet" name="ConstantSpeedController" args="load autorally_control/ConstantSpeedController autorally_core_manager" output="screen"  machine="autorally-master">
+  <node pkg="nodelet" type="nodelet" name="Tele_op_PID_speed_controller" args="load autorally_control/tele_op_PID_speed_controller autorally_core_manager" output="screen"  machine="autorally-master">
 
     <rosparam param="throttleCalibration" command="load" file="$(env AR_CONFIG_PATH)/throttlePositionCalibration.yaml" />
     <param name="speedCommander" value="OCS" />
