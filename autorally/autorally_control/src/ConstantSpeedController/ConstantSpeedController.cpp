@@ -66,7 +66,7 @@ void ConstantSpeedController::onInit()
 
   loadThrottleCalibration();
 
-  m_mostRecentSpeedCommand.data = 0;
+  m_mostRecentSpeedCommand.data = -99;
 
   m_speedCommandSub = nh.subscribe("constantSpeedController/speedCommand", 1,
                           &ConstantSpeedController::speedCallback, this);
@@ -155,7 +155,10 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   
   //command->throttle = 1.0;
   //ROS_ERROR("Speed command: %f", command->throttle);
-  m_chassisCommandPub.publish(command);
+  if (m_mostRecentSpeedCommand.data != -99)
+  {
+    m_chassisCommandPub.publish(command);
+  }
 }
 
 /*void ConstantSpeedController::enableControlCallback(const ros::TimerEvent& time)

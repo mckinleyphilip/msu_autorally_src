@@ -2,7 +2,7 @@
 # 	The autorally_chassis receives all of these messages and selects the highest priority valid command for each actuator. 
 #   This design allows different programs to control different actuators at the same time such as independent steering and throttle controllers
 'mppi_controller': 1
-'BaseController': 2
+'base_controller_nodelet': 2
 'constantSpeedController': 4
 'tele_op_PID_speed_controller': 3
 'waypointFollower': 4
