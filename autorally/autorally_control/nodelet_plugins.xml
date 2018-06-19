@@ -22,9 +22,18 @@
   </class>
 </library>
 
+<!-- MSU Additions -->
 
 <library path="lib/libtele_op_PID_speed_controller">
   <class name="autorally_control/tele_op_PID_speed_controller" type="autorally_control::tele_op_PID_speed_controller" base_class_type="nodelet::Nodelet">
+    <description>
+    Drive robot at a constant speed using wheel speed data
+    </description>
+  </class>
+</library>
+
+<library path="lib/libbase_controller_nodelet">
+  <class name="autorally_control/base_controller_nodelet" type="autorally_control::base_controller_nodelet" base_class_type="nodelet::Nodelet">
     <description>
     Drive robot at a constant speed using wheel speed data
     </description>

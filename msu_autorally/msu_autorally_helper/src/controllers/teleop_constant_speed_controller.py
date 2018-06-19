@@ -100,6 +100,12 @@ class keyboard_tele_op_node():
 			
 		
 	def on_shutdown(self):
+		
+		# Send a flag to tell the nodelet that it no longer needs to send chassisCommands
+		self.current_speed_setting = -99
+		self.speed_cmd_pub.publish(self.current_speed_setting)
+		
+		
 		# Curses messes with the terminal printing and text will not display properly unless we reset the terminal state when we are done
 		os.system('reset')
 		pass
