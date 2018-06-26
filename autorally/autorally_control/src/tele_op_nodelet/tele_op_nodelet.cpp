@@ -24,7 +24,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /**********************************************
- * @file tele_op_PID_speed_controller.cpp
+ * @file tele_op_nodelet.cpp
  * @author Brian Goldfain <bgoldfai@gmail.com>
  * @date April 14, 2014
  * @copyright 2014 Georgia Institute of Technology
@@ -36,17 +36,17 @@
 #include <math.h>
 #include <pluginlib/class_list_macros.h>
 
-#include "tele_op_PID_speed_controller.h"
+#include "tele_op_nodelet.h"
 
 #define PI 3.14159265
 #define DEGTORAD (PI/180)
 
-PLUGINLIB_DECLARE_CLASS(autorally_control, tele_op_PID_speed_controller, autorally_control::tele_op_PID_speed_controller, nodelet::Nodelet)
+PLUGINLIB_DECLARE_CLASS(autorally_control, tele_op_nodelet, autorally_control::tele_op_nodelet, nodelet::Nodelet)
 
 namespace autorally_control
 {
 
-tele_op_PID_speed_controller::tele_op_PID_speed_controller():
+tele_op_nodelet::tele_op_nodelet():
   m_controllerState(DISABLED),
   m_constantSpeedPrevThrot(0.0),
   m_controlEnabled(true),
@@ -55,12 +55,12 @@ tele_op_PID_speed_controller::tele_op_PID_speed_controller():
   m_integralError(0.0)
 {}
 
-tele_op_PID_speed_controller::~tele_op_PID_speed_controller()
+tele_op_nodelet::~tele_op_nodelet()
 {}
 
-void tele_op_PID_speed_controller::onInit()
+void tele_op_nodelet::onInit()
 {
-  NODELET_INFO("tele_op_PID_speed_controller initialization");
+  NODELET_INFO("tele_op_nodelet initialization");
   ros::NodeHandle nh = getNodeHandle();
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
 
@@ -68,13 +68,13 @@ void tele_op_PID_speed_controller::onInit()
 
   m_mostRecentSpeedCommand.data = -99;
 
-  m_speedCommandSub = nh.subscribe("tele_op_PID_speed_controller/speedCommand", 1,
-                          &tele_op_PID_speed_controller::speedCallback, this);
+  m_speedCommandSub = nh.subscribe("tele_op_nodelet/speedCommand", 1,
+                          &tele_op_nodelet::speedCallback, this);
   m_wheelSpeedsSub = nh.subscribe("wheelSpeeds", 1,
-                          &tele_op_PID_speed_controller::wheelSpeedsCallback,
+                          &tele_op_nodelet::wheelSpeedsCallback,
                           this);
   m_chassisCommandPub = nh.advertise<autorally_msgs::chassisCommand>
-                        ("tele_op_PID_speed_controller/chassisCommand", 1);
+                        ("tele_op_nodelet/chassisCommand", 1);
 
   if(!nhPvt.getParam("speedCommander", m_speedCommander) ||
      !nhPvt.getParam("accelerationRate", m_accelerationRate) ||
@@ -84,36 +84,36 @@ void tele_op_PID_speed_controller::onInit()
      !nhPvt.getParam("KI", m_constantSpeedKI) ||
      !nhPvt.getParam("IMax", m_constantSpeedIMax))
   {
-    NODELET_ERROR("Could not get all tele_op_PID_speed_controller params");
+    NODELET_ERROR("Could not get all tele_op_nodelet params");
   }
 
   //m_accelerationProfile = generateAccelerationProfile(100);
 
   m_controlTimer = nh.createTimer(ros::Rate(1),
-                      &tele_op_PID_speed_controller::controlCallback, this);
+                      &tele_op_nodelet::controlCallback, this);
   /*m_controlEnableTimer = nh.createTimer(ros::Rate(0.2),
-                      &tele_op_PID_speed_controller::enableControlCallback, this);*/
-  NODELET_INFO("tele_op_PID_speed_controller initialization complete");
+                      &tele_op_nodelet::enableControlCallback, this);*/
+  NODELET_INFO("tele_op_nodelet initialization complete");
 
 }
 
-void tele_op_PID_speed_controller::speedCallback(const std_msgs::Float64ConstPtr& msg)
+void tele_op_nodelet::speedCallback(const std_msgs::Float64ConstPtr& msg)
 {
   if (m_mostRecentSpeedCommand.data != msg->data)
   {
-    NODELET_INFO_STREAM("tele_op_PID_speed_controller: new speed setpoint:" << msg->data);
+    NODELET_INFO_STREAM("tele_op_nodelet: new speed setpoint:" << msg->data);
   }
   m_mostRecentSpeedCommand = *msg;
 }
 
-void tele_op_PID_speed_controller::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)
+void tele_op_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)
 {
   m_frontWheelsSpeed = 0.5*(msg->lfSpeed + msg->rfSpeed);
   //m_backWheelsSpeed = 0.2*m_backWheelsSpeed + 0.4*(msg->lbSpeed + msg->rbSpeed);
 
   autorally_msgs::chassisCommandPtr command(new autorally_msgs::chassisCommand);
   command->header.stamp = ros::Time::now();
-  command->sender = "tele_op_PID_speed_controller";
+  command->sender = "tele_op_nodelet";
   command->steering = -5.0;
   command->frontBrake = 0.0;
 
@@ -143,7 +143,7 @@ void tele_op_PID_speed_controller::wheelSpeedsCallback(const autorally_msgs::whe
     }
     else
     {
-      NODELET_WARN("tele_op_PID_speed_controller could not interpolate speed %f", m_mostRecentSpeedCommand.data);
+      NODELET_WARN("tele_op_nodelet could not interpolate speed %f", m_mostRecentSpeedCommand.data);
       command->throttle = 0;
     }
   }
@@ -161,16 +161,16 @@ void tele_op_PID_speed_controller::wheelSpeedsCallback(const autorally_msgs::whe
   }
 }
 
-/*void tele_op_PID_speed_controller::enableControlCallback(const ros::TimerEvent& time)
+/*void tele_op_nodelet::enableControlCallback(const ros::TimerEvent& time)
 {
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
   if(!nhPvt.getParam("controlEnabled", m_controlEnabled) )
   {
-    NODELET_ERROR("Could not update tele_op_PID_speed_controller params");
+    NODELET_ERROR("Could not update tele_op_nodelet params");
   }
 }*/
 
-void tele_op_PID_speed_controller::controlCallback(const ros::TimerEvent& time)
+void tele_op_nodelet::controlCallback(const ros::TimerEvent& time)
 {
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
   nhPvt.getParam("KP", m_constantSpeedKP);
@@ -180,7 +180,7 @@ void tele_op_PID_speed_controller::controlCallback(const ros::TimerEvent& time)
 
 }
 
-void tele_op_PID_speed_controller::loadThrottleCalibration()
+void tele_op_nodelet::loadThrottleCalibration()
 {
   NODELET_INFO("Loading calibration");
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
@@ -194,19 +194,19 @@ void tele_op_PID_speed_controller::loadThrottleCalibration()
       std::pair<double, double> toAdd(std::pair<double, double>(
                                       boost::lexical_cast<double>(mapIt->first),
                                       static_cast<double>(mapIt->second)));
-      NODELET_INFO_STREAM("tele_op_PID_speed_controller added to add mapping " <<
+      NODELET_INFO_STREAM("tele_op_nodelet added to add mapping " <<
                              toAdd.first << ":" << toAdd.second);
       if(!m_throttleMappings.update(toAdd))
       {
-        NODELET_ERROR_STREAM("tele_op_PID_speed_controller Failed to add mapping " <<
+        NODELET_ERROR_STREAM("tele_op_nodelet Failed to add mapping " <<
                              toAdd.first << ":" << toAdd.second);
       }
     } else
     {
-      NODELET_ERROR("tele_op_PID_speed_controller: XmlRpc throttle calibration formatted incorrectly");
+      NODELET_ERROR("tele_op_nodelet: XmlRpc throttle calibration formatted incorrectly");
     }
   }
-  NODELET_INFO_STREAM("tele_op_PID_speed_controller: Loaded " <<
+  NODELET_INFO_STREAM("tele_op_nodelet: Loaded " <<
                       m_throttleMappings.size() <<
                       " throttle mappings");
 }

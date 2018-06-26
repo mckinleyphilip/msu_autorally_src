@@ -24,7 +24,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /**********************************************
- * @file ConstantSpeedController.h
+ * @file tele_op_nodelet.h
  * @author Brian Goldfain <bgoldfai@gmail.com>
  * @date November 13, 2013
  * @copyright 2012 Georgia Institute of Technology
@@ -49,11 +49,11 @@
 namespace autorally_control
 {
 
-class tele_op_PID_speed_controller : public nodelet::Nodelet
+class tele_op_nodelet : public nodelet::Nodelet
 {
  public:
-  tele_op_PID_speed_controller();
-  ~tele_op_PID_speed_controller();
+  tele_op_nodelet();
+  ~tele_op_nodelet();
   void onInit();
 
  private:

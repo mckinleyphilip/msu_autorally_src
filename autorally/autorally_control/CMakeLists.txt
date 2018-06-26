@@ -35,7 +35,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${Eigen3_INCLUDE_DIRS})
 
 add_subdirectory(src/ConstantSpeedController)
-add_subdirectory(src/tele_op_PID_speed_controller)
+add_subdirectory(src/tele_op_nodelet)
 add_subdirectory(src/base_controller_nodelet)
 add_subdirectory(src/joystick)
 add_subdirectory(src/gpsWaypoint)
