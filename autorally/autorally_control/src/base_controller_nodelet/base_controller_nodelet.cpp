@@ -68,7 +68,7 @@ void base_controller_nodelet::onInit()
 
   m_mostRecentSpeedCommand.data = -99;
 
-  m_speedCommandSub = nh.subscribe("base_controller_nodelet/speedCommand", 1,
+  m_speedCommandSub = nh.subscribe("cmd_vel", 1,
                           &base_controller_nodelet::speedCallback, this);
   m_wheelSpeedsSub = nh.subscribe("wheelSpeeds", 1,
                           &base_controller_nodelet::wheelSpeedsCallback,
@@ -97,13 +97,16 @@ void base_controller_nodelet::onInit()
 
 }
 
-void base_controller_nodelet::speedCallback(const std_msgs::Float64ConstPtr& msg)
+void base_controller_nodelet::speedCallback(const geometry_msgs::TwistPtr& msg)
 {
+	NODELET_INFO("Test");
+	/*
   if (m_mostRecentSpeedCommand.data != msg->data)
   {
     NODELET_INFO_STREAM("base_controller_nodelet: new speed setpoint:" << msg->data);
   }
   m_mostRecentSpeedCommand = *msg;
+  * */
 }
 
 void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)

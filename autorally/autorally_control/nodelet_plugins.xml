@@ -24,8 +24,8 @@
 
 <!-- MSU Additions -->
 
-<library path="lib/libtele_op_PID_speed_controller">
-  <class name="autorally_control/tele_op_PID_speed_controller" type="autorally_control::tele_op_PID_speed_controller" base_class_type="nodelet::Nodelet">
+<library path="lib/libtele_op_nodelet">
+  <class name="autorally_control/tele_op_nodelet" type="autorally_control::tele_op_nodelet" base_class_type="nodelet::Nodelet">
     <description>
     Drive robot at a constant speed using wheel speed data
     </description>

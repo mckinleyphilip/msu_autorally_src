@@ -4,6 +4,7 @@ TebLocalPlannerROS:
 
  odom_topic: /odom
  map_frame: /odom
+ controller_frequency: 21
     
  # Trajectory
   

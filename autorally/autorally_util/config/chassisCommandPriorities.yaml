@@ -4,7 +4,7 @@
 'mppi_controller': 1
 'base_controller_nodelet': 2
 'constantSpeedController': 4
-'tele_op_PID_speed_controller': 3
+'tele_op_nodelet': 3
 'waypointFollower': 4
 'joystick': 5
 'OCS': 6
