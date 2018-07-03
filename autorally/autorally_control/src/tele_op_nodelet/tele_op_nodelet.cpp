@@ -66,7 +66,8 @@ void tele_op_nodelet::onInit()
 
   loadThrottleCalibration();
 
-  m_mostRecentSpeedCommand.data = -99;
+  m_mostRecentSpeedCommand.data = 99;
+  m_reverse = false;
 
   m_speedCommandSub = nh.subscribe("tele_op_nodelet/speedCommand", 1,
                           &tele_op_nodelet::speedCallback, this);
@@ -104,6 +105,17 @@ void tele_op_nodelet::speedCallback(const std_msgs::Float64ConstPtr& msg)
     NODELET_INFO_STREAM("tele_op_nodelet: new speed setpoint:" << msg->data);
   }
   m_mostRecentSpeedCommand = *msg;
+  
+  // Set reverse flag based on the sign of the speed command
+  if (msg->data < 0)
+  {
+	  m_reverse = true;
+  }
+  else
+  {
+	  m_reverse = false;
+  }
+  
 }
 
 void tele_op_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)
@@ -116,13 +128,17 @@ void tele_op_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConst
   command->sender = "tele_op_nodelet";
   command->steering = -5.0;
   command->frontBrake = 0.0;
+  command->reverse = m_reverse;
+  
+  double abs_goal_speed = abs(m_mostRecentSpeedCommand.data);
+  double abs_front_wheel_speed = abs(m_frontWheelsSpeed);
 
-  if (m_mostRecentSpeedCommand.data > 0.1)
+  if (abs_goal_speed > 0.1 && abs_goal_speed < 99)
   {
     double p;
-    if(m_throttleMappings.interpolateKey(m_mostRecentSpeedCommand.data, p))
+    if(m_throttleMappings.interpolateKey(abs_goal_speed, p))
     {
-      m_integralError += m_mostRecentSpeedCommand.data - m_frontWheelsSpeed;
+      m_integralError += abs_goal_speed - abs_front_wheel_speed;
       if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
       {
         m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
@@ -134,7 +150,7 @@ void tele_op_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConst
       }
 
       command->throttle = p +
-                 m_constantSpeedKP*(m_mostRecentSpeedCommand.data - m_frontWheelsSpeed);
+                 m_constantSpeedKP*(abs_goal_speed - abs_front_wheel_speed);
       command->throttle += m_constantSpeedKI * m_integralError;
       command->throttle = std::max(0.0, std::min(1.0, command->throttle));
 
@@ -155,7 +171,7 @@ void tele_op_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConst
   
   //command->throttle = 1.0;
   //ROS_ERROR("Speed command: %f", command->throttle);
-  if (m_mostRecentSpeedCommand.data != -99)
+  if (abs_goal_speed != 99)
   {
     m_chassisCommandPub.publish(command);
   }

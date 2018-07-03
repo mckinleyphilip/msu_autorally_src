@@ -47,6 +47,7 @@
 #include <autorally_core/RingBuffer.h>
 
 #include <geometry_msgs/Twist.h>
+#include <math.h>
 
 
 namespace autorally_control
@@ -95,10 +96,14 @@ class base_controller_nodelet : public nodelet::Nodelet
   double m_throttleAccEnd;
   ros::Time m_accelerationStartTime;
   double m_accelerationDuration;
+  
+  std::string m_node_name;
+  double m_steering_command;
 
   autorally_core::RingBuffer<double> m_throttleMappings;
   std::vector<double> m_accelerationProfile;
   void speedCallback(const geometry_msgs::TwistPtr& msg);
+  double Clamp(double num, double min, double max);
   void wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg);
 
   void enableControlCallback(const ros::TimerEvent& time);
