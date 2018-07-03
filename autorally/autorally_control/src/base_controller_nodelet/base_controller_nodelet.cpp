@@ -151,9 +151,17 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   command->frontBrake = 0.0;
   command->reverse = m_reverse;
   
-  double abs_goal_speed = abs(m_mostRecentSpeedCommand.data);
-  double abs_front_wheel_speed = abs(m_frontWheelsSpeed);
+  double abs_goal_speed = std::abs(m_mostRecentSpeedCommand.data);
+  double abs_front_wheel_speed = std::abs(m_frontWheelsSpeed);
   
+  
+  
+  // braking
+  double speed_diff = abs_goal_speed - abs_front_wheel_speed; 
+  if (speed_diff < 0)
+  {
+	  command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
+  }
   
 
   if (abs_goal_speed > 0.1 && abs_goal_speed < 99)
