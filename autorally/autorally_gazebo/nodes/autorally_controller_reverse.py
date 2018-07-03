@@ -143,7 +143,7 @@ class AutoRallyCtrlr(object):
     def __init__(self, namespace='controller_manager'):
         """Initialize this _AutoRallyCtrlr."""
 
-        rospy.init_node('autorally_controller')
+        rospy.init_node('autorally_controller_reverse')
 
       # Parameters
 

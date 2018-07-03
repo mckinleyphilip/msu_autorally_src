@@ -7,7 +7,7 @@
 	<rosparam param="throttle_calib_file" subst_value="True">$(arg throttle_calib_file)</rosparam>
 	
 	
-	<arg name="gui" value="false"/>
+	<arg name="gui" default="false"/>
 	
 	
 	<!-- Autorally base launch files -->
