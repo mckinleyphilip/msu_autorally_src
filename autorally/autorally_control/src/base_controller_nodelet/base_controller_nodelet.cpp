@@ -60,13 +60,18 @@ base_controller_nodelet::~base_controller_nodelet()
 
 void base_controller_nodelet::onInit()
 {
-  NODELET_INFO("base_controller_nodelet initialization");
+  m_node_name = "base_controller_nodelet";
+  
+  NODELET_INFO("%s initialization", m_node_name.c_str());
   ros::NodeHandle nh = getNodeHandle();
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
 
   loadThrottleCalibration();
+  
+  
 
   m_mostRecentSpeedCommand.data = -99;
+  m_steering_command = -5;
 
   m_speedCommandSub = nh.subscribe("cmd_vel", 1,
                           &base_controller_nodelet::speedCallback, this);
@@ -99,15 +104,43 @@ void base_controller_nodelet::onInit()
 
 void base_controller_nodelet::speedCallback(const geometry_msgs::TwistPtr& msg)
 {
-	NODELET_INFO("Test");
+	// NODELET_INFO("%s: New X speed: %f", m_node_name.c_str(), msg->linear.x);
+	
+	// Set speed goal to the linear.x portion of the twist msg
+	// Twist msg should only have a non-zero value in the x portion if using the teb_local_planner
+	m_mostRecentSpeedCommand.data = 1.5 * float(msg->linear.x);
+	
+	// Compute steering angle based off of directions in the teb_local_planner for car-like vehicles
+	// http://wiki.ros.org/teb_local_planner/Tutorials/Planning%20for%20car-like%20robots
+	
+	double omega = -1.0 * msg->angular.z;
+	double wheelbase = 0.57;
+	double v = msg->linear.x;
+	
 	/*
-  if (m_mostRecentSpeedCommand.data != msg->data)
-  {
-    NODELET_INFO_STREAM("base_controller_nodelet: new speed setpoint:" << msg->data);
-  }
-  m_mostRecentSpeedCommand = *msg;
-  * */
+	if ((omega == 0) || (v ==0))
+	{
+		m_steering_command = 0;
+	}
+	else
+	{
+		double radius;
+		radius = v / omega;
+		m_steering_command = atan(wheelbase / radius);
+	} 
+	*/
+	
+	m_steering_command = Clamp(1.0  * omega,-1.0,1.0);
 }
+
+double base_controller_nodelet::Clamp(double num, double min, double max)
+  {
+    if (num < min)
+      num = min;
+    if (num > max)
+      num = max;
+    return num;
+  }
 
 void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)
 {
@@ -116,8 +149,8 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
 
   autorally_msgs::chassisCommandPtr command(new autorally_msgs::chassisCommand);
   command->header.stamp = ros::Time::now();
-  command->sender = "base_controller_nodelet";
-  command->steering = -5.0;
+  command->sender = m_node_name;
+  command->steering = m_steering_command;
   command->frontBrake = 0.0;
 
   if (m_mostRecentSpeedCommand.data > 0.1)

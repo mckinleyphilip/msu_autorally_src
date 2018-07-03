@@ -7,7 +7,7 @@
 	<rosparam param="throttle_calib_file" subst_value="True">$(arg throttle_calib_file)</rosparam>
 	
 	
-	<arg name="gui" value="false"/>
+	<arg name="gui" default="false"/>
 	
 	
 	<!-- Autorally base launch files -->
@@ -17,10 +17,10 @@
 	
 	<include file="$(find autorally_core)/launch/stateEstimator.launch" />
 	
-	<include file="$(find autorally_control)/launch/waypointFollower.launch" />
-	<include file="$(find autorally_control)/launch/constantSpeedController.launch" />
+	<!-- <include file="$(find autorally_control)/launch/waypointFollower.launch" /> -->
+	<!-- <include file="$(find autorally_control)/launch/constantSpeedController.launch" /> -->
 	<include file="$(find msu_autorally_helper)/launch/tele_op_nodelet.launch" />
-	<!-- <include file="$(find msu_autorally_helper)/launch/base_controller_nodelet.launch" /> -->
+	<include file="$(find msu_autorally_helper)/launch/base_controller_nodelet.launch" />
 	
 	
 
@@ -48,10 +48,10 @@
 		<rosparam file="$(find msu_autorally_helper)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
 		<rosparam file="$(find msu_autorally_helper)/config/local_costmap_params.yaml" command="load" />
 		<rosparam file="$(find msu_autorally_helper)/config/global_costmap_params.yaml" command="load" />
-		<!-- <rosparam file="$(find msu_autorally_helper)/config/base_local_planner_params.yaml" command="load" /> --> <!-- Base local planner config -->
+		<rosparam file="$(find msu_autorally_helper)/config/base_local_planner_params.yaml" command="load" /> <!-- Base local planner config -->
 		<rosparam file="$(find msu_autorally_helper)/config/teb_local_planner_params.yaml" command="load" /> <!-- teb local planner config -->
-		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-		<!-- <param name="controller_frequency" value="10000.0" /> -->
+		<rosparam file="$(find msu_autorally_helper)/config/move_base_params.yaml" command="load" />
+		<param name="base_local_planner" value="TebLocalPlannerROS" /> <!-- TrajectoryPlannerROS   TebLocalPlannerROS -->
 	</node>
 	
 	
@@ -70,7 +70,7 @@
 		<!-- <node name = "speed_controller_speed_pub" pkg="msu_autorally_helper" type="constant_speed_controller_speed_pub.py"/> -->
 	</group>
 	
-		
+	<!--
 	<group ns="msu_autorally_utility_trackers">
 		<node name = "collision_monitor" pkg="msu_autorally_helper" type="autorally_collision_monitor.py" output="screen"/>
 	</group>
@@ -79,6 +79,7 @@
 	<group ns="msu_autorally_goal_model_nodes">
 		<node name = "goal_model_node" pkg="msu_autorally_helper" type="goal_model_monitor.py" output="screen"/>
 	</group>
+	-->
 	
 	<group ns="msu_tf_helpers">
 		<node name="hokuyo_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/>
