@@ -91,6 +91,7 @@ class base_controller_nodelet : public nodelet::Nodelet
   double m_frontWheelsSpeed;
   double m_backWheelsSpeed;
   std_msgs::Float64 m_mostRecentSpeedCommand;
+  bool m_reverse;
   double m_speedSetPoint;
   double m_throttleAccStart;
   double m_throttleAccEnd;

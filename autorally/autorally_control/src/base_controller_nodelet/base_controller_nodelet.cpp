@@ -70,7 +70,9 @@ void base_controller_nodelet::onInit()
   
   
 
-  m_mostRecentSpeedCommand.data = -99;
+  m_mostRecentSpeedCommand.data = 99;
+  m_reverse = false;
+  
   m_steering_command = -5;
 
   m_speedCommandSub = nh.subscribe("cmd_vel", 1,
@@ -106,30 +108,25 @@ void base_controller_nodelet::speedCallback(const geometry_msgs::TwistPtr& msg)
 {
 	// NODELET_INFO("%s: New X speed: %f", m_node_name.c_str(), msg->linear.x);
 	
-	// Set speed goal to the linear.x portion of the twist msg
-	// Twist msg should only have a non-zero value in the x portion if using the teb_local_planner
-	m_mostRecentSpeedCommand.data = 1.5 * float(msg->linear.x);
 	
-	// Compute steering angle based off of directions in the teb_local_planner for car-like vehicles
-	// http://wiki.ros.org/teb_local_planner/Tutorials/Planning%20for%20car-like%20robots
+	// Handle Throttle
+	double speed_multiplier = 1.5;
+	m_mostRecentSpeedCommand.data = speed_multiplier * float(msg->linear.x);
 	
-	double omega = -1.0 * msg->angular.z;
-	double wheelbase = 0.57;
-	double v = msg->linear.x;
 	
-	/*
-	if ((omega == 0) || (v ==0))
+	// Handle Reverse
+	// Set reverse flag based on the sign of the speed command
+	if (msg->linear.x < 0)
 	{
-		m_steering_command = 0;
+		m_reverse = true;
 	}
 	else
 	{
-		double radius;
-		radius = v / omega;
-		m_steering_command = atan(wheelbase / radius);
-	} 
-	*/
+		m_reverse = false;
+	}
 	
+	// Handle Steering
+	double omega = -1.0 * msg->angular.z;
 	m_steering_command = Clamp(1.0  * omega,-1.0,1.0);
 }
 
@@ -152,13 +149,19 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   command->sender = m_node_name;
   command->steering = m_steering_command;
   command->frontBrake = 0.0;
+  command->reverse = m_reverse;
+  
+  double abs_goal_speed = abs(m_mostRecentSpeedCommand.data);
+  double abs_front_wheel_speed = abs(m_frontWheelsSpeed);
+  
+  
 
-  if (m_mostRecentSpeedCommand.data > 0.1)
+  if (abs_goal_speed > 0.1 && abs_goal_speed < 99)
   {
     double p;
-    if(m_throttleMappings.interpolateKey(m_mostRecentSpeedCommand.data, p))
+    if(m_throttleMappings.interpolateKey(abs_goal_speed, p))
     {
-      m_integralError += m_mostRecentSpeedCommand.data - m_frontWheelsSpeed;
+      m_integralError += abs_goal_speed - abs_front_wheel_speed;
       if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
       {
         m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
@@ -170,7 +173,7 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
       }
 
       command->throttle = p +
-                 m_constantSpeedKP*(m_mostRecentSpeedCommand.data - m_frontWheelsSpeed);
+                 m_constantSpeedKP*(abs_goal_speed - abs_front_wheel_speed);
       command->throttle += m_constantSpeedKI * m_integralError;
       command->throttle = std::max(0.0, std::min(1.0, command->throttle));
 
@@ -191,7 +194,7 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   
   //command->throttle = 1.0;
   //ROS_ERROR("Speed command: %f", command->throttle);
-  if (m_mostRecentSpeedCommand.data != -99)
+  if (abs_goal_speed != -99)
   {
     m_chassisCommandPub.publish(command);
   }
