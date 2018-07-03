@@ -1,5 +1,5 @@
 base_global_planner: navfn/NavfnROS
-base_local_planner: teb_local_planner/TebLocalPlannerROS
+base_local_planner: TebLocalPlannerROS
 clearing_rotation_allowed: true
 conservative_reset_dist: 3.0
 controller_frequency: 20.0

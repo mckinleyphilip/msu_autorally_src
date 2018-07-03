@@ -48,6 +48,7 @@
 
 #include <geometry_msgs/Twist.h>
 #include <math.h>
+#include <cmath>
 
 
 namespace autorally_control
