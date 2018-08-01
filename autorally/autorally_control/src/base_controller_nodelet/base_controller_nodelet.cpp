@@ -126,7 +126,7 @@ void base_controller_nodelet::speedCallback(const geometry_msgs::TwistPtr& msg)
 	}
 	
 	// Handle Steering
-	double omega = -1.0 * msg->angular.z;
+	double omega = -1.2 * msg->angular.z;
 	m_steering_command = Clamp(1.0  * omega,-1.0,1.0);
 }
 
@@ -157,10 +157,12 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   
   
   // braking
-  double speed_diff = abs_goal_speed - abs_front_wheel_speed; 
-  if (speed_diff < 0)
+  double speed_diff = abs_goal_speed - abs_front_wheel_speed;
+  if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
+  //if (!((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
   {
-	  command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
+	  //command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
+	  command->frontBrake = 1.0;
   }
   
 
