@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+	
+	<!-- Spawn the simulated platform model -->
+	<include file="$(find msu_autorally_helper)/launch/spawn_autorally_model.launch" />
+	
+	
+	<!-- Start other Autorally controller options -->
+	<!--	Note that some of these are dependent on the stateEstimator which is optionally launched from the spawn_autorally_model launch file -->
+	<!-- <include file="$(find autorally_control)/launch/waypointFollower.launch" /> -->
+	<!-- <include file="$(find autorally_control)/launch/constantSpeedController.launch" /> -->
+	<!-- <include file="$(find msu_autorally_helper)/launch/tele_op_nodelet.launch" /> -->
+	<!-- <include file="$(find autorally_control)/launch/joystickController.launch" /> -->
+	
+	
+	<!-- Start the ROS Navigation Stack -->
+	<include file="$(find msu_autorally_helper)/launch/autorally_ros_nav_stack.launch" />
+	
+	
+	<!-- Start custom TF helpers to fill out the tf tree from /base_link to /odom -->
+	<group ns="msu_tf_helpers">
+		<node name="hokuyo_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/>
+		<!-- <node name="kinect_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/> --> <!-- Note this transform has to be rotated yet! -->
+		
+		<!-- odom_to_base.. uses info derived from sensors on the platform. gazebo_model state uses information from simulation enviroment.
+					have to use odom_to_base.. for the physical platform.
+					gazebo_model states gets better performance in simulation. -->
+		<!-- <node name="odom_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="odom_to_baselink_tf_broadcaster.py"/> --> <!-- stateEstimator must be running for this -->
+		<node name="gazebo_model_states_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="gazebo_model_state_to_baselink_tf_broadcaster.py"/>
+	</group>
+	
+	
+	<!-- Start utility monitors -->
+	<include file="$(find msu_autorally_helper)/launch/autorally_utility_monitors.launch" />
+	
+	
+	<!-- Empty required node. Kill this and ROS will clean up all nodes spawned as a result of this whole launch file -->
+	<node name = "empty_required_node" pkg="msu_autorally_helper" type="empty_node.py" required="true"/>
+
+</launch>
