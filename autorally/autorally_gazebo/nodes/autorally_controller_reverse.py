@@ -144,6 +144,7 @@ class AutoRallyCtrlr(object):
 		"""Initialize this _AutoRallyCtrlr."""
 
 		rospy.init_node('autorally_controller_reverse')
+		rospy.on_shutdown(self.on_shutdown)
 
 	  # Parameters
 
@@ -334,6 +335,10 @@ class AutoRallyCtrlr(object):
 			rospy.Subscriber('/autorally_platform/joint_states',
 							 JointState, self.wheelSpeedsCb)
 
+	# Last activities to perform before the node shuts down
+	def on_shutdown(self):
+		pass
+		
 	def spin(self):
 		"""Control the vehicle."""
 

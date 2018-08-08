@@ -31,9 +31,11 @@ limitations under the License.
 
 
 
-<robot name="autorally_platform" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="autorally_platform" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- sensor Configuration -->
   <xacro:property name="use_cameras" value="false"/>
+  <xacro:property name="use_kinect" value="false"/>
+  <xacro:property name="use_lidar" value="true"/>
   
   
   
@@ -627,21 +629,6 @@ limitations under the License.
 
   <!--  MSU Sensors -->
   
-  
-  <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
-    <alwaysOn>true</alwaysOn>
-    <updateRate>50.0</updateRate>
-    <bodyName>base_link</bodyName>
-    <topicName>ground_truth/state</topicName>
-    <gaussianNoise>0.01</gaussianNoise>
-    <frameName>world</frameName>
-    <xyzOffsets>0 0 0</xyzOffsets>
-    <rpyOffsets>0 0 0</rpyOffsets>
-  </plugin>
-  
-  
-  
-  
   <!-- Contact sensor on the chassis of the rover -->
   <gazebo reference="chassis">
     <sensor name="chassis_sensor" type="contact">
@@ -658,6 +645,16 @@ limitations under the License.
   </gazebo>
   
   
+ <!-- Kinect Sensor -->
+<xacro:if value="${use_kinect}">
+  <xacro:include filename="$(find autorally_description)/urdf/sensors/kinect.urdf.xacro" />
+
+  <xacro:sensor_kinect
+    parent="base_link">
+  </xacro:sensor_kinect>
+</xacro:if>
+
+<xacro:if value="${use_lidar}">
   <!-- Hokuo Laser Joint -->
   <joint name="hokuyo_joint" type="fixed">
     <axis xyz="0 0 -1" />
@@ -725,25 +722,7 @@ limitations under the License.
       </plugin>
     </sensor>
 </gazebo>
-
-  <!-- Forward facing Lidar Sensor -->
-<!--
-  <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/lidar_sensor.urdf.xacro" />
-  <xacro:lidar_sensor
-    name="lidar_front"
-    parent="base_link"
-    ros_topic="lidar_front"
-    update_rate="10"
-    min_range="0.06"
-    max_range="20.0"
-    field_of_view_horizontal="${180*M_PI/180}"
-    field_of_view_vertical="${1*M_PI/180}"
-    ray_count_horizontal="542" 
-    ray_count_vertical="1"
-    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
-    <origin xyz="0.5 0 0.1" rpy="0 0 0"/>
-  </xacro:lidar_sensor>
--->
+</xacro:if>
   
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
