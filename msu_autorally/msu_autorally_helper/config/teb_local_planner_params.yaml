@@ -13,16 +13,18 @@ TebLocalPlannerROS:
  dt_ref: 0.5
  dt_hysteresis: 0.1
  global_plan_overwrite_orientation: True
- max_global_plan_lookahead_dist: -1 # Setting to negative disables this restriction. It is limited by the local cost map settings
+ max_global_plan_lookahead_dist: -0.1 # Setting to negative disables this restriction. It is limited by the local cost map settings
+ #global_plan_viapoint_sep: 5
+ #weight_viapoint: 0.1
  feasibility_check_no_poses: 5
     
  # Robot     
- max_vel_x: 10 # 26.82 
+ max_vel_x: 20.0 # 26.82 
  max_vel_x_backwards: 3.0
- max_vel_theta: 1
+ max_vel_theta: 2
  acc_lim_x: 5
- acc_lim_theta: 1
- min_turning_radius: 1.5
+ acc_lim_theta: 2
+ min_turning_radius: 1.0
  wheel_base: 0.57
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    # vertices: [[0.125,0.45], [0.125,-0.45], [-0.125,-0.45], [-0.125,0.45]] # for type "polygon"
@@ -30,13 +32,13 @@ TebLocalPlannerROS:
 
  # GoalTolerance
     
- xy_goal_tolerance: 1
- yaw_goal_tolerance: 0.5
- free_goal_vel: False
+ xy_goal_tolerance: 3
+ yaw_goal_tolerance: 0.75
+ free_goal_vel: True
     
  # Obstacles
     
- min_obstacle_dist: 0.15
+ min_obstacle_dist: 1.0
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 4.0
  obstacle_poses_affected: 10
@@ -69,7 +71,7 @@ TebLocalPlannerROS:
  enable_multithreading: True
  simple_exploration: False
  selection_cost_hysteresis: 1.75
- max_number_classes: 2
+ max_number_classes: 3
  roadmap_graph_no_samples: 15
  roadmap_graph_area_width: 5
  h_signature_prescaler: 0.5
@@ -77,3 +79,4 @@ TebLocalPlannerROS:
  obstacle_keypoint_offset: 0.1
  obstacle_heading_threshold: 0.45
  visualize_hc_graph: False
+ switching_blocking_period: 5.0

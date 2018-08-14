@@ -2,7 +2,7 @@
 
 <launch>
 	
-	<arg name="waypoint_file" default="$(find msu_autorally_helper)/waypoints/waypoints_08-01-18_11:39.yaml"/>
+	<arg name="waypoint_file" default="$(find msu_autorally_helper)/waypoints/simple_loop1.yaml"/>
 	<rosparam file="$(arg waypoint_file)" command="load" />
 	
 	<node name="move_base_sequence" pkg="msu_autorally_helper" type="move_base_goal_publisher_node.py" output="screen"/>
