@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+	
+	<!-- <group ns="evo_ros2"> -->
+		<rosparam file="$(find evo_ros2)/config/evo_ros2_config.yaml" command="load"/>
+		<rosparam file="$(find evo_ros2)/config/genome_mapping.yaml" command="load"/>
+		
+		<!-- <node name = "transporter_node" pkg="evo_ros2" type="transporter_node.py" output="screen"/> -->
+		<node name = "software_manager_node" pkg="evo_ros2" type="software_manager_node.py" output="screen"/>
+	<!-- </group> -->
+
+</launch>

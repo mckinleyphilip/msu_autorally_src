@@ -25,7 +25,7 @@ from std_srvs.srv import Empty
 from gazebo_msgs.srv import DeleteModel
 from gazebo_msgs.srv import GetWorldProperties
 from evo_ros2.msg import ResetStatus
-
+from evo_ros2.srv import *
 
 
 class ResetSimNode():
@@ -39,11 +39,11 @@ class ResetSimNode():
 		rospy.on_shutdown(self.on_shutdown)
 		
 		# Write command line arguments into class variables
-		self.debug = cmd_args.debug
+		self.debug = (cmd_args.debug or rospy.get_param('/DEBUG',False))
 		
 		
 		# Configure Publishers
-		self.reset_status_pub = rospy.Publisher('{}/reset_status'.format(self.param_namespace), ResetStatus, queue_size=10)
+		self.reset_status_pub = rospy.Publisher('evo_ros2/reset_status', ResetStatus, queue_size=10)
 			
 		# Get model_name, namespace, and required_node from ROS params
 		self.model_name = rospy.get_param('{}/model_name'.format(self.param_namespace), 'autoRallyPlatform')
@@ -81,11 +81,11 @@ class ResetSimNode():
 		self.get_world_properties = rospy.ServiceProxy(get_world_properties, GetWorldProperties, persistent=False)
 		
 		
-		# Start the reset
-		self.run_reset()
+		self.service_handle = rospy.Service('SoftReset', SoftReset, self.run_reset)
+		rospy.spin()
 		
 			
-	def run_reset(self):
+	def run_reset(self, empty):
 		
 		#self.pause_physics()
 		
@@ -94,7 +94,9 @@ class ResetSimNode():
 		msg.text = 'Beginning reset simulation process'
 		self.reset_status_pub.publish(msg)
 		
-		
+		return_response = SoftResetResponse()
+		return_response.status = 1
+		return_response.text = ''
 			
 		# 1 - Kill required node
 		if self.debug:
@@ -109,8 +111,10 @@ class ResetSimNode():
 			msg.text = 'An error occured when attempting to kill the required node'
 			self.reset_status_pub.publish(msg)
 			
-			rospy.signal_shutdown('Reset Sim Node: Failed to kill \'{}\' ROS node!'.format(self.required_node))
-			return
+			#rospy.signal_shutdown('Reset Sim Node: Failed to kill \'{}\' ROS node!'.format(self.required_node))
+			
+			return_response.text = 'An error occured when attempting to kill the required node'
+			return return_response
 		
 		if self.debug:
 			rospy.loginfo('Reuired node killed!')
@@ -135,7 +139,11 @@ class ResetSimNode():
 			msg.text = 'An error occured when attempting to delete the model'
 			self.reset_status_pub.publish(msg)
 			
-			rospy.signal_shutdown('Reset Sim Node: Failed to connect to delete model service')
+			#rospy.signal_shutdown('Reset Sim Node: Failed to connect to delete model service')
+			
+			
+			return_response.text  = 'An error occured when attempting to delete the model'
+			return return_response
 		
 		try:
 			resp = self.delete_model(self.model_name)
@@ -151,8 +159,10 @@ class ResetSimNode():
 			msg.text = 'An error occured when attempting to delete the model'
 			self.reset_status_pub.publish(msg)
 			
-			rospy.signal_shutdown('Reset Sim Node: Failed to delete model: \'{}\'!'.format(self.model_name))
-			return
+			#rospy.signal_shutdown('Reset Sim Node: Failed to delete model: \'{}\'!'.format(self.model_name))
+			
+			return_response.text = 'An error occured when attempting to delete the model'
+			return return_response
 		
 		# Test if the model is actually deleted from the simulation
 		try:
@@ -166,12 +176,17 @@ class ResetSimNode():
 				msg.text = 'An error occured when attempting to delete the model'
 				self.reset_status_pub.publish(msg)
 				
-				rospy.signal_shutdown('Reset Sim Node: model: {} still found after call to deletion service!'.format(self.model_name))
-				return
+				#rospy.signal_shutdown('Reset Sim Node: model: {} still found after call to deletion service!'.format(self.model_name))
+				
+				return_response.text = 'An error occured when attempting to delete the model'
+				return return_response
 		except rospy.ServiceException as exc:
 			rospy.logerr('Reset Sim Node: Failed to get world properties!')
 			rospy.logerr('Exception: {}'.format(exc))
-			rospy.signal_shutdown('Reset Sim Node: Failed to get world properties!')
+			#rospy.signal_shutdown('Reset Sim Node: Failed to get world properties!')
+			
+			return_response.text = 'An error occured when attempting to delete the model'
+			return return_response
 		
 		if self.debug:
 			rospy.loginfo('Model Deleted!')
@@ -191,8 +206,11 @@ class ResetSimNode():
 			msg.text = 'An error occured when attempting to reset the sim world'
 			self.reset_status_pub.publish(msg)
 			
-			rospy.signal_shutdown('Reset Sim Node: Failed to reset world!')
-			return
+			#rospy.signal_shutdown('Reset Sim Node: Failed to reset world!')
+			
+			
+			return_response.text = 'An error occured when attempting to reset the sim world'
+			return return_response
 		
 		if self.debug:
 			rospy.loginfo('World reset!')
@@ -212,8 +230,10 @@ class ResetSimNode():
 			msg.text = 'An error occured when attempting to reset the simulation'
 			self.reset_status_pub.publish(msg)
 			
-			rospy.signal_shutdown('Reset Sim Node: Failed to reset simulation!')
-			return
+			#rospy.signal_shutdown('Reset Sim Node: Failed to reset simulation!')
+			
+			return_response.text = 'An error occured when attempting to reset the simulation'
+			return return_response
 		
 	
 		
@@ -225,8 +245,11 @@ class ResetSimNode():
 		
 		if self.debug:
 			rospy.loginfo('Simulation reset!')
-			
-		#self.unpause_physics()		
+		
+		
+		return_response.status = 0
+		return_response.text = 'The simulation was reset successfully'
+		return return_response	
 		
 	def on_shutdown(self):
 		pass
