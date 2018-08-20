@@ -5,7 +5,7 @@
 	<arg name="namespace" default="autorally_platform"/>
 	<arg name="world_name" default="model://urdf/empty_sky_AR.world"/>
 	<arg name="cmd_timeout" default="0.5"/>
-	<arg name="gui" default="false"/>
+	<arg name="gui" default="true"/>
 	
 	<group ns="$(arg namespace)">
 		<!-- Create the world. -->

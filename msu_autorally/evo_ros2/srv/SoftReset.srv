@@ -1,0 +1,5 @@
+---
+uint8 status
+uint8 SUCCEEDED		= 0	# The reset node has successfully reset the simulation enviroment
+uint8 FAILED		= 1 # The reset node has failed to reset the simulation enviroment
+string text				# Extra information partaining to the status
