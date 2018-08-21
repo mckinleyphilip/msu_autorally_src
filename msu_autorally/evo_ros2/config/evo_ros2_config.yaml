@@ -9,24 +9,12 @@ DEBUG: True
 EVO_ROS_COMM_TOPIC: 'evo_ros2_int_comms'
 
 
-
-# Server Script
-server:
-   LOG_FILE_NAME: log.dat
-   MAX_WAIT_TIME: 1200000 # Max wait time on evaluation collection socket before we resend genomes in miliseconds
-   POP_SIZE: 30 # How large the population size is for each generation
-   GEN_COUNT: 25 # How many generations is this experiment going to run for
-   MUTATION_PROB: 0.15 #Probability that an individual will have a random gene mutated
-   CROSS_OVER_PROB: 0.25 #Probability that two individuals will cross over and producing mixed offspring
-   TOURNAMENT_SIZE: 2 # Number of individuals that enter each selection tournament to create the next generation
-   NUM_EVAL_WORKS: 14 # Number of workers (ROS instances) being used to run evaluations of indiviuals
-
-
 # Software Manager
 software_manager:
    # Launch files: ['pkg', 'launch_file.launch']
    WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world.launch']
    PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform.launch']
+   SIM_MANAGER_LAUNCH_FILE: ['evo_ros2', 'sim_manager.launch']
 
    
  # Simulation Manager Script

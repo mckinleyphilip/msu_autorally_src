@@ -12,13 +12,17 @@ import argparse
 import numpy as np
 import time
 
-from evo_ros2.msg import ResetStatus
+import threading
+
+from evo_ros2.srv import SoftReset
+from evo_ros2.msg import EvoROS2State
 
 class SoftwareManagerNode():
 	def __init__(self, cmd_args):
 		
 		# Init Node
-		rospy.init_node('software_managaer_node',anonymous=False)
+		self.node_name = 'software_managaer_node'
+		rospy.init_node(self.node_name, anonymous=False)
 		
 		# Register shutdown hook
 		rospy.on_shutdown(self.on_shutdown)
@@ -27,53 +31,95 @@ class SoftwareManagerNode():
 		self.debug = (cmd_args.debug or rospy.get_param('/DEBUG',False))
 		
 		# Get ros params
-		self.world_launch_info = rospy.get_param('software_manager/WORLD_LAUNCH_FILE', ['msu_autorally_helper', 'spawn_gazebo_world.launch'])
-		self.platform_launch_info = rospy.get_param('software_manager/PLATFORM_LAUNCH_FILE', ['msu_autorally_helper','spawn_autorally_platform.launch'])
+		self.world_launch_info = rospy.get_param('software_manager/WORLD_LAUNCH_FILE')
+		self.platform_launch_info = rospy.get_param('software_manager/PLATFORM_LAUNCH_FILE')
+		self.sim_manager_launch_info = rospy.get_param('software_manager/SIM_MANAGER_LAUNCH_FILE')
 		
-		
-		"""
-		CODE HERE...
-		
-		# Configure Publishers
-		#self.collision_events_request_pub = rospy.Publisher('/util_comms/collision_events_request', Bool, queue_size=10)
-
-
-		# Configure Subscribers
-		#self.collision_events_sub = rospy.Subscriber('/util_comms/collision_events', String,self.on_collision_events_update)
-		
+		""" # Soft reset capabilities still being developed
+		# Set up connection for Evo-ROS2 soft reset
+		rospy.wait_for_service('/SoftReset')
+		self.soft_rest_service = rospy.ServiceProxy('/SoftReset', SoftReset, persistent=False)
 		"""
 		
+		# Set up threading event - Used to sync main thread and the evo-ros2 communication threads since the ros launch api has to be called from the main thread
+		self.event = threading.Event()
+		self.event.clear()
 		
+		self.set_up_evo_ros2_communications()
 		
-		
-
-		self.start_sim_env()
-		
-		if self.debug:
-			rospy.logwarn('Started env')
-		
-		raw_input('soft reset...')
-		self.soft_reset()
-		
-		if self.debug:
-			rospy.logwarn('finished soft reset spawn')
-		
-		raw_input('hard reset...')
-		self.hard_reset()
-		
-		if self.debug:
-			rospy.logwarn('finished hard reset')
-		
-		raw_input('start_sim_env')
-		self.start_sim_env()
-		
-		if self.debug:
-			rospy.logwarn('restarted env')
+		while not rospy.is_shutdown():
 			
-		rospy.spin()
+			# This will block until the event flag is set to true or the timeout value (in seconds) is reached
+			#	Returns true if the flag has been set and false if the timeout value is hit
+			if not self.event.wait(timeout = 2.0):
+				continue
+			
+			state = rospy.get_param('evo_ros2_state')
+			
+			if self.debug:
+				rospy.logwarn('{} - in main thread and state {}'.format(self.node_name, state))
+			
+			if state == 1:
+				self.start_sim_env()
+				self.event.clear()
+				self.set_evo_ros2_state(2)
+				continue
+			
+			if state == 2:
+				self.start_sim_manager()
+				self.event.clear()
+				# Software manager will set new state when ready
+				continue
+				
+			if state == 6:
+				self.hard_reset()
+				self.event.clear()
+				self.set_evo_ros2_state(7)
+				continue
+				
+			
 
+		
+	def set_up_evo_ros2_communications(self):
+		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
+		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = False)
+		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
+	
+	
+	def set_evo_ros2_state(self, new_state_value):
+		rospy.set_param('evo_ros2_state', new_state_value)
+		msg = EvoROS2State()
+		msg.sender = self.node_name
+		msg.state = new_state_value
+		self.evo_ros2_comm_pub.publish(msg)
+		
+			
+	def on_evo_ros2_state_change(self, msg):
+		if self.debug:
+			rospy.logwarn('{} - In state: {}'.format(self.node_name, msg.state))
+		
+		if msg.state == 1:
+			self.event.set()
+			#self.start_sim_env()
+			#self.set_evo_ros2_state(2)
+		
+		if msg.state == 2:
+			self.event.set()
+			#self.start_sim_manager()
+			# Software manager will set new state when ready
+			
+		if msg.state == 6:
+			self.event.set()
+			#self.hard_reset()
+			#self.set_evo_ros2_state(7)
+			
 		
 	
+	
+	def start_sim_manager(self):
+		self.sim_manager_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.sim_manager_launch_info))
+		self.sim_manager_launch.start()
+		
 	def start_sim_env(self):
 		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 		roslaunch.configure_logging(self.uuid)
@@ -83,31 +129,23 @@ class SoftwareManagerNode():
 		
 		self.world_launch.start()
 		self.platform_launch.start()
-	
-	
+
+
 	def hard_reset(self):
-		self.reset_node_process.stop()
 		self.world_launch.shutdown()
 		self.platform_launch.shutdown()
-		time.sleep(7)
+		self.sim_manager_launch.shutdown()
 		
 		
 	def soft_reset(self):
-		reset_node = roslaunch.core.Node('evo_ros2', 'reset_sim.py', name='reset_sim')
-		reset_node_launch = roslaunch.scriptapi.ROSLaunch()
-		reset_node_launch.start()
-		self.reset_node_process = reset_node_launch.launch(reset_node)
-		self.soft_reset_status_sub = rospy.Subscriber('/evo_ros2/reset_status', ResetStatus, self.soft_reset_status_callback)
+		self.platform_launch.shutdown()
+		self.soft_rest_service()
 		
-		
-	def soft_reset_status_callback(self, msg):
-		if self.debug:
-			rospy.logwarn('Soft reset status : {}--{}'.format(msg.status, msg.text))
 		
 		
 		
 	def on_shutdown(self):
-		pass
+		self.hard_reset()
 		
 	
 if __name__ == '__main__':

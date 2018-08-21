@@ -52,6 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    ResetStatus.msg
+   EvoROS2State.msg
  )
 
 ## Generate services in the 'srv' folder

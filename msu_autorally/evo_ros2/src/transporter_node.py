@@ -12,11 +12,14 @@ import numpy as np
 
 import zmq
 
+from evo_ros2.msg import EvoROS2State
+
 class Transporter():
 	def __init__(self, cmd_args):
 		
 		# Init Node
-		rospy.init_node('transporter_node',anonymous=False)
+		self.node_name = 'transporter_node'
+		rospy.init_node(self.node_name, anonymous=False)
 		
 		# Register shutdown hook
 		rospy.on_shutdown(self.on_shutdown)
@@ -29,6 +32,7 @@ class Transporter():
 			return
 		else:
 			self.genome_mapping = rospy.get_param('GENOME_MAPPING')
+		
 		
 		
 		# Set up socket communication using ZMQ
@@ -49,16 +53,49 @@ class Transporter():
 		
 		self.current_genome = dict()
 		
-		self.run()
+		self.set_up_evo_ros2_communications()
 		
 		
-	
-	def run(self):
-		while not rospy.is_shutdown():
-			self.recv_genome(self.genome_receiver.recv_json())
-			#self.write_genome_to_ros_params()
+		self.set_evo_ros2_state(0)
 
+		rospy.spin()
+		
 	
+			
+	def set_up_evo_ros2_communications(self):
+		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
+		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = False)
+		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
+	
+	
+	def set_evo_ros2_state(self, new_state_value):
+		rospy.set_param('evo_ros2_state', new_state_value)
+		msg = EvoROS2State()
+		msg.sender = self.node_name
+		msg.state = new_state_value
+		self.evo_ros2_comm_pub.publish(msg)	
+		
+	
+	def on_evo_ros2_state_change(self, msg):
+		if self.debug:
+			rospy.logwarn('{} - In state: {}'.format(self.node_name, msg.state))
+			
+		if msg.state == 0:
+			self.recv_genome(self.genome_receiver.recv_json())
+			self.set_evo_ros2_state(1)
+		
+		if msg.state == 3:
+			self.write_genome_to_ros_params()
+			self.set_evo_ros2_state(4)
+			
+		if msg.state == 6:
+			pass
+			# Send result
+		
+		if msg.state == 7:
+			# Simulation reset is complete, ready for new genome
+			self.set_evo_ros2_state(0)
+
 	
 	def recv_genome(self, raw_genome):
 		if raw_genome == 'end':

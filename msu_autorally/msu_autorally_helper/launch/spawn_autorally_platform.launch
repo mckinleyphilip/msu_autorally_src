@@ -35,6 +35,6 @@
 	
 	
 	<!-- Empty required node. Kill this and ROS will clean up all nodes spawned as a result of this whole launch file -->
-	<node name = "platform_empty_required_node" pkg="msu_autorally_helper" type="empty_node.py" required="true"/>
+	<!-- <node name = "platform_empty_required_node" pkg="msu_autorally_helper" type="empty_node.py" required="true"/> -->
 
 </launch>

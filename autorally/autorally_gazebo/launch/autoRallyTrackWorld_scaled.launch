@@ -12,6 +12,7 @@
   <arg name="verbose" default="false"/>
   <arg name="world_name" default="worlds/empty_sky.world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
   <arg name="namespace" default="autorally_platform"/>
+  <arg name="spawn_track" default="true"/>
   
   <!-- set use_sim_time flag -->
   <group if="$(arg use_sim_time)">
@@ -37,12 +38,14 @@
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
   </group>
 
-
+  
+  <group if="$(arg spawn_track)">
   <node name="spawn_track" pkg="gazebo_ros" type="spawn_model"
         args="-file $(find autorally_description)/urdf/autoRallyTrack_scaled.urdf -urdf -model track
               -gazebo_namespace /$(arg namespace)/gazebo
               -x 0 -y 0 -z 0.0762
               -R 0 -P 0 -Y 0.785398"/>
+  </group>
 
 
 </launch>
