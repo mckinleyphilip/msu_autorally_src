@@ -2,7 +2,7 @@
 <launch>
 	
 	<group ns="msu_autorally_utility_trackers">
-		<node name = "collision_monitor" pkg="evo_ros2" type="autorally_collision_monitor.py" output="screen"/>
+		<node name = "collision_monitor" pkg="evo_ros2" type="autorally_collision_monitor.py" output="log"/>
 	</group>
 	
 	

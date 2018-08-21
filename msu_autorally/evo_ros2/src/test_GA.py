@@ -26,7 +26,7 @@ genome = list()
 genome = [1,2,3,4]
 #genome = 'end'
 
-for i in range(1):
+for i in range(2):
 	#genome.append(i)
 	socket.send_json(genome)
 	

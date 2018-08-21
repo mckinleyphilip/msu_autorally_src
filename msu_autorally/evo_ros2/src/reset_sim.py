@@ -54,7 +54,12 @@ class ResetSimNode():
 			rospy.loginfo('\n\t Model Name: {} \n\t Namespace: {} \n\t Required Node: {}'.format(self.model_name, self.namespace, self.required_node))
 		
 		
+		self.service_handle = rospy.Service('SoftReset', SoftReset, self.run_reset)
+		rospy.spin()
 		
+		
+		
+	def set_up_service_connections(self):
 		# Set up Gazebo services
 		reset_world_service = '/{}/gazebo/reset_world'.format(self.namespace)
 		reset_simulation_service = '/{}/gazebo/reset_simulation'.format(self.namespace)
@@ -81,11 +86,9 @@ class ResetSimNode():
 		self.get_world_properties = rospy.ServiceProxy(get_world_properties, GetWorldProperties, persistent=False)
 		
 		
-		self.service_handle = rospy.Service('SoftReset', SoftReset, self.run_reset)
-		rospy.spin()
-		
-			
 	def run_reset(self, empty):
+		
+		self.set_up_service_connections()
 		
 		#self.pause_physics()
 		
@@ -97,7 +100,8 @@ class ResetSimNode():
 		return_response = SoftResetResponse()
 		return_response.status = 1
 		return_response.text = ''
-			
+		
+		"""
 		# 1 - Kill required node
 		if self.debug:
 			rospy.loginfo('Killing required node...')
@@ -118,8 +122,7 @@ class ResetSimNode():
 		
 		if self.debug:
 			rospy.loginfo('Reuired node killed!')
-
-
+		"""
 
 
 		# 2 - Delete model 
