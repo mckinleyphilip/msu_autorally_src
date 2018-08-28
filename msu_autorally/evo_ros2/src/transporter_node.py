@@ -64,7 +64,7 @@ class Transporter():
 			
 	def set_up_evo_ros2_communications(self):
 		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
-		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = False)
+		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = True)
 		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
 	
 	
