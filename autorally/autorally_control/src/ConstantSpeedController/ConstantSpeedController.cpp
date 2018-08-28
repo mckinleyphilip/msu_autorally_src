@@ -117,12 +117,20 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   command->steering = -5.0;
   command->frontBrake = 0.0;
 
-  if (m_mostRecentSpeedCommand.data > 0.1)
+  float speed = m_mostRecentSpeedCommand.data;
+  if ((-99 < m_mostRecentSpeedCommand.data) &&  (m_mostRecentSpeedCommand.data < 0))
+  {
+    command->reverse = true;
+    speed = -1 * m_mostRecentSpeedCommand.data;
+  }
+  
+
+  if (speed > 0.1)
   {
     double p;
-    if(m_throttleMappings.interpolateKey(m_mostRecentSpeedCommand.data, p))
+    if(m_throttleMappings.interpolateKey(speed, p))
     {
-      m_integralError += m_mostRecentSpeedCommand.data - m_frontWheelsSpeed;
+      m_integralError += speed - m_frontWheelsSpeed;
       if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
       {
         m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
@@ -134,7 +142,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
       }
 
       command->throttle = p +
-                 m_constantSpeedKP*(m_mostRecentSpeedCommand.data - m_frontWheelsSpeed);
+                 m_constantSpeedKP*(speed - m_frontWheelsSpeed);
       command->throttle += m_constantSpeedKI * m_integralError;
       command->throttle = std::max(0.0, std::min(1.0, command->throttle));
 
@@ -152,7 +160,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
     command->throttle = 0;
     
   }
-  
+
   //command->throttle = 1.0;
   //ROS_ERROR("Speed command: %f", command->throttle);
   if (m_mostRecentSpeedCommand.data != -99)

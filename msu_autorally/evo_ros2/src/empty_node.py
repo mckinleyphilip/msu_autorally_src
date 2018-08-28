@@ -18,13 +18,14 @@ class EmptyNode():
 	def __init__(self, cmd_args):
 		
 		# Init Node
-		rospy.init_node('Empty_node',anonymous=False)
+		self.node_name = 'empty_node'
+		rospy.init_node(self.node_name, anonymous=False)
 		
 		# Register shutdown hook
 		rospy.on_shutdown(self.on_shutdown)
 		
 		# Write command line arguments into class variables
-		self.debug = cmd_args.debug
+		self.debug = (cmd_args.debug or rospy.get_param('/DEBUG',False))
 		
 		
 		

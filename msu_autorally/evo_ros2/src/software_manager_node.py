@@ -55,25 +55,24 @@ class SoftwareManagerNode():
 				continue
 			
 			state = rospy.get_param('evo_ros2_state')
+			self.event.clear()
 			
 			if self.debug:
 				rospy.logwarn('{} - in main thread and state {}'.format(self.node_name, state))
 			
 			if state == 1:
 				self.start_sim_env()
-				self.event.clear()
+				
 				self.set_evo_ros2_state(2)
 				continue
 			
 			if state == 2:
 				self.start_sim_manager()
-				self.event.clear()
 				# Software manager will set new state when ready
 				continue
 				
 			if state == 6:
 				self.hard_reset()
-				self.event.clear()
 				self.set_evo_ros2_state(7)
 				continue
 				
@@ -82,7 +81,7 @@ class SoftwareManagerNode():
 		
 	def set_up_evo_ros2_communications(self):
 		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
-		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = False)
+		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = True)
 		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
 	
 	

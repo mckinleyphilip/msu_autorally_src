@@ -7,8 +7,10 @@
 # GAS 2018-08-21
 
 import rospy
+import roslaunch
 import argparse
 import numpy as np
+import threading
 
 from evo_ros2.msg import EvoROS2State
 
@@ -27,16 +29,57 @@ class AutorallySimManagerNode():
 		# Write command line arguments into class variables
 		self.debug = (cmd_args.debug or rospy.get_param('/DEBUG',False))
 		
+		# Get ros params
+		self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
+		
+		
+		# Set up threading event - Used to sync main thread and the evo-ros2 communication threads since the ros launch api has to be called from the main thread
+		self.event = threading.Event()
+		self.event.clear()
 		
 		self.set_up_evo_ros2_communications()
 		
-		rospy.spin()
+		while not rospy.is_shutdown():
+			
+			# This will block until the event flag is set to true or the timeout value (in seconds) is reached
+			#	Returns true if the flag has been set and false if the timeout value is hit
+			if not self.event.wait(timeout = 2.0):
+				continue
+			
+			state = rospy.get_param('evo_ros2_state')
+			self.event.clear()
+			
+			if self.debug:
+				rospy.logwarn('{} - in main thread and state {}'.format(self.node_name, state))
+			
+			if state == 4:
+				# start sim
+				raw_input('In state {} - press enter to advance'.format(state))
+				self.start_sim()
+				self.set_evo_ros2_state(5)
+				continue
 	
-
+			if state == 5:
+				# sim running
+				raw_input('In state {} - press enter to advance'.format(state))
+				self.end_sim()
+				self.set_evo_ros2_state(6)
+				continue
 		
+
+	
+	def start_sim(self):
+		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+		roslaunch.configure_logging(self.uuid)
+		self.mission_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.mission_launch_info ))
+		self.mission_launch.start()
+	
+	def end_sim(self):
+		self.mission_launch.shutdown()
+	
 	def set_up_evo_ros2_communications(self):
 		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
-		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = False)
+		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = True)
 		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
 	
 	
@@ -56,14 +99,13 @@ class AutorallySimManagerNode():
 			self.set_evo_ros2_state(3)
 			
 		if msg.state == 4:
+			self.event.set()
 			# start sim
-			raw_input('In state {} - press enter to advance'.format(msg.state))
-			self.set_evo_ros2_state(5)
 
 		if msg.state == 5:
+			self.event.set()
 			# sim running
-			raw_input('In state {} - press enter to advance'.format(msg.state))
-			self.set_evo_ros2_state(6)
+
 			
 	
 	def on_shutdown(self):

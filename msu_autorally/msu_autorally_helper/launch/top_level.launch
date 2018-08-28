@@ -3,7 +3,7 @@
 <launch>
 	
 	<!-- Start the Gazebo World -->
-	<arg name="gui" default="false"/>
+	<arg name="gui" default="true"/>
 	<include file="$(find msu_autorally_helper)/launch/spawn_gazebo_world.launch">
 		<arg name="gui" value="$(arg gui)"/>
 	</include>

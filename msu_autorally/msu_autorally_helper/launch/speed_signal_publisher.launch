@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+	
+	<!-- <arg name="speed_file" default="$(find msu_autorally_helper)/speed_signals/ramp_up_hold_ramp_down.yaml"/>
+	<rosparam file="$(arg speed_file)" command="load" /> -->
+	
+	<node name="speed_signal_publisher_node" pkg="msu_autorally_helper" type="speed_signal_publisher.py" output="screen"/>
+</launch>
