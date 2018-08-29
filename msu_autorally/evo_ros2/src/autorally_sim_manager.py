@@ -8,6 +8,7 @@
 
 import rospy
 import roslaunch
+import rosnode
 import argparse
 import numpy as np
 import threading
@@ -54,25 +55,49 @@ class AutorallySimManagerNode():
 			
 			if state == 4:
 				# start sim
-				raw_input('In state {} - press enter to advance'.format(state))
+				#raw_input('In state {} - press enter to advance'.format(state))
 				self.start_sim()
 				self.set_evo_ros2_state(5)
 				continue
 	
 			if state == 5:
 				# sim running
-				raw_input('In state {} - press enter to advance'.format(state))
+				self.sleep_rate = rospy.Rate(10) # Hz
+				
+				# Perform logging while the mission nodes are still a subset of all ros nodes (they exist)
+				while set(self.mission_nodes) < set(rosnode.get_node_names()):
+					self.log()
+					self.sleep_rate.sleep()
+				
 				self.end_sim()
 				self.set_evo_ros2_state(6)
 				continue
 		
 
+	def log(self):
+		pass
 	
 	def start_sim(self):
+		# Get list of ros nodes that are present before the mission launch file is started
+		pre_mission_nodes = rosnode.get_node_names()
+		
+		# Start mission launch file which is responsible for controlling the platform through the simulation
 		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 		roslaunch.configure_logging(self.uuid)
 		self.mission_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.mission_launch_info ))
 		self.mission_launch.start()
+		
+		sleep_rate = rospy.Rate(2) # Hz
+		while pre_mission_nodes == rosnode.get_node_names():
+			sleep_rate.sleep()
+			
+		
+		# Get list of ros nodes that are present after the mission launch file has been started and compare it to the ones 
+		# 	alive prior to determine the nodes that were spawned as a result of the mission launch file
+		post_mission_nodes = rosnode.get_node_names()
+		self.mission_nodes = list(set(post_mission_nodes) - set(pre_mission_nodes))
+		rospy.logwarn('Mission nodes: {}'.format(self.mission_nodes))
+		
 	
 	def end_sim(self):
 		self.mission_launch.shutdown()
