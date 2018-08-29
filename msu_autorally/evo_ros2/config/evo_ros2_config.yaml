@@ -19,5 +19,6 @@ software_manager:
    
  # Simulation Manager Script
 sim_manager:
-   MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
+   #MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
+   MISSION_LAUNCH_FILE: ['msu_autorally_helper','speed_signal_publisher.launch']
    MAX_SIM_TIME: 540 # simulation seconds a simulation is allowed to run before ending 

@@ -60,7 +60,7 @@ ConstantSpeedController::~ConstantSpeedController()
 
 void ConstantSpeedController::onInit()
 {
-  NODELET_INFO("ConstantSpeedController initialization");
+  //NODELET_INFO("ConstantSpeedController initialization");
   ros::NodeHandle nh = getNodeHandle();
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
 
@@ -93,7 +93,7 @@ void ConstantSpeedController::onInit()
                       &ConstantSpeedController::controlCallback, this);
   /*m_controlEnableTimer = nh.createTimer(ros::Rate(0.2),
                       &ConstantSpeedController::enableControlCallback, this);*/
-  NODELET_INFO("ConstantSpeedController initialization complete");
+  //NODELET_INFO("ConstantSpeedController initialization complete");
 
 }
 
@@ -101,7 +101,7 @@ void ConstantSpeedController::speedCallback(const std_msgs::Float64ConstPtr& msg
 {
   if (m_mostRecentSpeedCommand.data != msg->data)
   {
-    NODELET_INFO_STREAM("ConstantSpeedController: new speed setpoint:" << msg->data);
+    //NODELET_INFO_STREAM("ConstantSpeedController: new speed setpoint:" << msg->data);
   }
   m_mostRecentSpeedCommand = *msg;
 }
@@ -146,7 +146,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
       command->throttle += m_constantSpeedKI * m_integralError;
       command->throttle = std::max(0.0, std::min(1.0, command->throttle));
 
-      // NODELET_INFO("interp %f, command %f",p, command->throttle);
+      //NODELET_INFO("interp %f, command %f",p, command->throttle);
       m_constantSpeedPrevThrot = p;
     }
     else
@@ -190,7 +190,7 @@ void ConstantSpeedController::controlCallback(const ros::TimerEvent& time)
 
 void ConstantSpeedController::loadThrottleCalibration()
 {
-  NODELET_INFO("Loading calibration");
+  //NODELET_INFO("Loading calibration");
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
   XmlRpc::XmlRpcValue v;
   nhPvt.param("throttleCalibration", v, v);
@@ -202,8 +202,8 @@ void ConstantSpeedController::loadThrottleCalibration()
       std::pair<double, double> toAdd(std::pair<double, double>(
                                       boost::lexical_cast<double>(mapIt->first),
                                       static_cast<double>(mapIt->second)));
-      NODELET_INFO_STREAM("ConstantSpeedController added to add mapping " <<
-                             toAdd.first << ":" << toAdd.second);
+      //NODELET_INFO_STREAM("ConstantSpeedController added to add mapping " <<
+      //                       toAdd.first << ":" << toAdd.second);
       if(!m_throttleMappings.update(toAdd))
       {
         NODELET_ERROR_STREAM("ConstantSpeedController Failed to add mapping " <<
@@ -214,9 +214,9 @@ void ConstantSpeedController::loadThrottleCalibration()
       NODELET_ERROR("ConstantSpeedController: XmlRpc throttle calibration formatted incorrectly");
     }
   }
-  NODELET_INFO_STREAM("ConstantSpeedController: Loaded " <<
-                      m_throttleMappings.size() <<
-                      " throttle mappings");
+  //NODELET_INFO_STREAM("ConstantSpeedController: Loaded " <<
+  //                    m_throttleMappings.size() <<
+  //                    " throttle mappings");
 }
 
 }

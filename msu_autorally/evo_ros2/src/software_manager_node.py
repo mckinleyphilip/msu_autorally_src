@@ -128,6 +128,7 @@ class SoftwareManagerNode():
 		
 		self.world_launch.start()
 		self.platform_launch.start()
+		rospy.sleep(2)
 
 
 	def hard_reset(self):

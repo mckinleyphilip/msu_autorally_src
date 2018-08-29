@@ -28,7 +28,7 @@ class SpeedSignalPublisherNode():
 		
 		self.running = True
 		self.speed_pub = rospy.Publisher('/constantSpeedController/speedCommand', Float64, queue_size=10)
-		self.sleep_rate = rospy.Rate(10)
+		self.sleep_rate = rospy.Rate(10) # Hz
 		
 		# Rospy returns 0 if the call to get_time() does not receive a value from /clock before the timeout period
 		#	This happens commonly on slower than real time simulation, thus loop until non-zero value is returned
@@ -48,7 +48,6 @@ class SpeedSignalPublisherNode():
 			current_time = rospy.get_time()
 		time = (current_time - self.start_time)
 		
-		
 		goal_speed = 0
 		if 0 <= time < 5:
 			goal_speed = time
@@ -65,8 +64,7 @@ class SpeedSignalPublisherNode():
 			
 		return goal_speed
 		
-		
-	
+
 	def on_shutdown(self):
 		pass
 		

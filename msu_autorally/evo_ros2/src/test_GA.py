@@ -29,7 +29,7 @@ genome = [1,2,3,4]
 
 print('Sending addr: {}'.format('tcp://{}:{}'.format(IP_ADDR, SEND_PORT)))
 
-for i in range(2):
+for i in range(1):
 	#genome.append(i)
 	socket.send_json(genome)
 	
