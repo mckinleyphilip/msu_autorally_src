@@ -14,6 +14,7 @@ import numpy as np
 import threading
 
 from evo_ros2.msg import EvoROS2State
+from evo_ros2.msg import LogEvent
 
 
 
@@ -32,13 +33,17 @@ class AutorallySimManagerNode():
 		
 		# Get ros params
 		self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
-		
+		self.logging_rate = rospy.get_param('LOGGING_RATE', 10)
 		
 		# Set up threading event - Used to sync main thread and the evo-ros2 communication threads since the ros launch api has to be called from the main thread
 		self.event = threading.Event()
 		self.event.clear()
 		
+		# Set up communication topics
 		self.set_up_evo_ros2_communications()
+		
+		# Set up other member variables
+		 self.log_event_times = []
 		
 		while not rospy.is_shutdown():
 			
@@ -62,11 +67,11 @@ class AutorallySimManagerNode():
 	
 			if state == 5:
 				# sim running
-				self.sleep_rate = rospy.Rate(10) # Hz
+				self.sleep_rate = rospy.Rate(self.logging_rate) # Hz
 				
 				# Perform logging while the mission nodes are still a subset of all ros nodes (they exist)
 				while set(self.mission_nodes) < set(rosnode.get_node_names()):
-					self.log()
+					self.log_event()
 					self.sleep_rate.sleep()
 				
 				self.end_sim()
@@ -74,8 +79,21 @@ class AutorallySimManagerNode():
 				continue
 		
 
-	def log(self):
+	def log_collection_cb(self, msg):
 		pass
+		
+	def log_event(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_rostime()
+		
+		msg = LogEvent()
+		msg.time = current_time
+		msg.event = 0 # TRIGGER
+		self.log_event_topic.publish(msg)
+		
+		self.log_event_times.append(current_time)
+
 	
 	def start_sim(self):
 		# Get list of ros nodes that are present before the mission launch file is started
@@ -87,11 +105,11 @@ class AutorallySimManagerNode():
 		self.mission_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.mission_launch_info ))
 		self.mission_launch.start()
 		
-		sleep_rate = rospy.Rate(2) # Hz
+		# Wait for new nodes to show up
+		sleep_rate = rospy.Rate(10) # Hz
 		while pre_mission_nodes == rosnode.get_node_names():
 			sleep_rate.sleep()
 			
-		
 		# Get list of ros nodes that are present after the mission launch file has been started and compare it to the ones 
 		# 	alive prior to determine the nodes that were spawned as a result of the mission launch file
 		post_mission_nodes = rosnode.get_node_names()
@@ -103,9 +121,14 @@ class AutorallySimManagerNode():
 		self.mission_launch.shutdown()
 	
 	def set_up_evo_ros2_communications(self):
+		# Evo ROS state event topic
 		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
 		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = True)
 		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
+		
+		# Evo ROS logging topics
+		self.log_event_topic = rospy.Publisher(rospy.get_param('EVO_ROS_LOG_EVENT_TOPIC'), LogEvent, queue_size=10)
+		self.log_collection_topic = rospy.Subscriber(rospy.get_param('EVO_ROS_LOG_COLLECTION_TOPIC'), LogEvent, self.log_collection_cb)
 	
 	
 	def set_evo_ros2_state(self, new_state_value):
@@ -131,8 +154,6 @@ class AutorallySimManagerNode():
 			self.event.set()
 			# sim running
 
-			
-	
 	def on_shutdown(self):
 		pass
 		

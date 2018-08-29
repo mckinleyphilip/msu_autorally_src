@@ -7,6 +7,9 @@ GENOME_PORT: 5000
 RESULT_PORT: 5010
 DEBUG: True
 EVO_ROS_COMM_TOPIC: 'evo_ros2_int_comms'
+EVO_ROS_LOG_EVENT_TOPIC: 'evo_ros2_log_event'
+EVO_ROS_LOG_COLLECTION_TOPIC:  'evo_ros2_log_collection'
+LOGGING_RATE: 10 # Hz
 
 
 # Software Manager
