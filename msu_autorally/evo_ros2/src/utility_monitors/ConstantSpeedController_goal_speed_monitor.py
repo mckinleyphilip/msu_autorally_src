@@ -33,7 +33,7 @@ class ConstantSpeedController_goal_speed_monitor():
 		self.set_up_log_event_communications()
 		
 		# Set up other member variables
-		self.last_speed = ''
+		self.last_speed = 0
 		self.data_list = []
 		self.time_list = []
 		
@@ -51,8 +51,8 @@ class ConstantSpeedController_goal_speed_monitor():
 		
 	def set_up_log_event_communications(self):
 		# Evo ROS logging topics
-		self.log_event_topic = rospy.Subscriber(rospy.get_param('EVO_ROS_LOG_EVENT_TOPIC'), LogEvent, self.log_event)
-		self.log_collection_topic = rospy.Publisher(rospy.get_param('EVO_ROS_LOG_COLLECTION_TOPIC'), LogEvent, queue_size=10)
+		self.log_event_topic = rospy.Subscriber(rospy.get_param('/EVO_ROS_LOG_EVENT_TOPIC'), LogEvent, self.log_event)
+		self.log_collection_topic = rospy.Publisher(rospy.get_param('/EVO_ROS_LOG_COLLECTION_TOPIC'), LogEvent, queue_size=10)
 		
 	def log_event(self,msg):
 		
@@ -60,14 +60,16 @@ class ConstantSpeedController_goal_speed_monitor():
 			self.data_list.append(self.last_speed)
 			self.time_list.append(msg.time)
 		elif msg.event == 1: # Request
-			send_logged_data()
+			self.send_logged_data()
 			
 	
 	def send_logged_data(self):
 		msg = LogEvent()
+		msg.time = rospy.get_rostime()
+		msg.sender = self.node_name
 		msg.event = 2 # Reply
 		msg.log_data = self.data_list
-		self.log_collection_topic.Publish(msg)
+		self.log_collection_topic.publish(msg)
 		
 		
 	def on_shutdown(self):

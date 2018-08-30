@@ -33,6 +33,7 @@ class AutorallySimManagerNode():
 		
 		# Get ros params
 		self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
+		self.utility_monitors_launch_info = rospy.get_param('sim_manager/UTILITY_MONITORS_LAUNCH_FILE')
 		self.logging_rate = rospy.get_param('LOGGING_RATE', 10)
 		
 		# Set up threading event - Used to sync main thread and the evo-ros2 communication threads since the ros launch api has to be called from the main thread
@@ -43,7 +44,8 @@ class AutorallySimManagerNode():
 		self.set_up_evo_ros2_communications()
 		
 		# Set up other member variables
-		 self.log_event_times = []
+		self.log_event_times = []
+		self.sim_start_time = 0
 		
 		while not rospy.is_shutdown():
 			
@@ -60,7 +62,6 @@ class AutorallySimManagerNode():
 			
 			if state == 4:
 				# start sim
-				#raw_input('In state {} - press enter to advance'.format(state))
 				self.start_sim()
 				self.set_evo_ros2_state(5)
 				continue
@@ -71,7 +72,7 @@ class AutorallySimManagerNode():
 				
 				# Perform logging while the mission nodes are still a subset of all ros nodes (they exist)
 				while set(self.mission_nodes) < set(rosnode.get_node_names()):
-					self.log_event()
+					self.log_event_trigger()
 					self.sleep_rate.sleep()
 				
 				self.end_sim()
@@ -80,33 +81,67 @@ class AutorallySimManagerNode():
 		
 
 	def log_collection_cb(self, msg):
-		pass
+		self.collected_logs.append(msg.log_data)
 		
-	def log_event(self):
+		print('Received log data!')
+
+		
+	def log_event_trigger(self):
 		current_time = 0
 		while current_time == 0:
 			current_time = rospy.get_rostime()
 		
+		sim_time = current_time - self.sim_start_time
+		
 		msg = LogEvent()
-		msg.time = current_time
+		msg.sender = self.node_name
+		msg.time = sim_time
 		msg.event = 0 # TRIGGER
 		self.log_event_topic.publish(msg)
 		
-		self.log_event_times.append(current_time)
+		self.log_event_times.append(sim_time.to_sec())
 
+	def log_event_request(self):
+		self.collected_logs = []
+		self.collected_logs.append(self.log_event_times)
+		
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_rostime()
+			
+		msg = LogEvent()
+		msg.time = current_time
+		msg.event = 1 # REQUEST
+		self.log_event_topic.publish(msg)
+		
 	
 	def start_sim(self):
+		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+		roslaunch.configure_logging(self.uuid)
+		sleep_rate = rospy.Rate(10) # Hz
+		
+		
+		# Get list of ros nodes that are present before the utility monitors launch file is started
+		pre_utility_monitors_nodes = rosnode.get_node_names()
+		
+		# Start mission launch file which is responsible for controlling the platform through the simulation
+		self.utility_monitors_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.utility_monitors_launch_info))
+		self.utility_monitors_launch.start()
+		
+		# Wait for new nodes to show up
+		while pre_utility_monitors_nodes == rosnode.get_node_names():
+			sleep_rate.sleep()
+		
+		
+		
 		# Get list of ros nodes that are present before the mission launch file is started
 		pre_mission_nodes = rosnode.get_node_names()
 		
 		# Start mission launch file which is responsible for controlling the platform through the simulation
-		self.uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-		roslaunch.configure_logging(self.uuid)
 		self.mission_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.mission_launch_info ))
 		self.mission_launch.start()
 		
 		# Wait for new nodes to show up
-		sleep_rate = rospy.Rate(10) # Hz
 		while pre_mission_nodes == rosnode.get_node_names():
 			sleep_rate.sleep()
 			
@@ -116,9 +151,24 @@ class AutorallySimManagerNode():
 		self.mission_nodes = list(set(post_mission_nodes) - set(pre_mission_nodes))
 		rospy.logwarn('Mission nodes: {}'.format(self.mission_nodes))
 		
+		
+		# Get the sim start time
+		while self.sim_start_time == 0:
+			self.sim_start_time = rospy.get_rostime()
 	
 	def end_sim(self):
+		self.log_event_request()
+		
+		raw_input('press enter to advance')
+		
+		print(self.collected_logs)
+		
+		
+		raw_input('press enter to advance')
+		
 		self.mission_launch.shutdown()
+		self.utility_monitors_launch.shutdown()
+		
 	
 	def set_up_evo_ros2_communications(self):
 		# Evo ROS state event topic
@@ -155,7 +205,8 @@ class AutorallySimManagerNode():
 			# sim running
 
 	def on_shutdown(self):
-		pass
+		self.mission_launch.shutdown()
+		self.utility_monitors_launch.shutdown()
 		
 	
 if __name__ == '__main__':
