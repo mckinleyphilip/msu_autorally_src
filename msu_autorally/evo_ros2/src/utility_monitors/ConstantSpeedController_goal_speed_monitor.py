@@ -68,6 +68,7 @@ class ConstantSpeedController_goal_speed_monitor():
 		msg.time = rospy.get_rostime()
 		msg.sender = self.node_name
 		msg.event = 2 # Reply
+		msg.data_header = 'Goal Speed'
 		msg.log_data = self.data_list
 		self.log_collection_topic.publish(msg)
 		

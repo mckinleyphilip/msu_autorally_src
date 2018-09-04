@@ -11,3 +11,6 @@ uint8 SIM_COMPLETE				= 6 # The simulation has completed running. The result is 
 uint8 SIM_RESET					= 7 # The simulation environment has been reset.
 
 string text				# Extra information partaining to the status
+
+string[] result_headers
+Float64Array[] result
