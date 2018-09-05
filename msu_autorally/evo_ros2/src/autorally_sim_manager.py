@@ -12,9 +12,11 @@ import rosnode
 import argparse
 import numpy as np
 import threading
+import copy
 
 from evo_ros2.msg import EvoROS2State
 from evo_ros2.msg import LogEvent
+from evo_ros2.msg import Float64Array
 
 
 
@@ -99,21 +101,11 @@ class AutorallySimManagerNode():
 		
 		
 	def compile_results(self):
-		
 		self.results = []
-		
-		#print('\n\nheaders')
-		#print(self.result_headers)
-		
-		#print('\n\nCollected Logs')
-		#print(self.collected_logs)
-		
 		for index, header in enumerate(self.result_headers):
 			self.results.append((header, self.collected_logs[index]))
-		
-		if self.debug:
-			rospy.loginfo('\n\nResults')
-			rospy.loginfo(self.results)
+		rospy.loginfo('\n\n{}: Results'.format(self.node_name))
+		rospy.loginfo(self.results)
 		
 		
 	def log_event_trigger(self):
@@ -160,6 +152,7 @@ class AutorallySimManagerNode():
 		self.utility_monitors_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.utility_monitors_launch_info))
 		self.utility_monitors_launch.start()
 		
+		rospy.sleep(2)
 		# Wait for new nodes to show up
 		while pre_utility_monitors_nodes == rosnode.get_node_names():
 			sleep_rate.sleep()
@@ -174,6 +167,7 @@ class AutorallySimManagerNode():
 		self.mission_launch = roslaunch.parent.ROSLaunchParent(self.uuid, roslaunch.rlutil.resolve_launch_arguments(self.mission_launch_info ))
 		self.mission_launch.start()
 		
+		rospy.sleep(2)
 		# Wait for new nodes to show up
 		while pre_mission_nodes == rosnode.get_node_names():
 			sleep_rate.sleep()
@@ -197,21 +191,27 @@ class AutorallySimManagerNode():
 		
 		
 		while len(self.collected_logs) <= len(self.utility_monitors_nodes):
-			print('Waiting on results...')
+			if self.debug:
+				rospy.logwarn('Waiting for results...')
 			self.sleep_rate.sleep()
 					
-					
-		self.compile_results()		
+		
+		if self.debug:	
+			self.compile_results()		
 		
 		self.mission_launch.shutdown()
 		self.utility_monitors_launch.shutdown()
 		
+		# Load results into the next state change msg
 		msg = EvoROS2State()
-		msg.result_headers = self.result_headers
+		msg.result = []
+		for x in range(len(self.collected_logs)):
+			msg.result.append(Float64Array())
 		
-		for log_array in self.collected_logs:
-			msg.result.append(log_array)
-		#msg.result = self.collected_logs
+		for index, log_array in enumerate(self.collected_logs):
+			msg.result[index].header = self.result_headers[index]
+			msg.result[index].data = copy.deepcopy(log_array)
+	
 		return msg
 		
 	
@@ -230,6 +230,7 @@ class AutorallySimManagerNode():
 		rospy.set_param('evo_ros2_state', new_state_value)
 		msg.sender = self.node_name
 		msg.state = new_state_value
+		#print(msg)
 		self.evo_ros2_comm_pub.publish(msg)
 		
 			

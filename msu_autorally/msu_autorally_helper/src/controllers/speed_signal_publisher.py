@@ -52,14 +52,14 @@ class SpeedSignalPublisherNode():
 		if 0 <= time < 5:
 			goal_speed = time
 
-#		elif 5 <= time < 10:
-#			goal_speed = 5
-#		elif 10 <= time < 20:
-#			goal_speed = -time + 15
-#		elif 20 <= time < 25:
-#			goal_speed = -5
-#		elif 25 <= time < 30:
-#			goal_speed = time - 30
+		elif 5 <= time < 10:
+			goal_speed = 5
+		elif 10 <= time < 20:
+			goal_speed = -time + 15
+		elif 20 <= time < 25:
+			goal_speed = -5
+		elif 25 <= time < 30:
+			goal_speed = time - 30
 		else:
 			self.running = False
 			
