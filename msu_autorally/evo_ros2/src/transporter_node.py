@@ -61,6 +61,17 @@ class Transporter():
 		rospy.spin()
 		
 	
+	def send_result(self, msg):
+		self.results = []
+		
+		
+		for index, result in enumerate(msg.result):
+			self.results.append((msg.result[index].header, msg.result[index].data))
+		
+		if self.debug:
+			rospy.loginfo('\n\n Transporter Results')
+			rospy.loginfo(self.results)
+		
 			
 	def set_up_evo_ros2_communications(self):
 		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
@@ -89,8 +100,7 @@ class Transporter():
 			self.set_evo_ros2_state(4)
 			
 		if msg.state == 6:
-			pass
-			# Send result
+			self.send_result(msg)
 		
 		if msg.state == 7:
 			# Simulation reset is complete, ready for new genome

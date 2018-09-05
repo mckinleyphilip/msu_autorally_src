@@ -3,7 +3,8 @@
 	
 	<group ns="msu_autorally_utility_trackers">
 		<!-- <node name = "collision_monitor" pkg="evo_ros2" type="autorally_collision_monitor.py" output="screen"/> -->
-		<node name = "ConstantSpeedController_goal_speed_monitor" pkg="evo_ros2" type="ConstantSpeedController_goal_speed_monitor.py" output="screen"/>
+		<node name = "ConstantSpeedController_goal_speed_monitor" pkg="evo_ros2" type="ConstantSpeedController_goal_speed_monitor.py" output="log"/>
+		<node name = "autorally_actual_speed_monitor" pkg="evo_ros2" type="autorally_actual_speed_monitor.py" output="screen"/>
 	</group>
 	
 	
