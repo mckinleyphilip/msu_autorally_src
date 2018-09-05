@@ -104,7 +104,7 @@ class AutorallySimManagerNode():
 		self.results = []
 		for index, header in enumerate(self.result_headers):
 			self.results.append((header, self.collected_logs[index]))
-		rospy.loginfo('\n\n{}: Results'.format(self.node_name))
+		#rospy.loginfo('\n\n{}: Results'.format(self.node_name))
 		rospy.loginfo(self.results)
 		
 		

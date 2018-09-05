@@ -69,8 +69,12 @@ class Transporter():
 			self.results.append((msg.result[index].header, msg.result[index].data))
 		
 		if self.debug:
-			rospy.loginfo('\n\n Transporter Results')
-			rospy.loginfo(self.results)
+			rospy.loginfo('\n\n Transporter Result received')
+			#rospy.loginfo(self.results)
+		
+		self.result_sender.send_json(self.results)
+			
+		
 		
 			
 	def set_up_evo_ros2_communications(self):

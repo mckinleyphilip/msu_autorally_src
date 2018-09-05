@@ -31,7 +31,7 @@
 	
 	
 	<!-- Start utility monitors -->
-	<include file="$(find msu_autorally_helper)/launch/autorally_utility_monitors.launch" />
+	<!-- <include file="$(find msu_autorally_helper)/launch/autorally_utility_monitors.launch" /> -->
 	
 	
 	<!-- Empty required node. Kill this and ROS will clean up all nodes spawned as a result of this whole launch file -->
