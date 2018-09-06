@@ -126,7 +126,7 @@ class AutorallySimManagerNode():
 
 	def log_event_request(self):
 		self.collected_logs = []
-		self.result_headers.append('time')
+		self.result_headers.append('Time')
 		self.collected_logs.append(self.log_event_times)
 		
 		current_time = 0
