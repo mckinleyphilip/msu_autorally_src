@@ -33,5 +33,5 @@ for i in range(1):
 	#genome.append(i)
 	socket.send_json(genome)
 	
-	print(receiver.recv_json())
+	#print(receiver.recv_json())
 	

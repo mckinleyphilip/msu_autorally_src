@@ -40,10 +40,10 @@ class Transporter():
 		self.genome_port = rospy.get_param('GENOME_PORT',5557)
 		self.result_port = rospy.get_param('RESULT_PORT',5558)
 		
-		context = zmq.Context()
-		self.genome_receiver = context.socket(zmq.PULL)
+		self.context = zmq.Context()
+		self.genome_receiver = self.context.socket(zmq.PULL)
 		self.genome_receiver.connect('tcp://{}:{}'.format(self.server_ip_addr, self.genome_port))
-		self.result_sender = context.socket(zmq.PUSH)
+		self.result_sender = self.context.socket(zmq.PUSH)
 		self.result_sender.connect('tcp://{}:{}'.format(self.server_ip_addr, self.result_port)) 
 		
 		
@@ -134,7 +134,9 @@ class Transporter():
 			
 		
 	def on_shutdown(self):
-		pass
+		self.result_sender.close()
+		self.genome_receiver.close()
+		self.context.destroy()
 		
 if __name__ == '__main__':
 	# Parse arguments
