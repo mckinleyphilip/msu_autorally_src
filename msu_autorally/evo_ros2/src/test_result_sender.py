@@ -41,7 +41,7 @@ class Transporter():
 				#print(len(self.base_results))
 				#print(self.base_results)	
 				self.results = dict()
-				self.results['time'] = self.base_results[0][1]
+				self.results['Time'] = self.base_results[0][1]
 				self.results['Goal Speed'] = self.base_results[1][1]
 				self.results['Actual Speed'] = list()
 				
