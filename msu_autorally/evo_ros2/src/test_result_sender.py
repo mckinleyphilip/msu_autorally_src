@@ -15,8 +15,8 @@ class Transporter():
 		
 		# Set up socket communication using ZMQ
 		self.server_ip_addr = '127.0.0.1'
-		self.genome_port = 5026
-		self.result_port = 5036
+		self.genome_port = 5027
+		self.result_port = 5037
 		
 		self.context = zmq.Context()
 		self.genome_receiver = self.context.socket(zmq.PULL)
