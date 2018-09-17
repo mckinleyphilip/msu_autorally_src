@@ -88,6 +88,12 @@ void ConstantSpeedController::onInit()
   }
 
   //m_accelerationProfile = generateAccelerationProfile(100);
+  
+  //dynamic_reconfigure::Server<constantSpeedControllerPIDParamsConfig>::CallbackType cb;
+
+  //cb = boost::bind(&ConstantSpeedController::ConfigCallback, this, _1, _2);
+  //m_dynServer.setCallback(cb);
+    
 
   m_controlTimer = nh.createTimer(ros::Rate(1),
                       &ConstantSpeedController::controlCallback, this);
@@ -185,8 +191,18 @@ void ConstantSpeedController::controlCallback(const ros::TimerEvent& time)
   nhPvt.getParam("KD", m_constantSpeedKD);
   nhPvt.getParam("KI", m_constantSpeedKI);
   nhPvt.getParam("IMax", m_constantSpeedIMax);
-
+  //std::cout << "ConstantSpeedController:: Got a config!!" << std::endl << "	  " << m_constantSpeedKP <<  "," << m_constantSpeedKD <<  "," << m_constantSpeedKI <<  "," << m_constantSpeedIMax << std::endl;
 }
+
+void ConstantSpeedController::ConfigCallback(const constantSpeedControllerPIDParamsConfig &config, uint32_t level)
+  {
+	  // Disable the controlCallback for this to work
+    m_constantSpeedKP = config.KP;
+    m_constantSpeedKD = config.KD;
+	m_constantSpeedKI = config.KI;
+	m_constantSpeedIMax = config.IMax;
+    std::cout << "ConstantSpeedController:: Got a config!!" << std::endl << "	  " << m_constantSpeedKP <<  "," << m_constantSpeedKD <<  "," << m_constantSpeedKI <<  "," << m_constantSpeedIMax << std::endl;
+  }
 
 void ConstantSpeedController::loadThrottleCalibration()
 {

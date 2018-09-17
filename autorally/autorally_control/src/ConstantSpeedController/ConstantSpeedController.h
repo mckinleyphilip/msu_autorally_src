@@ -46,6 +46,11 @@
 #include <autorally_msgs/wheelSpeeds.h>
 #include <autorally_core/RingBuffer.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <autorally_control/constantSpeedControllerPIDParamsConfig.h>
+#include <boost/thread.hpp>          // Mutex
+#include <boost/lexical_cast.hpp>
+
 namespace autorally_control
 {
 
@@ -103,6 +108,9 @@ class ConstantSpeedController : public nodelet::Nodelet
 
   std::vector<double> generateAccelerationProfile(const int count);
   void loadThrottleCalibration();
+  
+  void ConfigCallback(const constantSpeedControllerPIDParamsConfig &config, uint32_t level);
+  dynamic_reconfigure::Server<constantSpeedControllerPIDParamsConfig> m_dynServer;
 
 };
 
