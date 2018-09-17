@@ -1,4 +1,4 @@
 # Genome Mapping for list of floats from Evo Search Algorithm
 # GAS 08-16-2018
 
-GENOME_MAPPING: ['/Base_controller_nodelet/IMax', '/Base_controller_nodelet/KD', '/Base_controller_nodelet/KI', '/Base_controller_nodelet/KP']
+GENOME_MAPPING: ['/ConstantSpeedController/IMax', '/ConstantSpeedController/KD', '/ConstantSpeedController/KI', '/ConstantSpeedController/KP']
