@@ -36,7 +36,7 @@
 	
 	
 	<!-- Start the ROS Navigation Stack -->
-	<!-- <include file="$(find msu_autorally_helper)/launch/autorally_ros_nav_stack.launch" /> -->
+	<include file="$(find msu_autorally_helper)/launch/autorally_ros_nav_stack.launch" />
 	
 	
 	<!-- Start custom TF helpers to fill out the tf tree from /base_link to /odom -->
