@@ -2,7 +2,8 @@
 # GAS 08-16-2018
 
 # Common Params
-SERVER_IP_ADDR: '35.12.212.123'
+#SERVER_IP_ADDR: '35.12.212.123'
+SERVER_IP_ADDR: '127.0.0.1'
 GENOME_PORT: 5022
 RESULT_PORT: 5032
 DEBUG: True
@@ -10,7 +11,7 @@ EVO_ROS_COMM_TOPIC: '/evo_ros2_int_comms'
 EVO_ROS_LOG_EVENT_TOPIC: '/evo_ros2_log_event'
 EVO_ROS_LOG_COLLECTION_TOPIC:  '/evo_ros2_log_collection'
 LOGGING_RATE: 10 # Hz
-
+ROS_GAZEBO_WORLD_PROPERTIES_SERVICE: '/autorally_platform/gazebo/get_world_properties'
 
 # Software Manager
 software_manager:
@@ -18,8 +19,8 @@ software_manager:
    WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world.launch']
    PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform.launch']
    SIM_MANAGER_LAUNCH_FILE: ['evo_ros2', 'sim_manager.launch']
-
    
+
  # Simulation Manager Script
 sim_manager:
    #MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
