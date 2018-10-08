@@ -11,8 +11,9 @@ import roslaunch
 import argparse
 import numpy as np
 import time
-
 import threading
+
+from gazebo_msgs.srv import GetWorldProperties
 
 from evo_ros2.srv import SoftReset
 from evo_ros2.msg import EvoROS2State
@@ -34,6 +35,8 @@ class SoftwareManagerNode():
 		self.world_launch_info = rospy.get_param('software_manager/WORLD_LAUNCH_FILE')
 		self.platform_launch_info = rospy.get_param('software_manager/PLATFORM_LAUNCH_FILE')
 		self.sim_manager_launch_info = rospy.get_param('software_manager/SIM_MANAGER_LAUNCH_FILE')
+		self.world_properties_service = rospy.get_param('ROS_GAZEBO_WORLD_PROPERTIES_SERVICE')
+		
 		
 		""" # Soft reset capabilities still being developed
 		# Set up connection for Evo-ROS2 soft reset
@@ -51,11 +54,14 @@ class SoftwareManagerNode():
 			
 			# This will block until the event flag is set to true or the timeout value (in seconds) is reached
 			#	Returns true if the flag has been set and false if the timeout value is hit
-			if not self.event.wait(timeout = 2.0):
+			if not self.event.wait(timeout = 1.0):
+				state = rospy.get_param('evo_ros2_state')
+				self.check_gazebo_time(state)
 				continue
 			
-			state = rospy.get_param('evo_ros2_state')
 			self.event.clear()
+			
+			state = rospy.get_param('evo_ros2_state')
 			
 			if self.debug:
 				rospy.logwarn('{} - in main thread and state {}'.format(self.node_name, state))
@@ -128,13 +134,20 @@ class SoftwareManagerNode():
 		
 		self.world_launch.start()
 		self.platform_launch.start()
-		rospy.sleep(2)
+		
+		# Get Access to Gazebo World properties
+		rospy.logwarn('{} - Waiting for Gazebo Properties'.format(self.node_name))
+		rospy.wait_for_service(self.world_properties_service)
+		self.getWorldProp = rospy.ServiceProxy(self.world_properties_service, GetWorldProperties)
 
 
 	def hard_reset(self):
-		self.world_launch.shutdown()
-		self.platform_launch.shutdown()
-		self.sim_manager_launch.shutdown()
+		try:
+			self.world_launch.shutdown()
+			self.platform_launch.shutdown()
+			self.sim_manager_launch.shutdown()
+		except:
+			rospy.logwarn('{} - Hard reset failed'.format(self.node_name))
 		
 		
 	def soft_reset(self):
@@ -142,8 +155,21 @@ class SoftwareManagerNode():
 		self.soft_rest_service()
 		
 		
-		
-		
+	# This acts as a simple error checking function, since Gazebo likes to crash on start up. If we cannot read the time from the sim world, we know that a crash has occured.
+	def check_gazebo_time(self, state):
+		if 2 < state <= 5: 
+			try:
+				current_time = self.getWorldProp().sim_time 
+				#rospy.logwarn('Current Gazebo time: {}'.format(current_time))
+			except:
+				rospy.logerr('!!!{} - Gazebo crash detected while in state {}!!!'.format(self.node_name, state))
+				self.hard_reset()
+				self.set_evo_ros2_state(1)
+		else:
+			#rospy.logwarn('Failing check state test')
+			pass
+				
+				
 	def on_shutdown(self):
 		self.hard_reset()
 		
