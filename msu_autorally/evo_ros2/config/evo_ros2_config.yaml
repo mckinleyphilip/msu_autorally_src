@@ -6,7 +6,7 @@ SERVER_IP_ADDR: '35.9.28.201'
 #SERVER_IP_ADDR: '127.0.0.1'
 GENOME_PORT: 5023
 RESULT_PORT: 5033
-DEBUG: False
+DEBUG: True
 EVO_ROS_COMM_TOPIC: '/evo_ros2_int_comms'
 EVO_ROS_LOG_EVENT_TOPIC: '/evo_ros2_log_event'
 EVO_ROS_LOG_COLLECTION_TOPIC:  '/evo_ros2_log_collection'
