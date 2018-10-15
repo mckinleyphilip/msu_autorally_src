@@ -52,8 +52,8 @@ class DEAP_EA():
 		self.run_number = 1
 		self.genome_size = 4
 		self.tourn_size = 2
-		self.pop_size = 3
-		self.number_generations = 2
+		self.pop_size = 25
+		self.number_generations = 25
 		
 		
 		# Socket Communication Params      
