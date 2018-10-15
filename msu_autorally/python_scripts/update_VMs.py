@@ -22,6 +22,8 @@ with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_f
 
 for worker in cfg['worker_list']:
 	print(str(worker))
+	ip = cfg[str(worker)]['ip']
+	print(str(ip))
 	
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
 		cd autorally_catkin_ws/src/;
@@ -30,7 +32,7 @@ for worker in cfg['worker_list']:
 		git log -1;
 		exec bash
 		""".format(git_branch)
-	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,worker.ip,cmds)
+	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
 	os.system(cmd_str)
 
 print('Script finished! \n')
