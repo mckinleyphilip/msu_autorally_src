@@ -62,11 +62,13 @@ class Transporter():
 		
 	
 	def send_result(self, msg):
-		self.results = []
+		self.results = dict()
+		self.results['Result'] = list()
 		
 		
+		self.results['Genome'] = self.raw_genome
 		for index, result in enumerate(msg.result):
-			self.results.append((msg.result[index].header, msg.result[index].data))
+			self.results['Result'].append((msg.result[index].header, msg.result[index].data))
 		
 		if self.debug:
 			rospy.loginfo('\n\n Transporter Result received')
@@ -117,6 +119,7 @@ class Transporter():
 			rospy.signal_shutdown('Transporter: Received ending signal from server')
 			return
 		else:
+			self.raw_genome = raw_genome
 			self.parse_genome(raw_genome)
 	
 	
