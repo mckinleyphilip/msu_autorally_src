@@ -1,0 +1,85 @@
+# List of nodes to be connected
+# GAS 10-15-18
+
+worker_list:
+   autorally-robo1vm1:
+      ip: '35.9.28.201'
+   autorally-robo1vm2:
+      ip: '35.9.28.202'
+   autorally-robo1vm3:
+      ip: '35.9.28.203'
+   autorally-robo1vm4:
+      ip: '35.9.28.204'
+   autorally-robo1vm5:
+      ip: '35.9.28.205'
+   autorally-robo1vm6:
+      ip: '35.9.28.206'
+   autorally-robo1vm7:
+      ip: '35.9.28.207'
+      
+      
+   autorally-robo2vm1:
+      ip: '35.9.28.211'
+   autorally-robo2vm2:
+      ip: '35.9.28.212'
+   autorally-robo2vm3:
+      ip: '35.9.28.213'
+   autorally-robo2vm4:
+      ip: '35.9.28.214'
+   autorally-robo2vm5:
+      ip: '35.9.28.215'
+   autorally-robo2vm6:
+      ip: '35.9.28.216'
+   autorally-robo2vm7:
+      ip: '35.9.28.217'
+      
+      
+   autorally-robo3vm1:
+      ip: '35.9.28.221'
+   autorally-robo3vm2:
+      ip: '35.9.28.222'
+   autorally-robo3vm3:
+      ip: '35.9.28.223'
+   autorally-robo3vm4:
+      ip: '35.9.28.224'
+   autorally-robo3vm5:
+      ip: '35.9.28.225'
+   autorally-robo3vm6:
+      ip: '35.9.28.226'
+   autorally-robo3vm7:
+      ip: '35.9.28.227'
+      
+      
+   autorally-robo4vm1:
+      ip: '35.9.28.231'
+   autorally-robo4vm2:
+      ip: '35.9.28.232'
+   autorally-robo4vm3:
+      ip: '35.9.28.233'
+   autorally-robo4vm4:
+      ip: '35.9.28.234'
+   autorally-robo4vm5:
+      ip: '35.9.28.235'
+   autorally-robo4vm6:
+      ip: '35.9.28.236'
+   autorally-robo4vm7:
+      ip: '35.9.28.237'
+      
+      
+   autorally-robo5vm1:
+      ip: '35.9.28.208'
+   autorally-robo5vm2:
+      ip: '35.9.28.209'
+   autorally-robo5vm3:
+      ip: '35.9.28.210'
+   autorally-robo5vm4:
+      ip: '35.9.28.228'
+   autorally-robo5vm5:
+      ip: '35.9.28.229'
+   autorally-robo5vm6:
+      ip: '35.9.28.230'
+   autorally-robo5vm7:
+      ip: '35.9.28.238'
+
+      
+ 
