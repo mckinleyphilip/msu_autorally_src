@@ -22,7 +22,7 @@ with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_f
 
 for worker in cfg['worker_list']:
 	print(str(worker))
-	ip = cfg[str(worker)]['ip']
+	ip = cfg['worker_list'][str(worker)]['ip']
 	print(str(ip))
 	
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
