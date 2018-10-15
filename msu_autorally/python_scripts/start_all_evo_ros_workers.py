@@ -12,12 +12,13 @@ args= parser.parse_args()
 
 print('Starting software_manager.py scripts on robo nodes...')
 
-name_of_script = "evo-ros2.launch"
+name_of_script = "evo_ros2.launch"
 GA_IP_ADDR = '35.9.28.201'
 script_arguments = "-ip {}".format(GA_IP_ADDR)
 ga_hostname = 'autorally-robo1vm1'
 
 work_nodes_file_name = 'active_nodes.yml'
+#work_nodes_file_name = 'test_nodes.yml'
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -33,10 +34,13 @@ for worker in cfg['worker_list']:
 	#Start Software Manager
 	cmds = """echo {}...;
 		cd;
-		roslaunch evo_ros2 {} {};
+		source /opt/ros/indigo/setup.bash;
+		source ~/autorally_catkin_ws/devel/setup.sh;
+		source ~/autorally_catkin_ws/src/autorally/autorally_util/setupEnvLocal.sh;
+		roslaunch evo_ros2 {};
 		exec bash
-		""".format(name_of_script, name_of_script, script_arguments)
-	cmd_str = """xterm -hold -title "Connection to {}" -e 'ssh -t -X {}.cse.msu.edu "{}"'&""".format(worker,worker,cmds)
+		""".format(name_of_script, name_of_script)
+	cmd_str = """xterm -hold -title "Connection to {}" -e 'ssh -t -X {} "{}"'&""".format(worker,ip,cmds)
 	os.system(cmd_str)
 
 
