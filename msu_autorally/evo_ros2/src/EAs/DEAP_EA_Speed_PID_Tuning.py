@@ -49,7 +49,7 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "PID-Tuning"
-		self.run_number = 3
+		self.run_number = 10
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
