@@ -76,6 +76,7 @@ class DEAP_EA():
 			self.set_up_sockets()
 			self.set_up_dirs()
 			
+			print('\nAbout to start exp: {} \n\t run: {}'.format(self.experiment_name, self.run_number))
 			raw_input("Press enter to run")
 		
 			# Run
