@@ -49,16 +49,16 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "PID-Tuning"
-		self.run_number = 10
+		self.run_number = 100
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
-		self.number_generations = 25
+		self.number_generations = 100
 		
 		
 		# Socket Communication Params      
-		#self.ip_addr = '127.0.0.1'
-		self.ip_addr = '35.9.28.201'
+		self.ip_addr = '127.0.0.1'
+		#self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 

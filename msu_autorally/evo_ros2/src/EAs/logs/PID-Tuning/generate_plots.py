@@ -35,7 +35,7 @@ class plot_generator():
 		
 		
 		run_multiple = True
-		self.number_runs = 2
+		self.number_runs = 10
 		
 		
 		if run_multiple:
