@@ -49,7 +49,7 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "PID-Tuning"
-		self.run_number = 1
+		self.run_number = 3
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
@@ -100,9 +100,11 @@ class DEAP_EA():
 
 		# Final logging and notifications
 		self.create_run_log()
+		print('Run log created.')
 		self.write_run_log()
-		self.create_run_plots()
-		print('Logs and plots saved!')
+		print('Log saved!')
+		#self.create_run_plots()
+		#print('Plots saved!')
 		
 		self.email_notification(json.dumps(self.run_log, indent=2))
 		print('Email notification sent!')
@@ -410,22 +412,32 @@ class DEAP_EA():
 		avg_fit = self.summary_log.select("avg")
 		best_fit = self.summary_log.select("min")
 
-
+		print('Preparing plot 1...')
 		fig, ax1 = plt.subplots()
+		print('1')
 		line1 = ax1.plot(gen, best_fit, "b-", label="Minimum (Best) Fitness")
+		print('2')
 		ax1.set_xlabel("Generation")
+		print('3')
 		ax1.set_ylabel("Fitness")
+		print('4')
 		line2 = ax1.plot(gen, avg_fit, "r-", label="Average Fitness")
+		print('5')
 		lns = line1 + line2
+		print('6')
 		labs = [l.get_label() for l in lns]
+		print('7')
 		ax1.legend(lns, labs, loc="best")
+		print('8')
 		ax1.set_title('Run {} Fitnesses over Generations'.format(self.run_number))
 
 		#plt.show()
+		print('Saving plot 1')
 		plt.savefig('{}/fitness_graph.png'.format(self.run_directory), bbox_inches='tight')
 		
 		
 		# Speed Signal of Best Ind
+		print('Preparing plot 2...')
 		details_of_best_ind = self.detailed_log[str(self.hof[0])]
 		self.df = pd.read_json(details_of_best_ind['dataFrame'], orient='columns')
 		self.df = self.df.sort_index()
@@ -433,6 +445,7 @@ class DEAP_EA():
 		ax2.legend(loc="best")
 		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
 		fig2 = ax2.get_figure()
+		print('Saving plot 2')
 		fig2.savefig('{}/best_ind_speed_plot.png'.format(self.run_directory), bbox_inches='tight')
 		
 	

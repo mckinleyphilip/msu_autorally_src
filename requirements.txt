@@ -1,4 +1,3 @@
-actionlib==1.11.13
 angles==1.9.11
 appdirs==1.4.3
 asn1crypto==0.24.0
