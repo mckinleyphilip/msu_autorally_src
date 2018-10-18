@@ -48,7 +48,7 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Tuning"
+		self.experiment_name = "PID-Tuning-Cubed-Fitness"
 		self.run_number = 100
 		self.genome_size = 4
 		self.tourn_size = 2
@@ -57,8 +57,8 @@ class DEAP_EA():
 		
 		
 		# Socket Communication Params      
-		self.ip_addr = '127.0.0.1'
-		#self.ip_addr = '35.9.28.201'
+		#self.ip_addr = '127.0.0.1'
+		self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 
@@ -178,41 +178,21 @@ class DEAP_EA():
 		return population, logbook
 		
 		
-	### Set up evaluation function ###
-	def evaluate_ind(self, ind):
-		#print('Sending ind: {}'.format(ind))
-		self.socket.send_json(ind)
-		
-		print('Waiting Result')
-
-		result = self.receiver.recv_json()
-		
-		print('Recv\'d Result')
-		df = pd.DataFrame.from_dict(dict(result))
-		df['Error'] = abs(df['Actual Speed'] - df['Goal Speed'])
-		#df.plot(x='Time')
-		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
-		print('Fitness: {}'.format(fitness))
-		
-		
-		
-		# add individual to detailed log
-		if str(ind) not in self.detailed_log.keys():
-			self.detailed_log[str(ind)] = {
-				"gen": self.gen,
-				"fitness": fitness,
-				"dataFrame": df.to_json()
-			}
-
-		return (fitness, )
-	
 	
 	def evaluate_result(self, ind, result):
 		print('Recv\'d Result')
 		df = pd.DataFrame.from_dict(dict(result))
 		df['Error'] = abs(df['Actual Speed'] - df['Goal Speed'])
 		#df.plot(x='Time')
+		
+		
+		# Fitness function used it original tuning exp
 		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
+		
+		
+		# Fitness functon used in cubed exp
+		fitness = (2 - mean_squared_error(df['Actual Speed'],  df['Goal Speed']))**3
+		
 		print('Fitness: {}'.format(fitness))
 		
 		
