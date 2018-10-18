@@ -462,6 +462,7 @@ class DEAP_EA():
 		ax2 = self.df.plot(x='Time')
 		ax2.legend(loc="best")
 		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
+		plt.ylabel('meters / second')
 		fig2 = ax2.get_figure()
 		print('Saving plot 2')
 		fig2.savefig('{}/best_ind_speed_plot.png'.format(self.run_directory), bbox_inches='tight')
