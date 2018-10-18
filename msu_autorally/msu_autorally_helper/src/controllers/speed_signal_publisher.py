@@ -42,6 +42,56 @@ class SpeedSignalPublisherNode():
 			self.sleep_rate.sleep()
 			
 	
+	
+	
+	
+	def jumpy_signal(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_time()
+		time = (current_time - self.start_time)
+		
+		goal_speed = 0
+		
+		if 0 <= time < 5:
+			goal_speed = 10
+		elif 5 <= time < 10:
+			goal_speed = 5
+		elif 10 <= time < 20:
+			goal_speed = 7.5
+		elif 20 <= time < 25:
+			goal_speed = 0
+		elif 25 <= time < 30:
+			goal_speed = 2.5
+		else:
+			self.running = False
+			
+		return goal_speed
+	
+	# Still working on this
+	def triangluar_speed_function(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_time()
+		time = (current_time - self.start_time)
+		
+		goal_speed = 0
+		
+		if 0 <= time < 5:
+			goal_speed = time*2
+		elif 5 <= time < 7.5:
+			goal_speed = -time*2 - 10
+		elif 7.5 <= time < 12.5:
+			goal_speed = 5
+		elif 20 <= time < 25:
+			goal_speed = -5
+		elif 25 <= time < 30:
+			goal_speed = time - 30
+		else:
+			self.running = False
+			
+		return goal_speed
+	
 	def basic_ramping_speed_function(self):
 		current_time = 0
 		while current_time == 0:
