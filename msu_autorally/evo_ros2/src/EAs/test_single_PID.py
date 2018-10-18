@@ -48,9 +48,10 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Tuning"
-		self.run_number = 0
-		self.ind = [0.2, 0.0, 0.001, 0.15]
+		self.experiment_name = "PID-Testing"
+		self.run_number = '_jumpy_signal_run2_parameters'
+		#self.ind = [0.2, 0.0, 0.001, 0.15] #Default
+		self.ind = [0.978905837000845, 0.07513378343124555, 0.04569592282669355, 0.5116667627180238] # Run 2 
 		
 		
 		# Socket Communication Params      
