@@ -1,5 +1,5 @@
 #
-# Used to generate PID-tuning experient plots
+# Used to generate PID-tuning-cubed experient plots
 # GAS 10-16-18
 
 # For command line argument parsing
@@ -35,7 +35,7 @@ class plot_generator():
 		
 		
 		run_multiple = True
-		self.number_runs = 10
+		self.number_runs = 1
 		
 		
 		if run_multiple:
@@ -119,9 +119,9 @@ class plot_generator():
 		#print(list(self.df.columns))
 		ax2 = self.df.plot(x='Time')
 		#ax2.legend(['Actual Speed', 'Error', 'Goal Speed'], loc="upper right")
-		ax2.legend(['Actual Speed', 'Goal Speed', 'Error'], bbox_to_anchor=(1.0, 0.8))
-		plt.ylabel('meters / second')
+		ax2.legend(['Actual Speed (m/s)', 'Goal Speed (m/s)', 'Error'], bbox_to_anchor=(1.2, 0.8))
 		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
+		plt.ylabel('meters / second')
 		plt.text(0.5, 0.03, 'Fitness: {}'.format(self.best_fitness), horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
 		fig2 = ax2.get_figure()
 		plt.margins(x = 0.0, y = 0.1)

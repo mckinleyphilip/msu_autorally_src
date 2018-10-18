@@ -183,6 +183,7 @@ class DEAP_EA():
 		ax2 = self.df.plot(x='Time')
 		ax2.legend(['Actual Speed', 'Goal Speed', 'Error'], bbox_to_anchor=(1.2, 0.8))
 		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
+		plt.ylabel('meters / second')
 		plt.text(0.5, 0.03, 'Mean Squared Error: {}'.format(self.fitness), horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
 		fig2 = ax2.get_figure()
 		plt.margins(x = 0.0, y = 0.1)
