@@ -130,13 +130,28 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
     speed = -1 * m_mostRecentSpeedCommand.data;
   }
   
+  
+  double abs_goal_speed = std::abs(m_mostRecentSpeedCommand.data);
+  double abs_front_wheel_speed = std::abs(m_frontWheelsSpeed);
+  
+  
+  
+  // braking
+  double speed_diff = abs_goal_speed - abs_front_wheel_speed;
+  if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
+  //if (!((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
+  {
+	  //command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
+	  command->frontBrake = 1.0;
+  }
+  
 
-  if (speed > 0.1)
+  if (abs_goal_speed > 0.1 && abs_goal_speed < 99)
   {
     double p;
-    if(m_throttleMappings.interpolateKey(speed, p))
+    if(m_throttleMappings.interpolateKey(abs_goal_speed, p))
     {
-      m_integralError += speed - m_frontWheelsSpeed;
+      m_integralError += abs_goal_speed - abs_front_wheel_speed;
       if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
       {
         m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
@@ -148,16 +163,16 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
       }
 
       command->throttle = p +
-                 m_constantSpeedKP*(speed - m_frontWheelsSpeed);
+                 m_constantSpeedKP*(abs_goal_speed - abs_front_wheel_speed);
       command->throttle += m_constantSpeedKI * m_integralError;
       command->throttle = std::max(0.0, std::min(1.0, command->throttle));
 
-      //NODELET_INFO("interp %f, command %f",p, command->throttle);
+      // NODELET_INFO("interp %f, command %f",p, command->throttle);
       m_constantSpeedPrevThrot = p;
     }
     else
     {
-      NODELET_WARN("ConstantSpeedController could not interpolate speed %f", m_mostRecentSpeedCommand.data);
+      NODELET_WARN("base_controller_nodelet could not interpolate speed %f", m_mostRecentSpeedCommand.data);
       command->throttle = 0;
     }
   }
@@ -166,10 +181,10 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
     command->throttle = 0;
     
   }
-
+  
   //command->throttle = 1.0;
   //ROS_ERROR("Speed command: %f", command->throttle);
-  if (m_mostRecentSpeedCommand.data != -99)
+  if (abs_goal_speed != -99)
   {
     m_chassisCommandPub.publish(command);
   }
