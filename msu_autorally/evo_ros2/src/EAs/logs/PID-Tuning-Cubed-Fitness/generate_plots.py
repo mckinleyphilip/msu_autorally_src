@@ -35,7 +35,7 @@ class plot_generator():
 		
 		
 		run_multiple = True
-		self.number_runs = 1
+		self.number_runs = 2
 		
 		
 		if run_multiple:
@@ -81,11 +81,13 @@ class plot_generator():
 		self.summary_log_dict['gen'] = list()
 		self.summary_log_dict['avg'] = list()
 		self.summary_log_dict['min'] = list()
+		self.summary_log_dict['max'] = list()
 		for gen in self.summary_log:
 			gen = dict(gen)
 			self.summary_log_dict['gen'].append(gen['gen'])
 			self.summary_log_dict['avg'].append(gen['avg'])
 			self.summary_log_dict['min'].append(gen['min'])
+			self.summary_log_dict['max'].append(gen['max'])
 			
 
 	### Create run plots ###
@@ -94,11 +96,11 @@ class plot_generator():
 		# Fitnesses of Population over Generations
 		gen = self.summary_log_dict['gen']
 		avg_fit = self.summary_log_dict['avg']
-		best_fit = self.summary_log_dict['min']
+		best_fit = self.summary_log_dict['max']
 
 		print('Preparing plot 1...')
 		fig, ax1 = plt.subplots()
-		line1 = ax1.plot(gen, best_fit, "b-", label="Minimum (Best) Fitness")
+		line1 = ax1.plot(gen, best_fit, "b-", label="Maximum (Best) Fitness")
 		ax1.set_xlabel("Generation")
 		ax1.set_ylabel("Fitness")
 		line2 = ax1.plot(gen, avg_fit, "r-", label="Average Fitness")
@@ -131,7 +133,7 @@ class plot_generator():
 		# Just best fitness over generations
 		print('Preparing plot 3...')
 		fig3, ax3 = plt.subplots()
-		line1 = ax3.plot(gen, best_fit, "b-", label="Minimum (Best) Fitness")
+		line1 = ax3.plot(gen, best_fit, "b-", label="Maximum (Best) Fitness")
 		ax3.set_xlabel("Generation")
 		ax3.set_ylabel("Fitness")
 		lns = line1
