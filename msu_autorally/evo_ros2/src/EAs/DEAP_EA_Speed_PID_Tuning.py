@@ -222,7 +222,12 @@ class DEAP_EA():
 		
 		
 		# Fitness functon used in cubed exp
-		fitness = (2 - mean_squared_error(df['Actual Speed'],  df['Goal Speed']))**3
+		mse = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
+		if mse < 2:
+			fitness = (2 - mse)**3
+		else:
+			fitness = 0
+		
 		
 		print('Fitness: {}'.format(fitness))
 		
