@@ -209,6 +209,7 @@ class DEAP_EA():
 
 		return (fitness, )
 	
+	
 	def evaluate_result(self, ind, result):
 		print('Recv\'d Result')
 		df = pd.DataFrame.from_dict(dict(result))
@@ -300,8 +301,9 @@ class DEAP_EA():
 	
 	### Set up individual's shape, fitness function, and EA operators ###
 	def set_up_EA(self):
-		creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-		creator.create("Individual", list, fitness=creator.FitnessMin)
+		#creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+		creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+		creator.create("Individual", list, fitness=creator.FitnessMax)
 
 		self.toolbox = base.Toolbox()
 		self.toolbox.register("attr_float", random.random)
