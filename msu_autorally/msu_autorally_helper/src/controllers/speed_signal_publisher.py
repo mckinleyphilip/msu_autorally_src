@@ -38,14 +38,15 @@ class SpeedSignalPublisherNode():
 
 		
 		while self.running:
-			self.speed_pub.publish(self.basic_double_ramp_speed_function())
+			#self.speed_pub.publish(self.basic_double_ramp_speed_function())
+			self.speed_pub.publish(self.tester_signal())
 			self.sleep_rate.sleep()
 			
 	
 	
 	
-	
-	def jumpy_signal(self):
+	# Testing speed signal
+	def tester_signal(self):
 		current_time = 0
 		while current_time == 0:
 			current_time = rospy.get_time()
@@ -53,69 +54,41 @@ class SpeedSignalPublisherNode():
 		
 		goal_speed = 0
 		
+		# 1
 		if 0 <= time < 5:
-			goal_speed = 10
-		elif 5 <= time < 10:
-			goal_speed = 5
-		elif 10 <= time < 20:
-			goal_speed = 7.5
-		elif 20 <= time < 25:
-			goal_speed = 0
-		elif 25 <= time < 30:
-			goal_speed = 2.5
-		else:
-			self.running = False
-			
-		return goal_speed
-	
-	# Still working on this
-	def triangluar_speed_function(self):
-		current_time = 0
-		while current_time == 0:
-			current_time = rospy.get_time()
-		time = (current_time - self.start_time)
-		
-		goal_speed = 0
-		
-		if 0 <= time < 5:
-			goal_speed = time*2
+			goal_speed = 2 * time
+		# 2
 		elif 5 <= time < 7.5:
-			goal_speed = -time*2 - 10
-		elif 7.5 <= time < 12.5:
+			goal_speed = -(5/2.5) * (time - 5) + 10
+		# 3
+		elif 7.5 <= time < 10:
 			goal_speed = 5
+		#4
+		elif 10 <= time < 17.5:
+			goal_speed = (10/7.5) * (time - 10) + 5
+		#5
+		elif 17.5 <= time < 20:
+			goal_speed = -(5/2.5) * (time - 17.5) + 15
+		#6
 		elif 20 <= time < 25:
-			goal_speed = -5
+			goal_speed = 10
+		#7
 		elif 25 <= time < 30:
-			goal_speed = time - 30
-		else:
-			self.running = False
-			
-		return goal_speed
-	
-	def basic_ramping_speed_function(self):
-		current_time = 0
-		while current_time == 0:
-			current_time = rospy.get_time()
-		time = (current_time - self.start_time)
-		
-		goal_speed = 0
-		
-		if 0 <= time < 5:
-			goal_speed = time
-		elif 5 <= time < 10:
-			goal_speed = 5
-		elif 10 <= time < 20:
-			goal_speed = -time + 15
-		elif 20 <= time < 25:
-			goal_speed = -5
-		elif 25 <= time < 30:
-			goal_speed = time - 30
+			goal_speed = -(10/5) * (time - 25) + 10
+		#8
+		elif 30 <= time < 35:
+			goal_speed = (15/5)*(time-30)
+		#9
+		elif 35 <= time < 40:
+			goal_speed = -(15/5)*(time-35)+15
 		else:
 			self.running = False
 			
 		return goal_speed
 		
 		
+		
+	# Used for the tuning experiments
 	def basic_double_ramp_speed_function(self):
 		current_time = 0
 		while current_time == 0:

@@ -145,6 +145,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
 	  command->frontBrake = 1.0;
   }
   
+  
 
   if (abs_goal_speed > 0.1 && abs_goal_speed < 99)
   {

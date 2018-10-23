@@ -42,16 +42,19 @@ import pickle
 # For multiple evaluations at once
 import threading
 
+import pprint
+
 
 class DEAP_EA():
 	def __init__(self, cmd_args):
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Testing"
-		self.run_number = '_temp6'
-		#self.ind = [0.2, 0.0, 0.001, 0.15] #Default
-		self.ind = [0.978905837000845, 0.07513378343124555, 0.04569592282669355, 0.5116667627180238] # Run 2 
+		self.experiment_name = "PID-Testing-Tester-Speed-Signal"
+		self.run_number = '_default-Braking-highRes'
+		self.ind = [0.2, 0.0, 0.001, 0.15] #Default
+		#self.ind = [0.978905837000845, 0.07513378343124555, 0.04569592282669355, 0.5116667627180238] # Run 2 
+		#self.ind =[0.36668979013531144, 0.8424649533363158, 0.20881916594532024, 0.914542700310715] # Run 9 
 		
 		
 		# Socket Communication Params      
@@ -180,6 +183,10 @@ class DEAP_EA():
 		print('Preparing plot 2...')
 		details_of_best_ind = self.df
 		self.df = self.df.sort_index()
+		
+		pp = pprint.PrettyPrinter(indent=4)
+		pp.pprint(self.df)
+		
 		ax2 = self.df.plot(x='Time')
 		ax2.legend(['Actual Speed', 'Goal Speed', 'Error'], bbox_to_anchor=(1.2, 0.8))
 		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
