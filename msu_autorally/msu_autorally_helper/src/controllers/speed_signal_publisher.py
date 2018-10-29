@@ -39,10 +39,43 @@ class SpeedSignalPublisherNode():
 		
 		while self.running:
 			#self.speed_pub.publish(self.basic_double_ramp_speed_function())
-			self.speed_pub.publish(self.tester_signal())
+			self.speed_pub.publish(self.SE_basic_double_ramp_speed_function())
 			self.sleep_rate.sleep()
 			
 	
+	# Used for the tuning experiments
+	def SE_basic_double_ramp_speed_function(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_time()
+		time = (current_time - self.start_time)
+		
+		goal_speed = 0
+		
+		if time < 7:
+			goal_speed = 3
+		elif 7 <= time < 10:
+			goal_speed = 0
+		else:
+			time = time - 10
+			
+			if 0 <= time < 5:
+				goal_speed = time
+			elif 5 <= time < 10:
+				goal_speed = 5
+			elif 10 <= time < 15:
+				goal_speed = -time + 15
+			elif 15 <= time < 20:
+				goal_speed = (time-15)
+			elif 20 <= time < 25:
+				goal_speed = 5
+			elif 25 <= time < 30:
+				goal_speed = -time + 30
+			else:
+				self.running = False
+			
+		print('Time: {} \t Goal Speed: {}'.format(time, goal_speed))
+		return goal_speed	
 	
 	
 	# Testing speed signal
@@ -52,7 +85,7 @@ class SpeedSignalPublisherNode():
 			current_time = rospy.get_time()
 		time = (current_time - self.start_time)
 		
-		print('time: {}'.format(time))
+		#print('time: {}'.format(time))
 		
 		goal_speed = 0
 		
