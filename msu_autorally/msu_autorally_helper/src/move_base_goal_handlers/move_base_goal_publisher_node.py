@@ -90,7 +90,7 @@ class MoveBaseSeq():
 		# 3 - SUCCEEDED - The goal was achieved successfully by the action server (Terminal State)
 		if status == 3:
 			rospy.loginfo("SUCCEEDED: Goal pose "+str(self.goal_cnt)+" reached") 
-			if self.goal_cnt< len(self.pose_seq):
+			if self.goal_cnt < len(self.pose_seq):
 				next_goal = MoveBaseGoal()
 				next_goal.target_pose.header.frame_id = "map"
 				next_goal.target_pose.header.stamp = rospy.Time.now()

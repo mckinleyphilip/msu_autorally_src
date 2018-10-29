@@ -52,6 +52,8 @@ class SpeedSignalPublisherNode():
 			current_time = rospy.get_time()
 		time = (current_time - self.start_time)
 		
+		print('time: {}'.format(time))
+		
 		goal_speed = 0
 		
 		# 1
