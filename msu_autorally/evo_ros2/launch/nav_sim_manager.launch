@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<node name = "sim_manager" pkg="evo_ros2" type="autorally_nav_tuning_sim_manager.py" output="screen"/>
+
+</launch>
