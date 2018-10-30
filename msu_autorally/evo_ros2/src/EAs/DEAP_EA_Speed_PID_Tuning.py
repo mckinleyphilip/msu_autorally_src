@@ -48,7 +48,7 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Tuning-Braking-Function-0.001-MaxStepSize"
+		self.experiment_name = "PID-Incline-Tuning-nNBrakes-HighRes"
 		self.run_number = 1
 		self.genome_size = 4
 		self.tourn_size = 2
