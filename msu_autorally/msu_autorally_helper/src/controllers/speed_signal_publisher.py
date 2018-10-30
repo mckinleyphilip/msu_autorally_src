@@ -75,7 +75,7 @@ class SpeedSignalPublisherNode():
 			else:
 				self.running = False
 			
-		print('Time: {} \t Goal Speed: {}'.format(time, goal_speed))
+		#print('Time: {} \t Goal Speed: {}'.format(time, goal_speed))
 		return goal_speed	
 	
 	

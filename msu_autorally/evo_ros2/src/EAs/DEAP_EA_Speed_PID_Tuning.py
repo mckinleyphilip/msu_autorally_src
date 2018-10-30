@@ -48,7 +48,7 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Incline-Tuning-nNBrakes-HighRes"
+		self.experiment_name = "PID-Incline-Tuning-NoBrakes-HighRes"
 		self.run_number = 1
 		self.genome_size = 4
 		self.tourn_size = 2
@@ -218,15 +218,15 @@ class DEAP_EA():
 		
 		
 		# Fitness function used it original tuning exp
-		#fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
+		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
 		
 		
 		# Fitness functon used in cubed exp
-		mse = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
-		if mse < 2:
-			fitness = (2 - mse)**3
-		else:
-			fitness = 0
+		#mse = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
+		#if mse < 2:
+		#	fitness = (2 - mse)**3
+		#else:
+		#	fitness = 0
 		
 		
 		print('Fitness: {}'.format(fitness))
@@ -306,9 +306,9 @@ class DEAP_EA():
 	
 	### Set up individual's shape, fitness function, and EA operators ###
 	def set_up_EA(self):
-		#creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-		creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-		creator.create("Individual", list, fitness=creator.FitnessMax)
+		creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+		#creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+		creator.create("Individual", list, fitness=creator.FitnessMin)
 
 		self.toolbox = base.Toolbox()
 		self.toolbox.register("attr_float", random.random)
