@@ -144,7 +144,8 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   {
 	  //command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
 	  command->frontBrake = 1.0;
-  }*/
+  }
+  */
   
   
 
