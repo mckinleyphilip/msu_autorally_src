@@ -51,10 +51,11 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "PID-Testing-Tester-Speed-Signal"
-		self.run_number = '_default-Braking-highRes'
-		self.ind = [0.2, 0.0, 0.001, 0.15] #Default
+		self.run_number = '_3-Braking-highRes'
+		#self.ind = [0.2, 0.0, 0.001, 0.15] #Default
 		#self.ind = [0.978905837000845, 0.07513378343124555, 0.04569592282669355, 0.5116667627180238] # Run 2 
 		#self.ind =[0.36668979013531144, 0.8424649533363158, 0.20881916594532024, 0.914542700310715] # Run 9 
+		self.ind = [0.20265782426571877, 1.244295400759123, 0.09175407739115371, 0.7188801125834188] # Run 3
 		
 		
 		# Socket Communication Params      
@@ -76,6 +77,7 @@ class DEAP_EA():
 			self.set_up_sockets()
 			self.set_up_dirs()
 			
+			print('\nAbout to start exp: {} \n\t run: {}'.format(self.experiment_name, self.run_number))
 			raw_input("Press enter to run")
 		
 			# Run

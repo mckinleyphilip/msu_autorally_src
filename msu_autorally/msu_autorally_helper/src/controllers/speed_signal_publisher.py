@@ -9,6 +9,7 @@
 import rospy
 import argparse
 import time
+import math
 
 from std_msgs.msg import Float64
 
@@ -43,7 +44,7 @@ class SpeedSignalPublisherNode():
 			self.sleep_rate.sleep()
 			
 	
-	# Used for the tuning experiments
+	# Used for the tuning experiments where the stateEstimator is used
 	def SE_basic_double_ramp_speed_function(self):
 		current_time = 0
 		while current_time == 0:
@@ -78,7 +79,40 @@ class SpeedSignalPublisherNode():
 		return goal_speed	
 	
 	
-	# Testing speed signal
+	
+	
+	# Testing speed signal 3
+	def tester_signal3(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_time()
+		time = (current_time - self.start_time)
+		
+		goal_speed = 0
+		
+		if time <= 20:
+			goal_speed = int(time)
+		else:
+			self.running = False
+		return goal_speed
+	
+	# Testing speed signal 2
+	def tester_signal2(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_time()
+		time = (current_time - self.start_time)
+		
+		goal_speed = 0
+		
+		if time <= 25:
+			goal_speed = 4 * math.sin(time/2 - math.pi / 2) + 4
+		else:
+			self.running = False
+		return goal_speed
+	
+	
+	# Testing speed signal 1
 	def tester_signal(self):
 		current_time = 0
 		while current_time == 0:
