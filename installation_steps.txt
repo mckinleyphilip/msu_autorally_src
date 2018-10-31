@@ -40,7 +40,7 @@
     mkdir build
     cd build/
     cmake -DGTSAM_INSTALL_GEOGRAPHICLIB=ON -DGTSAM_WITH_EIGEN_MKL=OFF ..
-    sudo ldconfig
+    make install
 
     # Install Autorally ROS Dependencies
     cd ~/autorally_catkin_ws/
