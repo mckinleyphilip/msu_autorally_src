@@ -49,11 +49,13 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "PID-Incline-Tuning-NoBrakes-HighRes"
-		self.run_number = 5
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
+		
+		starting_run_number = 6
+		number_of_runs = 10
 		
 		
 		# Socket Communication Params      
@@ -70,18 +72,24 @@ class DEAP_EA():
 		
 		
 		try:
-			 # Set up 
-			self.detailed_log = dict()
-			self.set_up_EA()
+			# Set up Socket communication
 			self.set_up_sockets()
-			self.set_up_dirs()
 			
-			print('\nAbout to start exp: {} \n\t run: {}'.format(self.experiment_name, self.run_number))
+			print('About to start {} runs of experiment {}'.format(number_of_runs,self.experiment_name))
 			raw_input("Press enter to run")
-		
-			# Run
-			self.start_time = time.time()
-			self.run()
+			
+			for i in range(starting_run_number, number_of_runs+1):
+				self.run_number = i
+				
+				# Set up for run
+				self.detailed_log = dict()
+				self.set_up_EA()
+				self.set_up_dirs()
+				
+				print('\nAbout to start exp: {} \n\t run: {}'.format(self.experiment_name, self.run_number))			
+				# Run
+				self.start_time = time.time()
+				self.run()
 		finally:
 			self.socket.close()
 			self.receiver.close()
