@@ -48,13 +48,13 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Incline-Tuning-NoBrakes-HighRes"
+		self.experiment_name = "PID-Decline-Tuning-NoBrakes-HighRes"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
 		
-		starting_run_number = 3
+		starting_run_number = 1
 		number_of_runs = 10
 		
 		
