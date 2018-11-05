@@ -24,7 +24,7 @@
 
 	<model name="ramp">
       <static>true</static>
-      <pose>0.0 0.0 0.1 0 -0.1745 0.0</pose>
+      <pose>0.0 0.0 0.1 0 0.1745 0.0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -54,7 +54,7 @@
     
     <model name="ramp_wall_1">
       <static>true</static>
-      <pose>0.0 -15.0 0.0 0 -0.1745 0.0</pose>
+      <pose>0.0 -15.0 0.0 0 0.1745 0.0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -81,7 +81,7 @@
     
     <model name="ramp_wall_2">
       <static>true</static>
-      <pose>0.0 15.0 0.0 0 -0.1745 0.0</pose>
+      <pose>0.0 15.0 0.0 0 0.1745 0.0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
