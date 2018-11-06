@@ -1,0 +1,24 @@
+%%
+%
+%
+% GAS 11-5-17
+
+number_of_runs = 10;
+
+headers = {'Run_Number', 'Best_Fitness', 'Best_IND'};
+comp_table = cell2table(cell(0,3));
+comp_table.Properties.VariableNames = headers;
+
+run_directories = dir();
+
+for i=1:length(run_directories)
+	if run_directories(i).isdir
+		dir_name = run_directories(i).name;
+		if contains(dir_name, 'run')
+			filename = strcat(dir_name, '/','log.json');
+			table = jsondecode(fileread(filename));
+			comp_table = [comp_table, {table.run_number, table.best_ind_fitness, table.best_ind}];
+		end
+	end
+end
+
