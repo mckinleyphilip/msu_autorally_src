@@ -2,8 +2,8 @@
 # GAS 08-16-2018
 
 # Common Params
-SERVER_IP_ADDR: '35.9.28.201'
-#SERVER_IP_ADDR: '127.0.0.1'
+#SERVER_IP_ADDR: '35.9.28.201'
+SERVER_IP_ADDR: '127.0.0.1'
 GENOME_PORT: 5023
 RESULT_PORT: 5033
 DEBUG: True
@@ -16,10 +16,10 @@ ROS_GAZEBO_WORLD_PROPERTIES_SERVICE: '/autorally_platform/gazebo/get_world_prope
 # Software Manager
 software_manager:
    # Launch files: ['pkg', 'launch_file.launch']
-   #WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world.launch']
-   #PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform.launch']
-   WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world_PID_incline.launch']
-   PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform_PID_incline.launch']
+   WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world.launch']
+   PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform.launch']
+   #WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world_PID_incline.launch']
+   #PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform_PID_incline.launch']
    SIM_MANAGER_LAUNCH_FILE: ['evo_ros2', 'sim_manager.launch']
    
 
