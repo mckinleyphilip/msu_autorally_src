@@ -50,8 +50,8 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Incline-Testing"
-		self.run_number = '_default-NoBraking-highRes'
+		self.experiment_name = "PID-Testing-NoIncline-Speed-Signals"
+		self.run_number = '_default-Braking-highRes'
 		self.ind = [0.2, 0.0, 0.001, 0.15] #Default
 		#self.ind = [0.978905837000845, 0.07513378343124555, 0.04569592282669355, 0.5116667627180238] # Run 2 
 		#self.ind =[0.36668979013531144, 0.8424649533363158, 0.20881916594532024, 0.914542700310715] # Run 9 

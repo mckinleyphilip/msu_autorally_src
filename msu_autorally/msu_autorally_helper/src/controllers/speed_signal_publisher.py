@@ -40,7 +40,7 @@ class SpeedSignalPublisherNode():
 		
 		while self.running:
 			#self.speed_pub.publish(self.basic_double_ramp_speed_function())
-			self.speed_pub.publish(self.SE_basic_double_ramp_speed_function())
+			self.speed_pub.publish(self.tester_signal4())
 			self.sleep_rate.sleep()
 			
 	
@@ -80,6 +80,20 @@ class SpeedSignalPublisherNode():
 	
 	
 	
+	# Testing speed signal 4
+	def tester_signal4(self):
+		current_time = 0
+		while current_time == 0:
+			current_time = rospy.get_time()
+		time = (current_time - self.start_time)
+		
+		goal_speed = 0
+		
+		if time <= 40:
+			goal_speed = int(time)/3
+		else:
+			self.running = False
+		return goal_speed
 	
 	# Testing speed signal 3
 	def tester_signal3(self):
