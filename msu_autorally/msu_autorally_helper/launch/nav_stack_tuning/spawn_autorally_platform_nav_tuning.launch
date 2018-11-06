@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+	
+	
+	
+	<!-- Spawn the simulated platform model -->
+	<include file="$(find msu_autorally_helper)/launch/spawn_autorally_model.launch">
+		<arg name="x" value="0"/>
+		<arg name="y" value="-25.5"/>
+		<arg name="z" value="0.3"/>
+		<arg name="roll" value="0.0"/>
+		<arg name="pitch" value="0.0"/>
+		<arg name="yaw" value="0.785398"/>
+	</include>
+	
+	<!-- Start the ROS Navigation Stack -->
+	<include file="$(find msu_autorally_helper)/launch/autorally_ros_nav_stack.launch" />
+	
+	
+	<!-- Start custom TF helpers to fill out the tf tree from /base_link to /odom -->
+	<group ns="msu_tf_helpers">
+		<node name="hokuyo_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/>
+		<!-- <node name="kinect_tf_broadcaster" pkg="msu_autorally_helper" type="laser_tf_broadcaster.py"/> --> <!-- Note this transform has to be rotated yet! -->
+		
+		<!-- odom_to_base.. uses info derived from sensors on the platform. gazebo_model state uses information from simulation enviroment.
+					have to use odom_to_base.. for the physical platform.
+					gazebo_model states gets better performance in simulation. -->
+		<!-- <node name="odom_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="odom_to_baselink_tf_broadcaster.py"/> --> <!-- stateEstimator must be running for this -->
+		<node name="gazebo_model_states_to_baselink_tf_broadcaster" pkg="msu_autorally_helper" type="gazebo_model_state_to_baselink_tf_broadcaster.py"/>
+	</group>
+
+	<!-- Empty required node. Kill this and ROS will clean up all nodes spawned as a result of this whole launch file -->
+	<!-- <node name = "platform_empty_required_node" pkg="msu_autorally_helper" type="empty_node.py" required="true"/> -->
+
+</launch>

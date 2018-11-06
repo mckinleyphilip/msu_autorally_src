@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 	
-	<!-- <arg name="map_file" default="$(find msu_autorally_helper)/maps/base_oval_track_map_clean.yaml"/> -->
-	<arg name="map_file" default="$(find msu_autorally_helper)/maps/blank_map.yaml"/>
+	<arg name="map_file" default="$(find msu_autorally_helper)/maps/base_oval_track_map_clean.yaml"/>
+	<!-- <arg name="map_file" default="$(find msu_autorally_helper)/maps/blank_map.yaml"/> -->
 	
 	
 	<!-- Start the Base Controller Nodelet -->

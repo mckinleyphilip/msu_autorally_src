@@ -22,6 +22,7 @@ from evo_ros2.msg import Float64Array
 
 from autorally_msgs.msg import wheelSpeeds
 from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist
 
 
 
@@ -54,7 +55,7 @@ class AutorallySimManagerNode():
 		
 		# Sent up monitored topics
 		self.wheel_speed_topic = rospy.Subscriber('/wheelSpeeds', wheelSpeeds, self.wheel_speed_topic_cb)
-		self.goal_speed_topic = rospy.Subscriber('/constantSpeedController/speedCommand', Float64, self.goal_speed_topic_cb)
+		self.goal_speed_topic = rospy.Subscriber('/cmd_vel', Twist, self.goal_speed_topic_cb)
 		
 		
 		
@@ -130,7 +131,7 @@ class AutorallySimManagerNode():
 		self.last_actual_speed = (msg.lfSpeed + msg.rfSpeed) / 2.0
 	
 	def goal_speed_topic_cb(self, msg):
-		self.last_goal_speed = msg.data
+		self.last_goal_speed = msg.linear.x * 1.5
 		
 
 	def start_sim(self):

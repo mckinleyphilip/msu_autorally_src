@@ -1,4 +1,13 @@
 # Genome Mapping for list of floats from Evo Search Algorithm
 # GAS 08-16-2018
 
-GENOME_MAPPING: ['/ConstantSpeedController/IMax', '/ConstantSpeedController/KD', '/ConstantSpeedController/KI', '/ConstantSpeedController/KP']
+#GENOME_MAPPING: ['/ConstantSpeedController/IMax', '/ConstantSpeedController/KD', '/ConstantSpeedController/KI', '/ConstantSpeedController/KP']
+GENOME_MAPPING: ['/autorally_move_base/global_costmap/inflation_layer/inflation_radius', 
+    '/autorally_move_base/local_costmap/inflation_layer/inflation_radius',
+    '/autorally_move_base/TebLocalPlannerROS/min_turning_radius',
+    '/autorally_move_base/TebLocalPlannerROS/weight_max_vel_x',
+    '/autorally_move_base/TebLocalPlannerROS/weight_max_vel_theta',
+    '/autorally_move_base/TebLocalPlannerROS/weight_acc_lim_x',
+    '/autorally_move_base/TebLocalPlannerROS/weight_kinematics_turning_radius',
+    '/autorally_move_base/TebLocalPlannerROS/weight_obstacle']
+GENOME_WEIGHTS: [2.5, 2.5, 10.0, 100, 100, 100, 100, 100]

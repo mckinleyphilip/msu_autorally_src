@@ -125,8 +125,11 @@ class Transporter():
 	
 	def parse_genome(self, raw_genome):
 		for index, element in enumerate(self.genome_mapping):
-			self.current_genome[element] = raw_genome[index]
-		
+			if rospy.has_param('GENOME_WEIGHTS'):
+				self.genome_weights = rospy.get_param('GENOME_WEIGHTS')
+				self.current_genome[element] = raw_genome[index] * float(self.genome_weights[index])
+			else:
+				self.current_genome[element] = raw_genome[index]
 		if self.debug:	
 			rospy.loginfo(self.current_genome)
 			
