@@ -53,9 +53,9 @@ class DEAP_EA():
 		self.tourn_size = 2
 		self.pop_size = 100
 		self.number_generations = 50
-		
 		starting_run_number = 1
 		number_of_runs = 50
+
 		
 		
 		# Socket Communication Params      
