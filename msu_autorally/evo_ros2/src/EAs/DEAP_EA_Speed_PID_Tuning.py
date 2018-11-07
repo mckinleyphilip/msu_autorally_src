@@ -48,14 +48,14 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Decline-Tuning-NoBrakes-HighRes"
+		self.experiment_name = "PID-NoIncline-HighRes-100pop-50gen"
 		self.genome_size = 4
 		self.tourn_size = 2
-		self.pop_size = 25
-		self.number_generations = 25
+		self.pop_size = 100
+		self.number_generations = 50
 		
 		starting_run_number = 1
-		number_of_runs = 10
+		number_of_runs = 50
 		
 		
 		# Socket Communication Params      
