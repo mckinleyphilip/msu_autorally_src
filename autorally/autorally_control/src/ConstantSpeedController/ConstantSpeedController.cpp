@@ -137,7 +137,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   
   
   // braking
-  
+  /*
   double speed_diff = abs_goal_speed - abs_front_wheel_speed;
   if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
   //if (!((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
@@ -145,6 +145,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
 	  //command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
 	  command->frontBrake = 1.0;
   }
+  */
   
   
   
