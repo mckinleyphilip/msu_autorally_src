@@ -54,7 +54,7 @@ class DEAP_EA():
 		self.pop_size = 25
 		self.number_generations = 25
 		
-		starting_run_number = 1
+		starting_run_number = 3
 		number_of_runs = 10
 		
 		
