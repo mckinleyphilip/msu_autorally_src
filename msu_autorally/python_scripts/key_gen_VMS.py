@@ -13,7 +13,7 @@ args= parser.parse_args()
 print('Starting update scripts on robo nodes...')
 
 
-work_nodes_file_name = 'active_nodes.yml'
+work_nodes_file_name = 'all_nodes.yml'
 
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
@@ -26,6 +26,7 @@ for worker in cfg['worker_list']:
 	
 	cmds = """
 		ssh-copy-id simongle@'{}';
+		exec bash;
 		""".format(ip)
 	cmd_str = 'xterm -title "Connection to {}" -hold -e "{}"&'.format(worker,cmds)
 	os.system(cmd_str)
