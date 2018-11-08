@@ -17,16 +17,18 @@ GA_IP_ADDR = '35.9.28.201'
 script_arguments = "-ip {}".format(GA_IP_ADDR)
 ga_hostname = 'autorally-robo1vm1'
 
-work_nodes_file_name = 'active_nodes.yml'
+work_nodes_file_name = 'all_nodes.yml'
 #work_nodes_file_name = 'test_nodes.yml'
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
 
+print('Starting {} nodes'.format(len(cfg['worker_list'])))
+
 for worker in cfg['worker_list']:
-	print(str(worker))
+	#print(str(worker))
 	ip = cfg['worker_list'][str(worker)]['ip']
-	print(str(ip))
+	#print(str(ip))
 	
 	if str(worker) is ga_hostname:
 		continue
