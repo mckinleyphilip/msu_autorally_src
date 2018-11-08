@@ -38,3 +38,4 @@ _ = raw_input()
 cmd_str = "pkill xterm"
 os.system(cmd_str)
 
+
