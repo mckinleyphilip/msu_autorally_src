@@ -2,38 +2,39 @@
 # GAS 10-15-18
 
 worker_list:
-    
-      
-   autorally-robo4vm1:
-      ip: '35.9.28.231'
-   autorally-robo4vm2:
-      ip: '35.9.28.232'
-   autorally-robo4vm3:
-      ip: '35.9.28.233'
-   autorally-robo4vm4:
-      ip: '35.9.28.234'
-   autorally-robo4vm5:
-      ip: '35.9.28.235'
-   autorally-robo4vm6:
-      ip: '35.9.28.236'
-   autorally-robo4vm7:
-      ip: '35.9.28.237'
+   autorally-robo6vm1:
+      ip: '35.9.28.161'
+   autorally-robo6vm2:
+      ip: '35.9.28.162'
+   autorally-robo6vm3:
+      ip: '35.9.28.163'
+   autorally-robo6vm4:
+      ip: '35.9.28.164'
+   autorally-robo6vm5:
+      ip: '35.9.28.165'
+   autorally-robo6vm6:
+      ip: '35.9.28.166'
+   autorally-robo6vm7:
+      ip: '35.9.28.167'
       
       
-   autorally-robo5vm1:
-      ip: '35.9.28.208'
-   autorally-robo5vm2:
-      ip: '35.9.28.209'
-   autorally-robo5vm3:
-      ip: '35.9.28.210'
-   autorally-robo5vm4:
-      ip: '35.9.28.228'
-   autorally-robo5vm5:
-      ip: '35.9.28.229'
-   autorally-robo5vm6:
-      ip: '35.9.28.230'
-   autorally-robo5vm7:
-      ip: '35.9.28.238'
-
+   autorally-robo7vm1:
+      ip: '35.9.28.168'
+   autorally-robo7vm2:
+      ip: '35.9.28.169'
+   autorally-robo7vm3:
+      ip: '35.9.28.170'
+   autorally-robo7vm4:
+      ip: '35.9.28.171'
+   autorally-robo7vm5:
+      ip: '35.9.28.172'
+   autorally-robo7vm6:
+      ip: '35.9.28.173'
+   autorally-robo7vm7:
+      ip: '35.9.28.174'
+   autorally-robo7vm8:
+      ip: '35.9.28.175'
+   autorally-robo7vm9:
+      ip: '35.9.28.176'
       
  

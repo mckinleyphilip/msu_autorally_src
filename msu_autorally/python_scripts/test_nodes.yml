@@ -1,9 +1,0 @@
-# List of nodes to be connected
-# GAS 10-15-18
-
-worker_list:
-#   autorally-robo1vm1:
-#      ip: '35.9.28.201'
-   autorally-robo4vm1:
-      ip: '35.9.28.231'
-
