@@ -13,7 +13,7 @@ args= parser.parse_args()
 print('Starting update scripts on robo nodes...')
 
 
-work_nodes_file_name = 'active_nodes.yml'
+work_nodes_file_name = 'all_nodes.yml'
 #work_nodes_file_name = 'test_nodes.yml'
 git_branch = "PID_evol_experiment"
 
