@@ -4,8 +4,8 @@
 worker_list:
 #   autorally-robo1vm1:
 #      ip: '35.9.28.201'
-   autorally-robo1vm2:
-      ip: '35.9.28.202'
+#   autorally-robo1vm2:
+#      ip: '35.9.28.202'
    autorally-robo1vm3:
       ip: '35.9.28.203'
    autorally-robo1vm4:
