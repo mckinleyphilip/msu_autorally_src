@@ -13,29 +13,22 @@ args= parser.parse_args()
 print('Starting update scripts on robo nodes...')
 
 
-work_nodes_file_name = 'all_nodes.yml'
-#work_nodes_file_name = 'update_nodes.yml'
-git_branch = "PID_evol_experiment"
+#work_nodes_file_name = 'all_nodes.yml'
+#work_nodes_file_name = 'test_nodes.yml'
+work_nodes_file_name = 'update_nodes.yml'
+
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
 
-
-print('Starting {} nodes'.format(len(cfg['worker_list'])))
-
-
 for worker in cfg['worker_list']:
-	#print(str(worker))
+	print(str(worker))
 	ip = cfg['worker_list'][str(worker)]['ip']
-	#print(str(ip))
+	print(str(ip))
 	
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
-		cd autorally_catkin_ws/src/;
-		git fetch --all;
-		git reset --hard origin/{};
-		git log -1;
-		exec bash
-		""".format(git_branch)
+		mv .bashrc-anaconda.bak .bashrc;
+		"""
 	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
 	os.system(cmd_str)
 
