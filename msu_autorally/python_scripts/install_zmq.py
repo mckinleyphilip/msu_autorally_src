@@ -14,7 +14,9 @@ print('Starting update scripts on robo nodes...')
 
 
 #work_nodes_file_name = 'all_nodes.yml'
+#work_nodes_file_name = 'test_nodes.yml'
 work_nodes_file_name = 'update_nodes.yml'
+
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -24,11 +26,12 @@ for worker in cfg['worker_list']:
 	ip = cfg['worker_list'][str(worker)]['ip']
 	print(str(ip))
 	
-	cmds = """
-		ssh-copy-id simongle@'{}';
-		exec bash;
-		""".format(ip)
-	cmd_str = 'xterm -title "Connection to {}" -hold -e "{}"&'.format(worker,cmds)
+	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
+		sudo apt-get install python-pip;
+		sudo pip install pyzmq --install-option='--zmq=bundled' --upgrade;
+		exec bash
+		"""
+	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
 	os.system(cmd_str)
 
 print('Script finished! \n')
