@@ -13,8 +13,8 @@ args= parser.parse_args()
 print('Starting update scripts on robo nodes...')
 
 
-#work_nodes_file_name = 'all_nodes.yml'
-work_nodes_file_name = 'update_nodes.yml'
+work_nodes_file_name = 'all_nodes.yml'
+#work_nodes_file_name = 'update_nodes.yml'
 git_branch = "PID_evol_experiment"
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
@@ -41,4 +41,3 @@ print('Press enter to close all xterm windows and close this script...')
 _ = raw_input()
 cmd_str = "pkill xterm"
 os.system(cmd_str)
-
