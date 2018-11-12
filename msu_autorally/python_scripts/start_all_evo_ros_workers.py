@@ -17,8 +17,8 @@ GA_IP_ADDR = '35.9.28.201'
 script_arguments = "-ip {}".format(GA_IP_ADDR)
 ga_hostname = 'autorally-robo1vm1'
 
-work_nodes_file_name = 'all_nodes.yml'
-#work_nodes_file_name = 'test_nodes.yml'
+#work_nodes_file_name = 'all_nodes.yml'
+work_nodes_file_name = 'active_nodes.yml'
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
