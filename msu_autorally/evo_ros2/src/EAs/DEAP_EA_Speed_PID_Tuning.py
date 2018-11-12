@@ -43,6 +43,8 @@ import pickle
 import threading
 
 
+
+
 class DEAP_EA():
 	def __init__(self, cmd_args):
 		self.debug = cmd_args.debug
@@ -53,8 +55,11 @@ class DEAP_EA():
 		self.tourn_size = 2
 		self.pop_size = 100
 		self.number_generations = 50
-		starting_run_number = 2
+		starting_run_number = 3
 		number_of_runs = 10
+		
+		#Running Params
+		self.timeout = 300
 
 		
 		
@@ -90,7 +95,19 @@ class DEAP_EA():
 				# Run
 				self.start_time = time.time()
 				self.run()
+				
+				# Final logging and notifications
+				self.create_run_log()
+				print('Run log created.')
+				self.write_run_log()
+				print('Log saved!')
+				#self.create_run_plots()
+				#print('Plots saved!')
+				
+				self.email_notification(json.dumps(self.email_log, indent=2))
+				print('Email notification sent!')
 		finally:
+
 			self.socket.close()
 			self.receiver.close()
 			self.context.destroy()
@@ -107,16 +124,7 @@ class DEAP_EA():
 		print('\n\nRun finished at: {} \n\tTaking: {} seconds'.format(datetime.datetime.now(), (self.end_time - self.start_time)))
 		
 
-		# Final logging and notifications
-		self.create_run_log()
-		print('Run log created.')
-		self.write_run_log()
-		print('Log saved!')
-		#self.create_run_plots()
-		#print('Plots saved!')
 		
-		self.email_notification(json.dumps(self.run_log, indent=2))
-		print('Email notification sent!')
 	
 	
 	def eaSimpleCustom(self, cxpb, mutpb):
@@ -255,7 +263,7 @@ class DEAP_EA():
 	def custom_eval_fit_mapping(self, individuals):
 		fitnesses = [float('Inf') for i in range(len(individuals))]
 		
-		print(individuals)
+		#print(individuals)
 		print('{} individuals need to be evaluated.'.format(len(individuals)))
 		
 		# Send out individuals to be evaluated
@@ -269,7 +277,20 @@ class DEAP_EA():
 		num_evaluated = 0
 		while any(fit == float('Inf') for fit in fitnesses):
 			print('\nWaiting results')
-			return_data = dict(self.receiver.recv_json())
+			
+			
+			socks = dict(self.poller.poll(self.timeout))
+			if socks:
+				if socks.get(self.receiver) == zmq.POLLIN:
+					return_data = dict(self.receiver.recv_json(zmq.NOBLOCK))))
+					#data = json.loads(self.receiver.recv_json(zmq.NOBLOCK))
+			else:
+				print('Timeout on receiver socket occured!')
+				non_resolved_ind = fitnesses.index(float('Inf'))
+				self.socket.send_json(individuals[non_resolved_ind])
+				continue
+			
+			
 			ind = list(return_data['Genome'])
 			result = dict(return_data['Result'])
 			fitness = self.evaluate_result(ind, result)
@@ -278,14 +299,14 @@ class DEAP_EA():
 			index = individuals.index(ind)
 			
 			# The populaton can have multiple copies of an individual and thus we need to assign each a unique fitness
-			print(ind)
+			#print(ind)
 			while True:
 				
 				if fitnesses[index] == float('Inf'):
 					fitnesses[index] = fitness
 					break
 				else:
-					print('Duplicate ind! index: {}'.format(index))
+					#print('Duplicate ind! index: {}'.format(index))
 					#print('\n\nPopulation: {}'.format(individuals))
 					#print('\n\nTruncated Pop: {}'.format(individuals[index+1:]))
 					#time.sleep(2)
@@ -302,7 +323,7 @@ class DEAP_EA():
 			
 			num_evaluated += 1
 			
-			print('fitnesses: {}'.format(fitnesses))
+			#print('fitnesses: {}'.format(fitnesses))
 			print('\n\n{}/{} individuals evaluated'.format(num_evaluated, len(individuals)))
 			
 			
@@ -359,6 +380,10 @@ class DEAP_EA():
 		# Setup the socket to read the responses on.
 		self.receiver = self.context.socket(zmq.PULL)
 		self.receiver.bind('tcp://{}:{}'.format(self.ip_addr, self.recv_port))
+		
+		# Setup ZMQ poller
+		self.poller = zmq.Poller()
+		self.poller.register(self.receiver, zmq.POLLIN)
 		
 		print('Sending Connection: {}'.format('tcp://{}:{}'.format(self.ip_addr, self.send_port)))
 		print('Result Connection: {}'.format('tcp://{}:{}'.format(self.ip_addr, self.recv_port)))
@@ -421,6 +446,7 @@ class DEAP_EA():
 		self.run_log['summary_log'] = self.summary_log
 		self.run_log['hall_of_fame'] = list(self.hof)
 		self.run_log['hall_of_fame_fitnesses'] = self.hof_fitnesses
+		self.email_log = self.run_log
 		self.run_log['detailed_log'] = self.detailed_log
 		
 		
