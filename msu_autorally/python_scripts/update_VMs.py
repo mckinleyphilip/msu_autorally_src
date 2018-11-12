@@ -20,10 +20,14 @@ git_branch = "PID_evol_experiment"
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
 
+
+print('Starting {} nodes'.format(len(cfg['worker_list'])))
+
+
 for worker in cfg['worker_list']:
-	print(str(worker))
+	#print(str(worker))
 	ip = cfg['worker_list'][str(worker)]['ip']
-	print(str(ip))
+	#print(str(ip))
 	
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
 		cd autorally_catkin_ws/src/;
