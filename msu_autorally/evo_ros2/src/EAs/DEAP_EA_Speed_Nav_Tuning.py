@@ -57,15 +57,15 @@ class DEAP_EA():
 		self.number_generations = 25
 		
 		
-		starting_run_number = 2
+		starting_run_number = 1
 		number_of_runs = 2
 		
 		#Running Params
 		self.timeout = 500 * 1000
 
 		# Socket Communication Params      
-		self.ip_addr = '127.0.0.1'
-		#self.ip_addr = '35.9.28.201'
+		#self.ip_addr = '127.0.0.1'
+		self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 
