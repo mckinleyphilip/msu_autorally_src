@@ -42,6 +42,8 @@ import pickle
 # For multiple evaluations at once
 import threading
 
+# For copying parts of the run log into the email log
+import copy
 
 
 
@@ -55,11 +57,11 @@ class DEAP_EA():
 		self.tourn_size = 2
 		self.pop_size = 100
 		self.number_generations = 50
-		starting_run_number = 3
-		number_of_runs = 10
+		starting_run_number = 5
+		number_of_runs = 20
 		
 		#Running Params
-		self.timeout = 300
+		self.timeout = 300 * 1000
 
 		
 		
@@ -80,7 +82,8 @@ class DEAP_EA():
 			# Set up Socket communication
 			self.set_up_sockets()
 			
-			print('About to start {} runs of experiment {}'.format(number_of_runs,self.experiment_name))
+			print('About to start {} runs of experiment {}'.format(number_of_runs - starting_run_number + 1,self.experiment_name))
+			print('\t starting at run number {}'.format(starting_run_number))
 			raw_input("Press enter to run")
 			
 			for i in range(starting_run_number, number_of_runs+1):
@@ -121,7 +124,7 @@ class DEAP_EA():
 
 		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
 		self.end_time = time.time()
-		print('\n\nRun finished at: {} \n\tTaking: {} seconds'.format(datetime.datetime.now(), (self.end_time - self.start_time)))
+		print('\n\nRun {} finished at: {} \n\tTaking: {} seconds'.format(self.run_number, datetime.datetime.now(), (self.end_time - self.start_time)))
 		
 
 		
@@ -198,7 +201,7 @@ class DEAP_EA():
 		#print('Sending ind: {}'.format(ind))
 		self.socket.send_json(ind)
 		
-		print('Waiting Result')
+		#print('Waiting Result')
 
 		result = self.receiver.recv_json()
 		
@@ -227,7 +230,7 @@ class DEAP_EA():
 	
 	
 	def evaluate_result(self, ind, result):
-		print('Recv\'d Result')
+		#print('Recv\'d Result')
 		df = pd.DataFrame.from_dict(dict(result))
 		df['Error'] = abs(df['Actual Speed'] - df['Goal Speed'])
 		#df.plot(x='Time')
@@ -245,7 +248,7 @@ class DEAP_EA():
 		#	fitness = 0
 		
 		
-		print('Fitness: {}'.format(fitness))
+		#print('Fitness: {}'.format(fitness))
 		
 		
 		
@@ -276,13 +279,13 @@ class DEAP_EA():
 		# While there are any fitnesses not yet evaluated, recv results from socket.
 		num_evaluated = 0
 		while any(fit == float('Inf') for fit in fitnesses):
-			print('\nWaiting results')
+			#print('\nWaiting results')
 			
 			
 			socks = dict(self.poller.poll(self.timeout))
 			if socks:
 				if socks.get(self.receiver) == zmq.POLLIN:
-					return_data = dict(self.receiver.recv_json(zmq.NOBLOCK))))
+					return_data = dict(self.receiver.recv_json(zmq.NOBLOCK))
 					#data = json.loads(self.receiver.recv_json(zmq.NOBLOCK))
 			else:
 				print('Timeout on receiver socket occured!')
@@ -324,7 +327,7 @@ class DEAP_EA():
 			num_evaluated += 1
 			
 			#print('fitnesses: {}'.format(fitnesses))
-			print('\n\n{}/{} individuals evaluated'.format(num_evaluated, len(individuals)))
+			print('{}/{} individuals evaluated'.format(num_evaluated, len(individuals)))
 			
 			
 		return fitnesses
@@ -445,8 +448,8 @@ class DEAP_EA():
 		self.run_log['best_ind_fitness'] = self.hof[0].fitness.values
 		self.run_log['summary_log'] = self.summary_log
 		self.run_log['hall_of_fame'] = list(self.hof)
+		self.email_log = copy.deepcopy(self.run_log)
 		self.run_log['hall_of_fame_fitnesses'] = self.hof_fitnesses
-		self.email_log = self.run_log
 		self.run_log['detailed_log'] = self.detailed_log
 		
 		
