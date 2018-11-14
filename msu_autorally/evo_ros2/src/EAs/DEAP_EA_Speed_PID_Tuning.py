@@ -57,7 +57,7 @@ class DEAP_EA():
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
-		starting_run_number = 11
+		starting_run_number = 12
 		number_of_runs = 40
 		
 		#Running Params
@@ -299,7 +299,12 @@ class DEAP_EA():
 			fitness = self.evaluate_result(ind, result)
 			
 			# Write the fitness into the spot in fitnesses corresponding to the position of the individual
-			index = individuals.index(ind)
+			try:
+				index = individuals.index(ind)
+			except:
+				print('Received ind from previous generation!')
+				continue
+				
 			
 			# The populaton can have multiple copies of an individual and thus we need to assign each a unique fitness
 			#print(ind)
