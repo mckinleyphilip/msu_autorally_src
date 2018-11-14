@@ -20,11 +20,11 @@ TebLocalPlannerROS:
     
  # Robot     
  max_vel_x: 26.82 
- max_vel_x_backwards: 10.0
- max_vel_theta: 2
+ max_vel_x_backwards: 5
+ max_vel_theta: 1
  acc_lim_x: 5
- acc_lim_theta: 2
- min_turning_radius: 1.0
+ acc_lim_theta: 1
+ min_turning_radius: 2.0
  wheel_base: 1.0
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    vertices: [[0.125,0.45], [0.125,-0.45], [-0.125,-0.45], [-0.125,0.45]] # for type "polygon"

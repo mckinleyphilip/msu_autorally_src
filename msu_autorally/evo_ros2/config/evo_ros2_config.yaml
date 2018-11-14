@@ -25,4 +25,4 @@ software_manager:
 sim_manager:
    MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
    UTILITY_MONITORS_LAUNCH_FILE: ['evo_ros2','utility_monitors.launch']
-   MAX_SIM_TIME: 300 # simulation seconds a simulation is allowed to run before ending 
+   MAX_SIM_TIME: 180 # simulation seconds a simulation is allowed to run before ending 

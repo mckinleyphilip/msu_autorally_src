@@ -45,6 +45,7 @@ class AutorallySimManagerNode():
 		self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
 		self.utility_monitors_launch_info = rospy.get_param('sim_manager/UTILITY_MONITORS_LAUNCH_FILE')
 		self.logging_rate = rospy.get_param('LOGGING_RATE', 10)
+		self.max_sim_time = rospy.get_param('sim_manager/MAX_SIM_TIME', 300)
 		self.world_properties_service = rospy.get_param('ROS_GAZEBO_WORLD_PROPERTIES_SERVICE')
 		
 		# Get Access to Gazebo World properties
@@ -97,10 +98,12 @@ class AutorallySimManagerNode():
 			if state == 5:
 				# sim running
 				self.sleep_rate = rospy.Rate(self.logging_rate) # Hz
+				self.current_time = 0
 				
-				# Perform logging while the mission nodes are still a subset of all ros nodes (they exist)
-				while set(self.mission_nodes) < set(rosnode.get_node_names()):
-					self.log_event()
+				# Perform logging while the mission nodes are still a subset of all ros nodes (they exist) and less than max time has occured
+				while (set(self.mission_nodes) < set(rosnode.get_node_names()) and self.current_time < self.max_sim_time):
+					#print('{}/{}'.format(self.current_time, self.max_sim_time))
+					self.log_event() # Log events update current time
 					self.sleep_rate.sleep()
 				
 				result_msg = self.end_sim()
@@ -128,7 +131,7 @@ class AutorallySimManagerNode():
 			current_time = self.getWorldProp().sim_time 
 		except:
 			rospy.logerr('{} - Failed to get sim time!'.format(self.node_name))
-			
+		self.current_time = current_time	
 		self.log[0].append(current_time)
 		self.log[1].append(self.last_goal_speed)
 		self.log[2].append(self.last_actual_speed)

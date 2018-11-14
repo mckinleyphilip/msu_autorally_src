@@ -50,16 +50,18 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "test2"
-		self.genome_size = 4
+		self.experiment_name = "nav_tuning_exp1"
+		self.genome_size = 11
 		self.tourn_size = 2
-		self.pop_size = 2
-		self.number_generations = 2
-		starting_run_number = 1
-		number_of_runs = 1
+		self.pop_size = 50
+		self.number_generations = 25
+		
+		
+		starting_run_number = 2
+		number_of_runs = 2
 		
 		#Running Params
-		self.timeout = 300 * 1000
+		self.timeout = 500 * 1000
 
 		# Socket Communication Params      
 		self.ip_addr = '127.0.0.1'
@@ -78,7 +80,7 @@ class DEAP_EA():
 			# Set up Socket communication
 			self.set_up_sockets()
 			
-			print('About to start {} runs of experiment {}'.format(number_of_runs - starting_run_number,self.experiment_name))
+			print('About to start {} runs of experiment {}'.format(number_of_runs - starting_run_number+1,self.experiment_name))
 			print('\tStarting at run: {}'.format(starting_run_number))
 			raw_input("Press enter to run")
 			
@@ -100,8 +102,6 @@ class DEAP_EA():
 				print('Run log created.')
 				self.write_run_log()
 				print('Log saved!')
-				#self.create_run_plots()
-				#print('Plots saved!')
 				
 				self.email_notification(json.dumps(self.email_log, indent=2))
 				print('Email notification sent!')
@@ -190,29 +190,63 @@ class DEAP_EA():
 	def evaluate_result(self, ind, result):
 		print('Recv\'d Result')
 		df = pd.DataFrame.from_dict(dict(result))
-		df['Error'] = abs(df['Actual Speed'] - df['Goal Speed'])
-		#df.plot(x='Time')
 		
+		# Get rid of first all 0s entry
+		df = df.truncate(before=2)
 		
-		# Fitness function used it original tuning exp
-		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
+		# Speeds
+		avg_speed = df['Actual Speed'].mean()
+		max_speed = df['Actual Speed'].max()
+		norm_avg_speed = avg_speed / 15
+		norm_max_speed = max_speed / 15
 		
+		# Waypoints
+		waypoints_achieved = df['Goal Status'].max()
+		norm_wp = waypoints_achieved / 4.0
 		
+		if norm_wp == 1.0:
+		    # Time
+		    time_elapsed = df['Time'].max()
+		    norm_time_elapsed =  15.2 / time_elapsed
 		
+		    # Distance
+		    dx = np.diff(df['Pos X'])
+		    dy = np.diff(df['Pos Y'])
+		    d = np.hypot(dx, dy)
+		    d = np.insert(d,0,0)
+		    total_distance = np.sum(d)
+		    norm_distance = 152.67 / total_distance
 		
-		print('Fitness: {}'.format(fitness))
+		else:
+		    # Time
+		    time_elapsed = df['Time'].max()
+		    norm_time_elapsed =  time_elapsed / 300.0
 		
+		    # Distance
+		    dx = np.diff(df['Pos X'])
+		    dy = np.diff(df['Pos Y'])
+		    d = np.hypot(dx, dy)
+		    d = np.insert(d,0,0)
+		    total_distance = np.sum(d)
+		    norm_distance = (total_distance / 222) / 2
 		
+		raw_fitness = [avg_speed, max_speed, waypoints_achieved, time_elapsed, total_distance]
+		norm_fitness = [norm_avg_speed * 2, norm_max_speed * 2, norm_wp * 3, norm_time_elapsed * 1, norm_distance * 1]
+		total_fitness = sum(norm_fitness)
+		
+		print('Raw Fitness: {}'.format(raw_fitness))
+		print('Total Fitness: {}'.format(total_fitness))
 		
 		# add individual to detailed log
 		if str(ind) not in self.detailed_log.keys():
 			self.detailed_log[str(ind)] = {
 				"gen": self.gen,
-				"fitness": fitness,
+				"fitness": total_fitness,
+				"rawFitness": raw_fitness,
 				"dataFrame": df.to_json()
 			}
 
-		return (fitness, )
+		return (total_fitness, )
 	
 	
 	def custom_eval_fit_mapping(self, individuals):
@@ -244,7 +278,11 @@ class DEAP_EA():
 			fitness = self.evaluate_result(ind, result)
 			
 			# Write the fitness into the spot in fitnesses corresponding to the position of the individual
-			index = individuals.index(ind)
+			try:
+				index = individuals.index(ind)
+			except:
+				print('Received individual from previous generation!')
+				continue
 			
 			# The populaton can have multiple copies of an individual and thus we need to assign each a unique fitness
 			#print(ind)
@@ -272,9 +310,8 @@ class DEAP_EA():
 	
 	### Set up individual's shape, fitness function, and EA operators ###
 	def set_up_EA(self):
-		creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-		#creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-		creator.create("Individual", list, fitness=creator.FitnessMin)
+		creator.create("FitnessMax", base.Fitness, weights=(1.0, ))
+		creator.create("Individual", list, fitness=creator.FitnessMax)
 
 		self.toolbox = base.Toolbox()
 		self.toolbox.register("attr_float", random.random)

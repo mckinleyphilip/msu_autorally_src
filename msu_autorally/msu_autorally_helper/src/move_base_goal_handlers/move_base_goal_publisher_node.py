@@ -107,7 +107,7 @@ class MoveBaseSeq():
 				rospy.loginfo("Final goal pose reached!")
 				rospy.signal_shutdown("Final goal pose reached!")
 				self.goal_status_pub.publish(self.goal_cnt)
-				rospy.sleep(0.25)
+				rospy.sleep(1.0)
 				return
 
 		# 4 - ABORTED - The goal was aborted during execution by the action server due
