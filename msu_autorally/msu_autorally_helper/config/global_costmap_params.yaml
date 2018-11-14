@@ -6,5 +6,5 @@ global_costmap:
   static_map: true
   footprint_padding: 0.5
   inflation_radius: 0.75
-  
+  footprint: [[0.125,0.45], [0.125,-0.45], [-0.125,-0.45], [-0.125,0.45]]
   

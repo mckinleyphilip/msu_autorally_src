@@ -24,6 +24,8 @@ from autorally_msgs.msg import wheelSpeeds
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist
 
+from gazebo_msgs.msg import ModelStates
+
 
 
 class AutorallySimManagerNode():
@@ -56,6 +58,8 @@ class AutorallySimManagerNode():
 		# Sent up monitored topics
 		self.wheel_speed_topic = rospy.Subscriber('/wheelSpeeds', wheelSpeeds, self.wheel_speed_topic_cb)
 		self.goal_speed_topic = rospy.Subscriber('/cmd_vel', Twist, self.goal_speed_topic_cb)
+		self.goal_status_topic = rospy.Subscriber('/goal_status', Float64, self.goal_status_cb)
+		self.model_states = rospy.Subscriber("/autorally_platform/gazebo/model_states", ModelStates, self.model_states_cb)
 		
 		
 		
@@ -110,10 +114,13 @@ class AutorallySimManagerNode():
 		except:
 			rospy.logerr('{} - Failed to get sim time!'.format(self.node_name))
 			
-		self.result_headers = ['Time', 'Goal Speed', 'Actual Speed']
+		self.result_headers = ['Time', 'Goal Speed', 'Actual Speed', 'Goal Status', 'Pos X', 'Pos Y', 'Pos Z', 'Ori X', 'Ori Y', 'Ori Z', 'Ori W']
 		self.last_goal_speed = 0
 		self.last_actual_speed = 0
-		self.log = [[current_time],[self.last_goal_speed],[self.last_actual_speed]]
+		self.last_goal = 0
+		self.pos = [0,0,0]
+		self.ori = [0,0,0,0]
+		self.log = [[current_time],[self.last_goal_speed],[self.last_actual_speed], [self.last_goal], [self.pos[0]], [self.pos[1]], [self.pos[2]], [self.ori[0]], [self.ori[1]], [self.ori[2]], [self.ori[3]],]
 		
 		
 	def log_event(self):
@@ -125,7 +132,27 @@ class AutorallySimManagerNode():
 		self.log[0].append(current_time)
 		self.log[1].append(self.last_goal_speed)
 		self.log[2].append(self.last_actual_speed)
+		self.log[3].append(self.last_goal)
+		self.log[4].append(self.pos[0])
+		self.log[5].append(self.pos[1])
+		self.log[6].append(self.pos[2])
+		self.log[7].append(self.ori[0])
+		self.log[8].append(self.ori[1])
+		self.log[9].append(self.ori[2])
+		self.log[10].append(self.ori[3])
 		
+	def model_states_cb(self, msg):
+		platform_name = "autoRallyPlatform"
+		for index, model in enumerate(msg.name):
+			if model == platform_name:
+				pose = msg.pose[index]
+				self.pos = [pose.position.x, pose.position.y, pose.position.z]
+				self.ori = [pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w]
+			
+		
+	def goal_status_cb(self, msg):
+		if msg.data % 2 == 0:
+			self.last_goal = float(msg.data/2)
 		
 	def wheel_speed_topic_cb(self, msg):
 		self.last_actual_speed = (msg.lfSpeed + msg.rfSpeed) / 2.0

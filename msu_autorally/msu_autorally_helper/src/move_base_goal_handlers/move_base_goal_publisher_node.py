@@ -14,6 +14,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import Pose, Point, Quaternion
 from tf.transformations import quaternion_from_euler
+from std_msgs.msg import Float64
 
 
 class MoveBaseSeq():
@@ -48,6 +49,9 @@ class MoveBaseSeq():
 			print("\tGoal: {}\nPos:\n{}\nQuat:\n{}\n".format(index, Point(*point),Quaternion(*quat_seq[index]) ) )
 			self.pose_seq.append(Pose(Point(*point),Quaternion(*quat_seq[index])))
 			
+		# Publish goals topic
+		self.goal_status_pub = rospy.Publisher('goal_status', Float64, queue_size=10)
+			
 			
 		#Create action client
 		self.client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
@@ -71,13 +75,12 @@ class MoveBaseSeq():
 
 	def feedback_cb(self, feedback):
 		#To print current pose at each feedback:
-		rospy.loginfo("Feedback for goal "+str(self.goal_cnt)+": "+str(feedback))
-		rospy.loginfo("Feedback for goal pose "+str(self.goal_cnt+1)+" received")
+		#rospy.loginfo("Feedback for goal "+str(self.goal_cnt)+": "+str(feedback))
+		#rospy.loginfo("Feedback for goal pose "+str(self.goal_cnt+1)+" received")
 		pass
 
 	def done_cb(self, status, result):
 		self.goal_cnt += 1
-		
 		
 		# Reference for terminal status values: http://docs.ros.org/diamondback/api/actionlib_msgs/html/msg/GoalStatus.html
 		
@@ -89,18 +92,22 @@ class MoveBaseSeq():
 
 		# 3 - SUCCEEDED - The goal was achieved successfully by the action server (Terminal State)
 		if status == 3:
+			
 			rospy.loginfo("SUCCEEDED: Goal pose "+str(self.goal_cnt)+" reached") 
+			self.goal_status_pub.publish(self.goal_cnt)
 			if self.goal_cnt < len(self.pose_seq):
 				next_goal = MoveBaseGoal()
 				next_goal.target_pose.header.frame_id = "map"
 				next_goal.target_pose.header.stamp = rospy.Time.now()
 				next_goal.target_pose.pose = self.pose_seq[self.goal_cnt]
 				rospy.loginfo("Sending goal pose "+str(self.goal_cnt+1)+" to Action Server")
-				rospy.loginfo(str(self.pose_seq[self.goal_cnt]))
+				#rospy.loginfo(str(self.pose_seq[self.goal_cnt]))
 				self.client.send_goal(next_goal, self.done_cb, self.active_cb, self.feedback_cb) 
 			else:
 				rospy.loginfo("Final goal pose reached!")
 				rospy.signal_shutdown("Final goal pose reached!")
+				self.goal_status_pub.publish(self.goal_cnt)
+				rospy.sleep(0.25)
 				return
 
 		# 4 - ABORTED - The goal was aborted during execution by the action server due

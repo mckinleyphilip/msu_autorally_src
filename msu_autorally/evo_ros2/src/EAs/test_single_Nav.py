@@ -51,7 +51,7 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "test"
-		self.run_number = '_0'
+		self.run_number = '_2'
 		self.ind = [0.3, 0.06, 0.1, 0.05, 0.01, 0.02, 0.1, 0.5] #default
 		
 		
@@ -172,6 +172,7 @@ class DEAP_EA():
 	def write_run_log(self):
 		with open(self.run_directory + '/log' + '.json', 'w+') as outfile:
 			json.dump(self.run_log, outfile, indent=2)
+		self.df.to_csv(self.run_directory + '/out.csv')
 		
 		
 	### Create run plots ###

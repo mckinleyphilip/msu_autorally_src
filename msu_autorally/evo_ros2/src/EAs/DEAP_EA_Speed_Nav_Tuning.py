@@ -42,25 +42,28 @@ import pickle
 # For multiple evaluations at once
 import threading
 
+import copy
+
 
 class DEAP_EA():
 	def __init__(self, cmd_args):
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Decline-Tuning-NoBrakes-HighRes"
+		self.experiment_name = "test2"
 		self.genome_size = 4
 		self.tourn_size = 2
-		self.pop_size = 25
-		self.number_generations = 25
-		
+		self.pop_size = 2
+		self.number_generations = 2
 		starting_run_number = 1
-		number_of_runs = 10
+		number_of_runs = 1
 		
-		
+		#Running Params
+		self.timeout = 300 * 1000
+
 		# Socket Communication Params      
-		#self.ip_addr = '127.0.0.1'
-		self.ip_addr = '35.9.28.201'
+		self.ip_addr = '127.0.0.1'
+		#self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 
@@ -75,7 +78,8 @@ class DEAP_EA():
 			# Set up Socket communication
 			self.set_up_sockets()
 			
-			print('About to start {} runs of experiment {}'.format(number_of_runs,self.experiment_name))
+			print('About to start {} runs of experiment {}'.format(number_of_runs - starting_run_number,self.experiment_name))
+			print('\tStarting at run: {}'.format(starting_run_number))
 			raw_input("Press enter to run")
 			
 			for i in range(starting_run_number, number_of_runs+1):
@@ -90,7 +94,19 @@ class DEAP_EA():
 				# Run
 				self.start_time = time.time()
 				self.run()
+				
+				# Final logging and notifications
+				self.create_run_log()
+				print('Run log created.')
+				self.write_run_log()
+				print('Log saved!')
+				#self.create_run_plots()
+				#print('Plots saved!')
+				
+				self.email_notification(json.dumps(self.email_log, indent=2))
+				print('Email notification sent!')
 		finally:
+
 			self.socket.close()
 			self.receiver.close()
 			self.context.destroy()
@@ -107,18 +123,6 @@ class DEAP_EA():
 		print('\n\nRun finished at: {} \n\tTaking: {} seconds'.format(datetime.datetime.now(), (self.end_time - self.start_time)))
 		
 
-		# Final logging and notifications
-		self.create_run_log()
-		print('Run log created.')
-		self.write_run_log()
-		print('Log saved!')
-		#self.create_run_plots()
-		#print('Plots saved!')
-		
-		self.email_notification(json.dumps(self.run_log, indent=2))
-		print('Email notification sent!')
-	
-	
 	def eaSimpleCustom(self, cxpb, mutpb):
 		population = self.population
 		toolbox = self.toolbox
@@ -134,9 +138,6 @@ class DEAP_EA():
 		# Evaluate the individuals with an invalid fitness
 		invalid_ind = [ind for ind in population if not ind.fitness.valid]
 		
-		
-		
-		#fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
 		fitnesses = self.custom_eval_fit_mapping(invalid_ind)
 		
 		
@@ -184,39 +185,7 @@ class DEAP_EA():
 			logbook.record(gen=gen, nevals=len(invalid_ind), **record)
 
 		return population, logbook
-		
-	### Set up evaluation function ###
-	def evaluate_ind(self, ind):
-		#print('Sending ind: {}'.format(ind))
-		self.socket.send_json(ind)
-		
-		print('Waiting Result')
-
-		result = self.receiver.recv_json()
-		
-		print('Recv\'d Result')
-		df = pd.DataFrame.from_dict(dict(result))
-		df['Error'] = abs(df['Actual Speed'] - df['Goal Speed'])
-		#df.plot(x='Time')
-		
-		
-		
-		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
-
-		print('Fitness: {}'.format(fitness))
-		
-		
-		
-		# add individual to detailed log
-		if str(ind) not in self.detailed_log.keys():
-			self.detailed_log[str(ind)] = {
-				"gen": self.gen,
-				"fitness": fitness,
-				"dataFrame": df.to_json()
-			}
-
-		return (fitness, )
-	
+			
 	
 	def evaluate_result(self, ind, result):
 		print('Recv\'d Result')
@@ -229,12 +198,6 @@ class DEAP_EA():
 		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
 		
 		
-		# Fitness functon used in cubed exp
-		#mse = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
-		#if mse < 2:
-		#	fitness = (2 - mse)**3
-		#else:
-		#	fitness = 0
 		
 		
 		print('Fitness: {}'.format(fitness))
@@ -254,22 +217,28 @@ class DEAP_EA():
 	
 	def custom_eval_fit_mapping(self, individuals):
 		fitnesses = [float('Inf') for i in range(len(individuals))]
-		
-		print(individuals)
 		print('{} individuals need to be evaluated.'.format(len(individuals)))
-		
 		# Send out individuals to be evaluated
 		for ind in individuals:
 			self.socket.send_json(ind)
-			
-		#print('All individuals sent')
-		
-		
+				
 		# While there are any fitnesses not yet evaluated, recv results from socket.
 		num_evaluated = 0
 		while any(fit == float('Inf') for fit in fitnesses):
 			print('\nWaiting results')
-			return_data = dict(self.receiver.recv_json())
+			
+			socks = dict(self.poller.poll(self.timeout))
+			if socks:
+				if socks.get(self.receiver) == zmq.POLLIN:
+					return_data = dict(self.receiver.recv_json(zmq.NOBLOCK))
+					#data = json.loads(self.receiver.recv_json(zmq.NOBLOCK))
+			else:
+				print('Timeout on receiver socket occured!')
+				non_resolved_ind = fitnesses.index(float('Inf'))
+				self.socket.send_json(individuals[non_resolved_ind])
+				continue
+			
+			
 			ind = list(return_data['Genome'])
 			result = dict(return_data['Result'])
 			fitness = self.evaluate_result(ind, result)
@@ -278,17 +247,13 @@ class DEAP_EA():
 			index = individuals.index(ind)
 			
 			# The populaton can have multiple copies of an individual and thus we need to assign each a unique fitness
-			print(ind)
+			#print(ind)
 			while True:
 				
 				if fitnesses[index] == float('Inf'):
 					fitnesses[index] = fitness
 					break
 				else:
-					print('Duplicate ind! index: {}'.format(index))
-					#print('\n\nPopulation: {}'.format(individuals))
-					#print('\n\nTruncated Pop: {}'.format(individuals[index+1:]))
-					#time.sleep(2)
 					if index > len(individuals):
 						print('Error - index out of range!')
 						exit()
@@ -296,16 +261,9 @@ class DEAP_EA():
 						old_index = index
 						index = individuals[old_index+1:].index(ind)
 						index += old_index + 1
-					
-					
-				
-			
 			num_evaluated += 1
-			
-			print('fitnesses: {}'.format(fitnesses))
+			#print('fitnesses: {}'.format(fitnesses))
 			print('\n\n{}/{} individuals evaluated'.format(num_evaluated, len(individuals)))
-			
-			
 		return fitnesses
 		
 		
@@ -328,7 +286,6 @@ class DEAP_EA():
 		self.toolbox.register("mate", tools.cxTwoPoint)
 		self.toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 		self.toolbox.register("select", tools.selTournament, tournsize=self.tourn_size)
-		self.toolbox.register("evaluate", self.evaluate_ind)
 		
 		# Set up EA history
 		self.history = tools.History()
@@ -359,6 +316,10 @@ class DEAP_EA():
 		# Setup the socket to read the responses on.
 		self.receiver = self.context.socket(zmq.PULL)
 		self.receiver.bind('tcp://{}:{}'.format(self.ip_addr, self.recv_port))
+		
+		# Setup ZMQ poller
+		self.poller = zmq.Poller()
+		self.poller.register(self.receiver, zmq.POLLIN)
 		
 		print('Sending Connection: {}'.format('tcp://{}:{}'.format(self.ip_addr, self.send_port)))
 		print('Result Connection: {}'.format('tcp://{}:{}'.format(self.ip_addr, self.recv_port)))
@@ -419,6 +380,7 @@ class DEAP_EA():
 		self.run_log['best_ind'] = self.hof[0]
 		self.run_log['best_ind_fitness'] = self.hof[0].fitness.values
 		self.run_log['summary_log'] = self.summary_log
+		self.email_log = copy.deepcopy(self.run_log)
 		self.run_log['hall_of_fame'] = list(self.hof)
 		self.run_log['hall_of_fame_fitnesses'] = self.hof_fitnesses
 		self.run_log['detailed_log'] = self.detailed_log
@@ -428,67 +390,17 @@ class DEAP_EA():
 	def write_run_log(self):
 		with open(self.run_directory + '/log' + '.json', 'w+') as outfile:
 			json.dump(self.run_log, outfile, indent=2)
-		
-		
-	### Create run plots ###
-	def create_run_plots(self):
-		
-		# Fitnesses of Population over Generations
-		gen = self.summary_log.select("gen")
-		avg_fit = self.summary_log.select("avg")
-		best_fit = self.summary_log.select("min")
-
-		print('Preparing plot 1...')
-		fig, ax1 = plt.subplots()
-		print('1')
-		line1 = ax1.plot(gen, best_fit, "b-", label="Minimum (Best) Fitness")
-		print('2')
-		ax1.set_xlabel("Generation")
-		print('3')
-		ax1.set_ylabel("Fitness")
-		print('4')
-		line2 = ax1.plot(gen, avg_fit, "r-", label="Average Fitness")
-		print('5')
-		lns = line1 + line2
-		print('6')
-		labs = [l.get_label() for l in lns]
-		print('7')
-		ax1.legend(lns, labs, loc="best")
-		print('8')
-		ax1.set_title('Run {} Fitnesses over Generations'.format(self.run_number))
-
-		#plt.show()
-		print('Saving plot 1')
-		plt.savefig('{}/fitness_graph.png'.format(self.run_directory), bbox_inches='tight')
-		
-		
-		# Speed Signal of Best Ind
-		print('Preparing plot 2...')
 		details_of_best_ind = self.detailed_log[str(self.hof[0])]
-		self.df = pd.read_json(details_of_best_ind['dataFrame'], orient='columns')
-		self.df = self.df.sort_index()
-		ax2 = self.df.plot(x='Time')
-		ax2.legend(loc="best")
-		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
-		plt.ylabel('meters / second')
-		fig2 = ax2.get_figure()
-		print('Saving plot 2')
-		fig2.savefig('{}/best_ind_speed_plot.png'.format(self.run_directory), bbox_inches='tight')
+		df = pd.read_json(details_of_best_ind['dataFrame'], orient='columns')
+		df = df.sort_index()
+		df.to_csv(self.run_directory + '/best_ind_details.csv')
 		
-	
-	
-	def print_genealogy_tree(self):
-		graph = networkx.DiGraph(self.history.genealogy_tree)
-		graph = graph.reverse()     # Make the grah top-down
-		print(graph)
-		colors = [self.toolbox.evaluate(self.history.genealogy_history[i])[0] for i in graph]
-		networkx.draw(graph, node_color=colors)
-		plt.show()
+		
 
 if __name__ == '__main__':
 	# Parse arguments
-	parser = argparse.ArgumentParser(description='Front end DEAP EA for PID Study')
+	parser = argparse.ArgumentParser(description='Front end DEAP EA for nav tuning Study')
 	parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal.')
 	args, unknown = parser.parse_known_args() # Only parse arguments defined above
 
-	node = DEAP_EA(cmd_args = args)
+node = DEAP_EA(cmd_args = args)
