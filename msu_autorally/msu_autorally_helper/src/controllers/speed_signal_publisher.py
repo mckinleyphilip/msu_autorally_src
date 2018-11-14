@@ -40,7 +40,7 @@ class SpeedSignalPublisherNode():
 		
 		while self.running:
 			#self.speed_pub.publish(self.basic_double_ramp_speed_function())
-			self.speed_pub.publish(self.tester_signal4())
+			self.speed_pub.publish(self.basic_double_ramp_speed_function())
 			self.sleep_rate.sleep()
 			
 	
