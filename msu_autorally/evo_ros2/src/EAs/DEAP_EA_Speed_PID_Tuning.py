@@ -314,10 +314,6 @@ class DEAP_EA():
 					fitnesses[index] = fitness
 					break
 				else:
-					#print('Duplicate ind! index: {}'.format(index))
-					#print('\n\nPopulation: {}'.format(individuals))
-					#print('\n\nTruncated Pop: {}'.format(individuals[index+1:]))
-					#time.sleep(2)
 					if index > len(individuals):
 						print('Error - index out of range!')
 						exit()
@@ -332,17 +328,11 @@ class DEAP_EA():
 							print(index)
 							print(individuals)
 							print(individuals[old_index+1:])
-							continue
-					
-					
-				
-			
+							num_evaluated -= 1
+							break
 			num_evaluated += 1
-			
 			#print('fitnesses: {}'.format(fitnesses))
 			print('{}/{} individuals evaluated'.format(num_evaluated, len(individuals)))
-			
-			
 		return fitnesses
 		
 		
