@@ -55,7 +55,10 @@ class SoftwareManagerNode():
 			# This will block until the event flag is set to true or the timeout value (in seconds) is reached
 			#	Returns true if the flag has been set and false if the timeout value is hit
 			if not self.event.wait(timeout = 1.0):
-				state = rospy.get_param('evo_ros2_state')
+				try:
+					state = rospy.get_param('evo_ros2_state')
+				except:
+					continue
 				self.check_gazebo_time(state)
 				continue
 			
