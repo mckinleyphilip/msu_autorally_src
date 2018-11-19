@@ -15,7 +15,7 @@ trackBoundaries = np.load(filename)
 obstacles_df = pd.read_csv('models.csv')
 
 # Prepare obstacle placement data
-course_df = pd.read_csv('../run2/best_ind_details.csv')
+course_df = pd.read_csv('../run1/best_ind_details.csv')
 
 #pp = pprint.PrettyPrinter(indent=4)
 #pp.pprint(course_df)
