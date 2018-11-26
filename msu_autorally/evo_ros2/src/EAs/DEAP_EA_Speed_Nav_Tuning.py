@@ -301,7 +301,6 @@ class DEAP_EA():
 							index = individuals[old_index+1:].index(ind)
 							index += old_index + 1
 						except:
-							raw_input("Error with assiging fitness")
 							print(ind)
 							print(index)
 							print(individuals)

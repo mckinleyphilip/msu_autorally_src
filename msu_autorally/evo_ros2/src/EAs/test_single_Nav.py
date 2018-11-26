@@ -51,7 +51,7 @@ class DEAP_EA():
 		
 		# EA Params
 		self.experiment_name = "test"
-		self.run_number = '_2'
+		self.run_number = '1'
 		self.ind = [0.3, 0.06, 0.1, 0.05, 0.01, 0.02, 0.1, 0.5, 0.1, 0.5, 0.1] #default
 		
 		
@@ -67,6 +67,7 @@ class DEAP_EA():
 		# Multi-threading Params
 		self.lock = threading.Lock()
 		
+		self.gen = 0
 		
 		try:
 			 # Set up 
@@ -96,16 +97,13 @@ class DEAP_EA():
 		return_data = dict(self.receiver.recv_json())
 		ind = list(return_data['Genome'])
 		result = dict(return_data['Result'])
-		fitness = self.evaluate_result(ind, result)
+		self.fitness = self.evaluate_result(ind, result)
 		
 		# Final logging and notifications
 		self.create_run_log()
 		print('Run log created.')
 		self.write_run_log()
 		print('Log saved!')
-		self.create_run_plots()
-		print('Plots saved!')
-		print('Email notification sent!')
 	
 	
 
@@ -113,12 +111,66 @@ class DEAP_EA():
 	
 	def evaluate_result(self, ind, result):
 		print('Recv\'d Result')
-		self.df = pd.DataFrame.from_dict(dict(result))
-		self.df['Error'] = abs(self.df['Actual Speed'] - self.df['Goal Speed'])
-		#df.plot(x='Time')
-		self.fitness = mean_squared_error(self.df['Actual Speed'],  self.df['Goal Speed'])
+		df = pd.DataFrame.from_dict(dict(result))
 		
-		return (self.fitness, )
+		# Get rid of first all 0s entry
+		df = df.truncate(before=2)
+		
+		self.df = df
+		
+		# Speeds
+		avg_speed = df['Actual Speed'].mean()
+		max_speed = df['Actual Speed'].max()
+		norm_avg_speed = avg_speed / 15
+		norm_max_speed = max_speed / 15
+		
+		# Waypoints
+		waypoints_achieved = df['Goal Status'].max()
+		norm_wp = waypoints_achieved / 4.0
+		
+		if norm_wp == 1.0:
+		    # Time
+		    time_elapsed = df['Time'].max()
+		    norm_time_elapsed =  15.2 / time_elapsed
+		
+		    # Distance
+		    dx = np.diff(df['Pos X'])
+		    dy = np.diff(df['Pos Y'])
+		    d = np.hypot(dx, dy)
+		    d = np.insert(d,0,0)
+		    total_distance = np.sum(d)
+		    norm_distance = 152.67 / total_distance
+		
+		else:
+		    # Time
+		    time_elapsed = df['Time'].max()
+		    norm_time_elapsed =  time_elapsed / 300.0
+		
+		    # Distance
+		    dx = np.diff(df['Pos X'])
+		    dy = np.diff(df['Pos Y'])
+		    d = np.hypot(dx, dy)
+		    d = np.insert(d,0,0)
+		    total_distance = np.sum(d)
+		    norm_distance = (total_distance / 222) / 2
+		
+		raw_fitness = [avg_speed, max_speed, waypoints_achieved, time_elapsed, total_distance]
+		norm_fitness = [norm_avg_speed * 2, norm_max_speed * 2, norm_wp * 3, norm_time_elapsed * 1, norm_distance * 1]
+		total_fitness = sum(norm_fitness)
+		
+		print('Raw Fitness: {}'.format(raw_fitness))
+		print('Total Fitness: {}'.format(total_fitness))
+		
+		# add individual to detailed log
+		if str(ind) not in self.detailed_log.keys():
+			self.detailed_log[str(ind)] = {
+				"gen": self.gen,
+				"fitness": total_fitness,
+				"rawFitness": raw_fitness,
+				"dataFrame": df.to_json()
+			}
+
+		return (total_fitness, )
 			
 		
 
@@ -175,27 +227,6 @@ class DEAP_EA():
 		self.df.to_csv(self.run_directory + '/best_ind_details.csv')
 		
 		
-	### Create run plots ###
-	def create_run_plots(self):
-		
-		
-		# Speed Signal of Best Ind
-		print('Preparing plot 2...')
-		details_of_best_ind = self.df
-		self.df = self.df.sort_index()
-		
-		pp = pprint.PrettyPrinter(indent=4)
-		pp.pprint(self.df)
-		
-		ax2 = self.df.plot(x='Time')
-		ax2.legend(['Actual Speed', 'Goal Speed', 'Error'], bbox_to_anchor=(1.2, 0.8))
-		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
-		plt.ylabel('meters / second')
-		plt.text(0.5, 0.03, 'Mean Squared Error: {}'.format(self.fitness), horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
-		fig2 = ax2.get_figure()
-		plt.margins(x = 0.0, y = 0.1)
-		print('Saving plot 2')
-		fig2.savefig('{}/best_ind_speed_plot.png'.format(self.run_directory), bbox_inches='tight')
 		
 	
 	
