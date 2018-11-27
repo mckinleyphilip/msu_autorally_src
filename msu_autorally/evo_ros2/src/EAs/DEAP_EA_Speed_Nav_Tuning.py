@@ -302,6 +302,11 @@ class DEAP_EA():
 							index += old_index + 1
 						except:
 							print("Error with assiging fitness")
+							print(ind)
+							print(index)
+							print(individuals)
+							print(individuals[old_index+1:])
+							num_evaluated -= 1
 							break
 			num_evaluated += 1
 			#print('fitnesses: {}'.format(fitnesses))
