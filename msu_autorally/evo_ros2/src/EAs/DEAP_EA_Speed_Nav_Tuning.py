@@ -57,8 +57,8 @@ class DEAP_EA():
 		self.number_generations = 25
 		
 		
-		starting_run_number = 1
-		number_of_runs = 2
+		starting_run_number = 2
+		number_of_runs = 10
 		
 		#Running Params
 		self.timeout = 500 * 1000
@@ -301,12 +301,7 @@ class DEAP_EA():
 							index = individuals[old_index+1:].index(ind)
 							index += old_index + 1
 						except:
-							raw_input("Error with assiging fitness")
-							print(ind)
-							print(index)
-							print(individuals)
-							print(individuals[old_index+1:])
-							num_evaluated -= 1
+							print("Error with assiging fitness")
 							break
 			num_evaluated += 1
 			#print('fitnesses: {}'.format(fitnesses))
