@@ -3,7 +3,7 @@
 %
 % GAS 11-5-17
 
-%clear all;
+clear all;
 
 headers = {'Run_Number', 'Best_Fitness', 'IMax', 'KD', 'KI', 'KP'};
 comp_table_2 = cell2table(cell(0,6));
@@ -18,7 +18,7 @@ for i=1:length(run_directories)
 			filename = strcat(dir_name, '/','log.json');
 			table = jsondecode(fileread(filename));
 			
-			for j=1:length(table.hall_of_fame)
+			for j=1%:length(table.hall_of_fame)
 				IMax = table.hall_of_fame(j, 1);
 				KD = table.hall_of_fame(j, 2);
 				KI = table.hall_of_fame(j, 3);

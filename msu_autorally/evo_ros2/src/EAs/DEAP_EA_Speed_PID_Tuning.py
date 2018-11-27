@@ -66,8 +66,8 @@ class DEAP_EA():
 		
 		
 		# Socket Communication Params      
-		#self.ip_addr = '127.0.0.1'
-		self.ip_addr = '35.9.28.201'
+		self.ip_addr = '127.0.0.1'
+		#self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 
