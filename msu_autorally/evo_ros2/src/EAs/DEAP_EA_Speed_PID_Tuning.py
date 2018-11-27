@@ -52,13 +52,13 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-Tuning-NoIncline-NoBraking-LowRes"
+		self.experiment_name = "PID-tuning-no-mutation"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
-		starting_run_number = 12
-		number_of_runs = 40
+		starting_run_number = 1
+		number_of_runs = 10
 		
 		#Running Params
 		self.timeout = 350 * 1000
@@ -67,7 +67,7 @@ class DEAP_EA():
 		
 		# Socket Communication Params      
 		self.ip_addr = '127.0.0.1'
-		#self.ip_addr = '35.9.28.201'
+		self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 
@@ -122,7 +122,7 @@ class DEAP_EA():
 		self.population = self.toolbox.population(n=self.pop_size)
 		self.history.update(self.population)
 
-		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
+		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.0)
 		self.end_time = time.time()
 		print('\n\nRun {} finished at: {} \n\tTaking: {} seconds'.format(self.run_number, datetime.datetime.now(), (self.end_time - self.start_time)))
 		
@@ -341,7 +341,7 @@ class DEAP_EA():
 	### Set up individual's shape, fitness function, and EA operators ###
 	def set_up_EA(self):
 		creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-		#creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+		creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 		creator.create("Individual", list, fitness=creator.FitnessMin)
 
 		self.toolbox = base.Toolbox()
@@ -351,7 +351,7 @@ class DEAP_EA():
 		self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 		
 		# Set up Evo Algo operators
-		self.toolbox.register("mate", tools.cxTwoPoint)
+		self.toolbox.register("mate", tools.cxOnePoint)
 		self.toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 		self.toolbox.register("select", tools.selTournament, tournsize=self.tourn_size)
 		self.toolbox.register("evaluate", self.evaluate_ind)
