@@ -2,7 +2,7 @@
 # GAS 08-16-2018
 
 # Common Params
-SERVER_IP_ADDR: '35.9.28.201'
+SERVER_IP_ADDR: '35.9.28.239'
 #SERVER_IP_ADDR: '127.0.0.1'
 GENOME_PORT: 5023
 RESULT_PORT: 5033
@@ -21,11 +21,11 @@ software_manager:
    WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world_PID_incline.launch']
    PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform_PID_incline.launch']
    SIM_MANAGER_LAUNCH_FILE: ['evo_ros2', 'sim_manager.launch']
-   
+
 
  # Simulation Manager Script
 sim_manager:
    #MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
    MISSION_LAUNCH_FILE: ['msu_autorally_helper','speed_signal_publisher.launch']
    UTILITY_MONITORS_LAUNCH_FILE: ['evo_ros2','utility_monitors.launch']
-   MAX_SIM_TIME: 540 # simulation seconds a simulation is allowed to run before ending 
+   MAX_SIM_TIME: 540 # simulation seconds a simulation is allowed to run before ending

@@ -22,20 +22,11 @@
   </class>
 </library>
 
-<!-- MSU Additions -->
-
-<library path="lib/libtele_op_nodelet">
-  <class name="autorally_control/tele_op_nodelet" type="autorally_control::tele_op_nodelet" base_class_type="nodelet::Nodelet">
+<library path="lib/libmppi_nodelet">
+  <class name="autorally_control/MPPINodelet" type="autorally_control::MPPINodelet" base_class_type="nodelet::Nodelet">
     <description>
-    Drive robot at a constant speed using wheel speed data
+    Nodeletized MPPI 
     </description>
   </class>
 </library>
 
-<library path="lib/libbase_controller_nodelet">
-  <class name="autorally_control/base_controller_nodelet" type="autorally_control::base_controller_nodelet" base_class_type="nodelet::Nodelet">
-    <description>
-    Drive robot at a constant speed using wheel speed data
-    </description>
-  </class>
-</library>
