@@ -15,7 +15,8 @@ for i=1:length(run_directories)
 	if run_directories(i).isdir
 		dir_name = run_directories(i).name;
 		if contains(dir_name, 'run')
-			filename = strcat(dir_name, '/','log.json');
+			%filename = strcat(dir_name, '/','log.json');
+			filename = strcat(dir_name, '/','best_from_last_gen.json');
 			table = jsondecode(fileread(filename));
 			
 			for j=1%:length(table.hall_of_fame)
