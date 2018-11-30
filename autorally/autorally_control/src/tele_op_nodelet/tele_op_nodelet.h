@@ -24,7 +24,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /**********************************************
- * @file ConstantSpeedController.h
+ * @file tele_op_nodelet.h
  * @author Brian Goldfain <bgoldfai@gmail.com>
  * @date November 13, 2013
  * @copyright 2012 Georgia Institute of Technology
@@ -46,19 +46,14 @@
 #include <autorally_msgs/wheelSpeeds.h>
 #include <autorally_core/RingBuffer.h>
 
-#include <dynamic_reconfigure/server.h>
-#include <autorally_control/constantSpeedControllerPIDParamsConfig.h>
-#include <boost/thread.hpp>          // Mutex
-#include <boost/lexical_cast.hpp>
-
 namespace autorally_control
 {
 
-class ConstantSpeedController : public nodelet::Nodelet
+class tele_op_nodelet : public nodelet::Nodelet
 {
  public:
-  ConstantSpeedController();
-  ~ConstantSpeedController();
+  tele_op_nodelet();
+  ~tele_op_nodelet();
   void onInit();
 
  private:
@@ -92,6 +87,7 @@ class ConstantSpeedController : public nodelet::Nodelet
   double m_frontWheelsSpeed;
   double m_backWheelsSpeed;
   std_msgs::Float64 m_mostRecentSpeedCommand;
+  bool m_reverse;
   double m_speedSetPoint;
   double m_throttleAccStart;
   double m_throttleAccEnd;
@@ -109,10 +105,7 @@ class ConstantSpeedController : public nodelet::Nodelet
   std::vector<double> generateAccelerationProfile(const int count);
   void loadThrottleCalibration();
 
-  void ConfigCallback(const constantSpeedControllerPIDParamsConfig &config, uint32_t level);
-  dynamic_reconfigure::Server<constantSpeedControllerPIDParamsConfig> m_dynServer;
-
 };
 
 }
-#endif
+#endif 

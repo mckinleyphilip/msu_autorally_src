@@ -24,11 +24,11 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /**********************************************
- * @file ConstantSpeedController.h
+ * @file base_controller_nodelet.h
  * @author Brian Goldfain <bgoldfai@gmail.com>
  * @date November 13, 2013
  * @copyright 2012 Georgia Institute of Technology
- * @brief ConstantSpeedController class definition
+ * @brief base_controller_nodelet class definition
  *
  ***********************************************/
 #ifndef JUMP_CONTROL_H_
@@ -46,19 +46,19 @@
 #include <autorally_msgs/wheelSpeeds.h>
 #include <autorally_core/RingBuffer.h>
 
-#include <dynamic_reconfigure/server.h>
-#include <autorally_control/constantSpeedControllerPIDParamsConfig.h>
-#include <boost/thread.hpp>          // Mutex
-#include <boost/lexical_cast.hpp>
+#include <geometry_msgs/Twist.h>
+#include <math.h>
+#include <cmath>
+
 
 namespace autorally_control
 {
 
-class ConstantSpeedController : public nodelet::Nodelet
+class base_controller_nodelet : public nodelet::Nodelet
 {
  public:
-  ConstantSpeedController();
-  ~ConstantSpeedController();
+  base_controller_nodelet();
+  ~base_controller_nodelet();
   void onInit();
 
  private:
@@ -92,15 +92,20 @@ class ConstantSpeedController : public nodelet::Nodelet
   double m_frontWheelsSpeed;
   double m_backWheelsSpeed;
   std_msgs::Float64 m_mostRecentSpeedCommand;
+  bool m_reverse;
   double m_speedSetPoint;
   double m_throttleAccStart;
   double m_throttleAccEnd;
   ros::Time m_accelerationStartTime;
   double m_accelerationDuration;
+  
+  std::string m_node_name;
+  double m_steering_command;
 
   autorally_core::RingBuffer<double> m_throttleMappings;
   std::vector<double> m_accelerationProfile;
-  void speedCallback(const std_msgs::Float64ConstPtr& msg);
+  void speedCallback(const geometry_msgs::TwistPtr& msg);
+  double Clamp(double num, double min, double max);
   void wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg);
 
   void enableControlCallback(const ros::TimerEvent& time);
@@ -109,10 +114,7 @@ class ConstantSpeedController : public nodelet::Nodelet
   std::vector<double> generateAccelerationProfile(const int count);
   void loadThrottleCalibration();
 
-  void ConfigCallback(const constantSpeedControllerPIDParamsConfig &config, uint32_t level);
-  dynamic_reconfigure::Server<constantSpeedControllerPIDParamsConfig> m_dynServer;
-
 };
 
 }
-#endif
+#endif 
