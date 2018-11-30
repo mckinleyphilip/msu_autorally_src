@@ -122,12 +122,12 @@ void publishFilter(const Imu::FilterData &data) {
 
   // Assume if we are getting GpsTime fields from the imu, we should use them
   bool gpsTimeMode = data.fields & Imu::FilterData::GpsTime;
-  
+
   //std::cout << "Data Fields: " << data.fields << " Looking for " << Imu::FilterData::GpsTime << std::endl;
 
   imu_3dm_gx4::FilterOutput output;
   if (gpsTimeMode) {
-    ros::Time currentTime = ros::Time::now();
+    // ros::Time currentTime = ros::Time::now(); // caused build error: unused variable
     ros::Time timeStamp;
     double ipart;
     double fpart = modf(data.gpsTow, &ipart);
@@ -137,7 +137,7 @@ void publishFilter(const Imu::FilterData &data) {
   } else {
   output.header.stamp = ros::Time::now();
   }
-  
+
   output.header.frame_id = frameId;
   output.orientation.w = data.quaternion[0];
   output.orientation.x = data.quaternion[1];
@@ -150,19 +150,19 @@ void publishFilter(const Imu::FilterData &data) {
   output.bias_covariance[0] = data.biasUncertainty[0]*data.biasUncertainty[0];
   output.bias_covariance[4] = data.biasUncertainty[1]*data.biasUncertainty[1];
   output.bias_covariance[8] = data.biasUncertainty[2]*data.biasUncertainty[2];
-  
+
   output.orientation_covariance[0] = data.angleUncertainty[0]*
       data.angleUncertainty[0];
   output.orientation_covariance[4] = data.angleUncertainty[1]*
       data.angleUncertainty[1];
   output.orientation_covariance[8] = data.angleUncertainty[2]*
       data.angleUncertainty[2];
-  
+
   output.quat_status = data.quaternionStatus;
   output.bias_status = data.biasStatus;
   output.orientation_covariance_status = data.angleUncertaintyStatus;
   output.bias_covariance_status = data.biasUncertaintyStatus;
-  
+
   pubFilter.publish(output);
   if (filterDiag) {
     filterDiag->tick(output.header.stamp);
@@ -173,13 +173,13 @@ std::shared_ptr<diagnostic_updater::TopicDiagnostic> configTopicDiagnostic(
     const std::string& name, double * target) {
   std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag;
   // const double period = 1.0 / *target;  //  for 1000Hz, period is 1e-3
-  
+
   diagnostic_updater::FrequencyStatusParam freqParam(target, target, 0.01, 10);
   // diagnostic_updater::TimeStampStatusParam timeParam(0, period * 0.5);
   diagnostic_updater::TimeStampStatusParam timeParam(0, 0.015);
 
-  diag.reset(new diagnostic_updater::TopicDiagnostic(name, 
-                                                     *updater, 
+  diag.reset(new diagnostic_updater::TopicDiagnostic(name,
+                                                     *updater,
                                                      freqParam,
                                                      timeParam));
   return diag;
@@ -192,11 +192,11 @@ void updateDiagnosticInfo(diagnostic_updater::DiagnosticStatusWrapper& stat,
   for (const std::pair<std::string,std::string>& p : map) {
     stat.add(p.first, p.second);
   }
-  
+
   try {
     //  try to read diagnostic info
     imu->getDiagnosticInfo(fields);
-    
+
     auto map = fields.toMap();
     for (const std::pair<std::string, unsigned int>& p : map) {
       stat.add(p.first, p.second);
@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
   bool enableGpsTimeSync;
   int requestedImuRate, requestedFilterRate;
   bool verbose;
-  
+
   //  load parameters from launch file
   nh.param<std::string>("device", device, "/dev/ttyACM0");
   nh.param<int>("baudrate", baudrate, 115200);
@@ -233,12 +233,12 @@ int main(int argc, char **argv) {
   nh.param<bool>("enable_gps_time_sync", enableGpsTimeSync, false);
   nh.param<int>("gps_time_fudge_factor", gpsTimeFudge, 0);
   nh.param<bool>("verbose", verbose, false);
-  
+
   if (requestedFilterRate < 0 || requestedImuRate < 0) {
     ROS_ERROR("imu_rate and filter_rate must be > 0");
     return -1;
   }
-  
+
   pubIMU = nh.advertise<sensor_msgs::Imu>("imu", 1);
   pubMag = nh.advertise<sensor_msgs::MagneticField>("magnetic_field", 1);
   pubPressure = nh.advertise<sensor_msgs::FluidPressure>("pressure", 1);
@@ -277,20 +277,20 @@ int main(int argc, char **argv) {
 
     //  calculate decimation rates
     if (static_cast<uint16_t>(requestedImuRate) > imuBaseRate) {
-      throw std::runtime_error("imu_rate cannot exceed " + 
+      throw std::runtime_error("imu_rate cannot exceed " +
                                std::to_string(imuBaseRate));
     }
     if (static_cast<uint16_t>(requestedFilterRate) > filterBaseRate) {
-      throw std::runtime_error("filter_rate cannot exceed " + 
+      throw std::runtime_error("filter_rate cannot exceed " +
                                std::to_string(filterBaseRate));
     }
-    
+
     const uint16_t imuDecimation = imuBaseRate / requestedImuRate;
     const uint16_t filterDecimation = filterBaseRate / requestedFilterRate;
-    
+
     ROS_INFO("Selecting IMU decimation: %u", imuDecimation);
     imu.setIMUDataRate(
-        imuDecimation, Imu::IMUData::Accelerometer | 
+        imuDecimation, Imu::IMUData::Accelerometer |
           Imu::IMUData::Gyroscope |
           Imu::IMUData::Magnetometer |
           Imu::IMUData::Barometer |
@@ -326,11 +326,11 @@ int main(int argc, char **argv) {
     if (!nh.hasParam("diagnostic_period")) {
       nh.setParam("diagnostic_period", 0.2);  //  5hz period
     }
-    
+
     updater.reset(new diagnostic_updater::Updater());
     const std::string hwId = info.modelName + "-" + info.modelNumber;
     updater->setHardwareID(hwId);
-    
+
     //  calculate the actual rates we will get
     double imuRate = imuBaseRate / (1.0 * imuDecimation);
     double filterRate = filterBaseRate / (1.0 * filterDecimation);
@@ -338,10 +338,10 @@ int main(int argc, char **argv) {
     if (enableFilter) {
       filterDiag = configTopicDiagnostic("filter",&filterRate);
     }
-    
-    updater->add("diagnostic_info", 
+
+    updater->add("diagnostic_info",
                  boost::bind(&updateDiagnosticInfo, _1, &imu));
-    
+
     ROS_INFO("Resuming the device");
     imu.resume();
 
