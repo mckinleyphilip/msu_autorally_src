@@ -98,7 +98,7 @@ class Transporter():
 			rospy.logwarn('{} - In state: {}'.format(self.node_name, msg.state))
 			
 		if msg.state == 0:
-			self.recv_genome(self.genome_receiver.recv_json())
+			self.recv_genome(dict(self.genome_receiver.recv_json()))
 			self.set_evo_ros2_state(1)
 		
 		if msg.state == 3:
@@ -113,14 +113,32 @@ class Transporter():
 			self.set_evo_ros2_state(0)
 
 	
-	def recv_genome(self, raw_genome):
-		if raw_genome == 'end':
-			rospy.logerr('Transporter: Ending signal has been received from server')
-			rospy.signal_shutdown('Transporter: Received ending signal from server')
-			return
+	def recv_genome(self, msg):		
+		# Parse received message
+		if "genome" in msg:
+			if msg['genome'] == 'end':
+				rospy.logerr('Transporter: Ending signal has been received from server')
+				rospy.signal_shutdown('Transporter: Received ending signal from server')
+				return
+			else:
+				self.raw_genome = msg['genome']
+				self.parse_genome(self.raw_genome)
 		else:
-			self.raw_genome = raw_genome
-			self.parse_genome(raw_genome)
+			rospy.logerr('Transporter: Received message did not contain a genome!')
+			self.set_evo_ros2_state(0)
+		
+		
+		# Check if enki is being used as a front-end to manipulate world traits
+		if "enki_genome" in msg:
+			
+			
+			
+		if "metadata" in msg:
+			pass
+			
+			
+			
+			
 	
 	
 	def parse_genome(self, raw_genome):

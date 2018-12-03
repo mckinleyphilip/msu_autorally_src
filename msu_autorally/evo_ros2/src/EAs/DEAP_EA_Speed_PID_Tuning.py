@@ -271,7 +271,9 @@ class DEAP_EA():
 		
 		# Send out individuals to be evaluated
 		for ind in individuals:
-			self.socket.send_json(ind)
+			msg = dict()
+			msg['genome'] = ind
+			self.socket.send_json(msg)
 			
 		#print('All individuals sent')
 		
