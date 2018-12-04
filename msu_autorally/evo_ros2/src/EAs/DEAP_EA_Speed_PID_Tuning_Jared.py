@@ -50,8 +50,8 @@ class DEAP_EA():
 		self.experiment_name = "PID-Incline-Tuning-NoBrakes-HighRes"
 		self.genome_size = 4
 		self.tourn_size = 2
-		self.pop_size = 9
-		self.number_generations = 10
+		self.pop_size = 15
+		self.number_generations = 20
 
 		starting_run_number = 1
 		number_of_runs = 1
