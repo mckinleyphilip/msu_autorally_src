@@ -296,8 +296,8 @@ class DEAP_EA():
 				continue
 			
 			
-			ind = list(return_data['Genome'])
-			result = dict(return_data['Result'])
+			ind = list(return_data['genome'])
+			result = dict(return_data['result'])
 			fitness = self.evaluate_result(ind, result)
 			
 			# Write the fitness into the spot in fitnesses corresponding to the position of the individual

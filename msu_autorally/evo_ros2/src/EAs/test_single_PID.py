@@ -94,13 +94,15 @@ class DEAP_EA():
 		
 		msg = dict()
 		msg['genome'] = self.ind
+		msg['metadata'] = 'test'
+		msg['enki_genome'] = [0,1,2,3,4,5]
 		self.socket.send_json(msg)
 		
 		print('Waiting Result')
 
 		return_data = dict(self.receiver.recv_json())
-		ind = list(return_data['Genome'])
-		result = dict(return_data['Result'])
+		ind = list(return_data['genome'])
+		result = dict(return_data['result'])
 		fitness = self.evaluate_result(ind, result)
 		
 		# Final logging and notifications

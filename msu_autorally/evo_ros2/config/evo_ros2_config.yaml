@@ -12,6 +12,8 @@ EVO_ROS_LOG_EVENT_TOPIC: '/evo_ros2_log_event'
 EVO_ROS_LOG_COLLECTION_TOPIC:  '/evo_ros2_log_collection'
 LOGGING_RATE: 20 # Hz
 ROS_GAZEBO_WORLD_PROPERTIES_SERVICE: '/autorally_platform/gazebo/get_world_properties'
+ENKI_INT: False
+ENKI_GENOME: [0]
 
 # Software Manager
 software_manager:
@@ -27,5 +29,6 @@ software_manager:
 sim_manager:
    #MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
    MISSION_LAUNCH_FILE: ['msu_autorally_helper','speed_signal_publisher.launch']
+   ENKI_MISSION_LAUNCH_FILE: ['msu_autorally_helper','enki_speed_signal_publisher.launch']
    UTILITY_MONITORS_LAUNCH_FILE: ['evo_ros2','utility_monitors.launch']
    MAX_SIM_TIME: 540 # simulation seconds a simulation is allowed to run before ending 

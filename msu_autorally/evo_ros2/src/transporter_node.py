@@ -63,12 +63,12 @@ class Transporter():
 	
 	def send_result(self, msg):
 		self.results = dict()
-		self.results['Result'] = list()
-		
-		
-		self.results['Genome'] = self.raw_genome
+		self.results['result'] = list()
+		self.results['genome'] = self.raw_genome
+		self.results['metadata'] = self.metadata
+		self.results['enki_genome'] = self.enki_genome
 		for index, result in enumerate(msg.result):
-			self.results['Result'].append((msg.result[index].header, msg.result[index].data))
+			self.results['result'].append((msg.result[index].header, msg.result[index].data))
 		
 		if self.debug:
 			rospy.loginfo('\n\n Transporter Result received')
@@ -130,11 +130,19 @@ class Transporter():
 		
 		# Check if enki is being used as a front-end to manipulate world traits
 		if "enki_genome" in msg:
-			
+			print('Found enki genome!')
+			rospy.set_param('ENKI_INT', True)
+			rospy.set_param('ENKI_GENOME', msg['enki_genome'])
+			self.enki_genome = msg['enki_genome']
+		else:
+			self.enki_genome = ''
 			
 			
 		if "metadata" in msg:
-			pass
+			print('Found metadata {}'.format(msg['metadata']))
+			self.metadata = msg['metadata']
+		else:
+			self.metadata = ''
 			
 			
 			
