@@ -9,6 +9,7 @@
 import rospy
 import argparse
 import numpy as np
+import pprint
 
 import zmq
 
@@ -71,8 +72,12 @@ class Transporter():
 			self.results['result'].append((msg.result[index].header, msg.result[index].data))
 		
 		if self.debug:
-			rospy.loginfo('\n\n Transporter Result received')
-			#rospy.loginfo(self.results)
+			#rospy.loginfo('\n\n Transporter Result sent')
+			rospy.loginfo(self.results)
+		
+		#pp = pprint.PrettyPrinter(indent=4)
+		#pp.pprint(self.results['result'])
+		
 		
 		self.result_sender.send_json(self.results)
 			
