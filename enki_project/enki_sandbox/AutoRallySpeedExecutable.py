@@ -3,7 +3,7 @@
 import numpy as np
 from enki.core.interface import EnkiEvoROSExecutable
 
-DEFAULT_IP_ADDRESS = '127.0.0.1'
+DEFAULT_IP_ADDRESS = '35.9.26.204'
 DEFAULT_SENDER_PORT = 5023
 DEFAULT_RECEIVER_PORT = 5033
 
