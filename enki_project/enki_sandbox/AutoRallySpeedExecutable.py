@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import argparse
+import matplotlib.pyplot as plt
 import numpy as np
+import os
+import pprint
+import sys
+from enki.core.io import ArchiveFileReader
 from enki.core.interface import EnkiEvoROSExecutable
+from sklearn.metrics import mean_squared_error
 
-DEFAULT_IP_ADDRESS = '35.9.26.204'
+DEFAULT_IP_ADDRESS = '35.9.26.204 '
 DEFAULT_SENDER_PORT = 5023
 DEFAULT_RECEIVER_PORT = 5033
 
@@ -94,10 +101,19 @@ class AutoRallySpeedExecutable(EnkiEvoROSExecutable):
         :param evoros_result: a result from an EvoROS execution
         :return: a result for Enki
         """
-        error = np.abs(np.array(evoros_result['Actual Speed']) - np.array(evoros_result['Goal Speed']))
+        # get actual speed from EvoROS
+        actual_speed = np.array(evoros_result['Actual Speed'])
+
+        # get goal speed from EvoROS
+        goal_speed = np.array(evoros_result['Goal Speed'])
+
+        # compute the error
+        error = np.abs(actual_speed - goal_speed)
 
         # convert to Enki result
         enki_result = {
+            'actual_speed': actual_speed,
+            'goal_speed': goal_speed,
             'error': error
         }
         return enki_result
@@ -151,49 +167,122 @@ def sample_piecewise_function(f_segments, t_start, t_end, t_step):
     return result
 
 
-def main():
-    """Runs a single instance of the executable with random inputs.
-
+def main(args):
     """
-    import matplotlib.pyplot as plt
-    import time
 
-    exe_instance = AutoRallySpeedExecutable()
-    print('Selecting random inputs...')
-    exe_inputs = dict()
-    for k, v in exe_instance.input_parameters.items():
-        try:
-            exe_inputs[k] = np.random.rand() * (v[1] - v[0]) + v[0]
-            if type(v[0]) == int:
-                exe_inputs[k] = int(exe_inputs[k])
-        except TypeError:
-            exe_inputs[k] = v[np.random.randint(len(v))]
+    :param args:
+    :return:
+    """
+    print('Enki Archive Plotter')
 
-    print('Inputs:')
-    evoros_input = exe_instance.convert_to_evoros_input(exe_inputs)
-    y = evoros_input['enki_genome']
-    x = np.arange(0.0, len(y) * 0.1, 0.1)
-    plt.title('Speed')
-    plt.xlim(0, 60.0)
-    plt.ylim(0, 10.0)
-    plt.plot(x, y)
-    plt.show()
+    if not os.path.exists(args.archive_path):
+        print('ERROR: Invalid archive path.')
+        sys.exit(1)
+    else:
+        # read archive object from file
+        reader = ArchiveFileReader(args.archive_path)
+        interface = reader.read_interface()
+        archive = reader.read(interface)
 
-    print('Executing...')
-    start_time = time.time()
-    exe_outputs = exe_instance.execute(exe_inputs)
-    elapsed_time = time.time() - start_time
-    print('Done. ({:02.0f}m {:02.0f}s)'.format(*divmod(elapsed_time, 60.0)))
+        # check if archive is empty
+        if len(archive.generations) == 0:
+            print('ERROR: Archive is empty.')
+            sys.exit(1)
+        else:
+            pp = pprint.PrettyPrinter(indent=3)
 
-    print('Outputs:')
-    y = exe_outputs['error']
-    x = np.arange(0.0, len(y) * 0.1, 0.1)
-    plt.title('Error')
-    plt.xlim(0, 60.0)
-    plt.ylim(0, 10.0)
-    plt.plot(x, y)
-    plt.show()
+            # create output path
+            if not os.path.exists(args.output_path):
+                print('Creating output directory {}...'.format(args.output_path))
+                os.makedirs(args.output_path)
+
+            # get individuals from the last generation in the archive and iterate through each
+            individuals = archive.generations[0]
+            for i in range(len(individuals)):
+                # get input from individual
+                try:
+                    print('Reading individual input values...')
+                    enki_input = individuals[i].genome.values
+                    pp.pprint(enki_input)
+
+                    print('Converting to speed signal...')
+                    f_segments = [
+                        [enki_input['speed_f1_type'], enki_input['speed_f1_min'], enki_input['speed_f1_max']],
+                        [enki_input['speed_f2_type'], enki_input['speed_f2_min'], enki_input['speed_f2_max']],
+                        [enki_input['speed_f3_type'], enki_input['speed_f3_min'], enki_input['speed_f3_max']],
+                        [enki_input['speed_f4_type'], enki_input['speed_f4_min'], enki_input['speed_f4_max']],
+                        [enki_input['speed_f5_type'], enki_input['speed_f5_min'], enki_input['speed_f5_max']],
+                        [enki_input['speed_f6_type'], enki_input['speed_f6_min'], enki_input['speed_f6_max']],
+                    ]
+                    input_speed = sample_piecewise_function(f_segments, TIME_START, TIME_END, TIME_STEP)
+                except KeyError:
+                    print('ERROR: Incompatible archive file.')
+                    sys.exit(1)
+
+                # get output from individual
+                try:
+                    print('Reading individual output values...')
+                    enki_output = individuals[i].phenome.values
+
+                    actual_speed = None
+                    if 'actual_speed' in enki_output:
+                        actual_speed = enki_output['actual_speed']
+
+                    goal_speed = None
+                    if 'goal_speed' in enki_output:
+                        goal_speed = enki_output['goal_speed']
+
+                    error = None
+                    if 'error' in enki_output:
+                        error = enki_output['error']
+                except KeyError:
+                    print('ERROR: Incompatible archive file.')
+                    sys.exit(1)
+
+                # plot the results
+                file_path = os.path.join(args.output_path, '{:03d}.jpg'.format(i))
+                print('Plotting to {}...'.format(file_path))
+                fig = plt.figure(figsize=(6.4, 4.8), dpi=100)
+                ax = fig.gca()
+                if actual_speed is not None and goal_speed is not None:
+                    mse = mean_squared_error(actual_speed, goal_speed)
+                    ax.set_title('Individual {:03d}, MSE={:0.4f}'.format(i, mse))
+                else:
+                    ax.set_title('Individual {:03d}'.format(i))
+                ax.set_ylim(MIN_SPEED, MAX_SPEED)
+                if actual_speed is not None:
+                    ax.plot(np.arange(len(actual_speed)), actual_speed, label='Actual Speed')
+                if goal_speed is not None:
+                    ax.plot(np.arange(len(goal_speed)), goal_speed, label='Goal Speed')
+                if error is not None:
+                    ax.plot(np.arange(len(error)), error, label='Error')
+                ax.legend()
+                fig.savefig(file_path)
+                plt.close(fig)
+
+
+def read_commandline():
+    """Reads command-line arguments.
+
+    :return: command-line arguments
+    """
+    parser = argparse.ArgumentParser(
+        description='Generates plots from Enki data.'
+    )
+    parser.add_argument(
+        'archive_path',
+        help='File path to an archive file.',
+        type=str
+    )
+    parser.add_argument(
+        '--output-path',
+        metavar='',
+        help='directory to save plots to',
+        default=os.getcwd(),
+        type=str
+    )
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
-    main()
+    main(read_commandline())
