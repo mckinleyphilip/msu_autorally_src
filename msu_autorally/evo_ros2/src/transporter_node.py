@@ -111,6 +111,7 @@ class Transporter():
 			self.set_evo_ros2_state(4)
 			
 		if msg.state == 6:
+			
 			self.send_result(msg)
 		
 		if msg.state == 7:
@@ -119,6 +120,7 @@ class Transporter():
 
 	
 	def recv_genome(self, msg):		
+		
 		# Parse received message
 		if "genome" in msg:
 			if msg['genome'] == 'end':
@@ -137,8 +139,19 @@ class Transporter():
 		if "enki_genome" in msg:
 			print('Found enki genome!')
 			rospy.set_param('ENKI_INT', True)
-			rospy.set_param('ENKI_GENOME', msg['enki_genome'])
 			self.enki_genome = msg['enki_genome']
+			
+			# Check for multiple enki genomes and flatten them
+			if any(isinstance(i, list) for i in msg['enki_genome']):
+				number_genomes = len(msg['enki_genome'])
+				print('number_genomes {}'.format(number_genomes))
+				flat_list = [item for sublist in msg['enki_genome'] for item in sublist]
+				print(flat_list)
+				rospy.set_param('ENKI_GENOME', flat_list)
+				
+			else:
+				rospy.set_param('ENKI_GENOME', msg['enki_genome'])
+			
 		else:
 			self.enki_genome = ''
 			
@@ -148,6 +161,8 @@ class Transporter():
 			self.metadata = msg['metadata']
 		else:
 			self.metadata = ''
+			
+		input('hold here')
 			
 			
 			

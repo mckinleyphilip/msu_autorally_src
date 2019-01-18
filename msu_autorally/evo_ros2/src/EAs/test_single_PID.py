@@ -95,7 +95,8 @@ class DEAP_EA():
 		msg = dict()
 		msg['genome'] = self.ind
 		msg['metadata'] = 'test'
-		msg['enki_genome'] = [0,1,2,3,4,5]
+		msg['enki_genome'] = [[0,1,2,3,4,5], [0,1,2,3,4,5], [0,1,2,3,4,5]]
+		#msg['enki_genome'] = [0,1,2,3,4,5]
 		self.socket.send_json(msg)
 		
 		print('Waiting Result')

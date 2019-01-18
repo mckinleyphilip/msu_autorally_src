@@ -45,6 +45,8 @@ import threading
 # For copying parts of the run log into the email log
 import copy
 
+import traceback
+
 
 
 class DEAP_EA():
@@ -52,13 +54,13 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-tuning-no-mutation"
+		self.experiment_name = "PID-evol-against-multiple-signals"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
 		starting_run_number = 1
-		number_of_runs = 10
+		number_of_runs = 2
 		
 		#Running Params
 		self.timeout = 350 * 1000
@@ -66,7 +68,7 @@ class DEAP_EA():
 		
 		
 		# Socket Communication Params      
-		self.ip_addr = '127.0.0.1'
+		#self.ip_addr = '127.0.0.1'
 		self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
@@ -109,8 +111,10 @@ class DEAP_EA():
 				
 				self.email_notification(json.dumps(self.email_log, indent=2))
 				print('Email notification sent!')
+		except Exception:
+			traceback.print_exc()
+			print('\n\n')
 		finally:
-
 			self.socket.close()
 			self.receiver.close()
 			self.context.destroy()
@@ -273,6 +277,8 @@ class DEAP_EA():
 		for ind in individuals:
 			msg = dict()
 			msg['genome'] = ind
+			msg['metadata'] = 'test'
+			msg['enki_genome'] = self.build_enki_genome()
 			self.socket.send_json(msg)
 			
 		#print('All individuals sent')
@@ -517,6 +523,13 @@ class DEAP_EA():
 		colors = [self.toolbox.evaluate(self.history.genealogy_history[i])[0] for i in graph]
 		networkx.draw(graph, node_color=colors)
 		plt.show()
+		
+	def build_enki_genome(self):
+		list_of_speed_signals = []
+		list_of_speed_signals.append([1,2,3,4,5])
+		list_of_speed_signals.append([1,2,3,4,5])
+		list_of_speed_signals.append([1,2,3,4,5])
+		return list_of_speed_signals
 
 if __name__ == '__main__':
 	# Parse arguments
