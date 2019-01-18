@@ -3,10 +3,6 @@
 import numpy as np
 from enki.core.interface import EnkiEvoROSExecutable
 
-DEFAULT_IP_ADDRESS = '192.168.56.1'
-DEFAULT_SENDER_PORT = 5023
-DEFAULT_RECEIVER_PORT = 5033
-
 PID_SETTINGS = [0.2, 0.0, 0.001, 0.15]
 MAX_ANGLE = np.pi / 6
 
@@ -40,18 +36,11 @@ class AutoRallyInclineExecutable(EnkiEvoROSExecutable):
             'error': [0.0, 10.0]
         }
 
-    def __init__(self):
-        """Initializes an instance of the executable.
-
-        Uses the base EnkiEvoROSExecutable class to execute the individual on a remote system running EvoROS.
-        """
-        super().__init__(ip_address=DEFAULT_IP_ADDRESS, sender_port=DEFAULT_SENDER_PORT, receiver_port=DEFAULT_RECEIVER_PORT)
-
     def convert_to_evoros_input(self, enki_input):
-        """Converts an executable input from Enki into a format for EvoROS.
+        """Converts an executable input from Enki into a format for Evo-ROS.
 
         :param enki_input: an input from Enki for execution
-        :return: an input for EvoROS for execution
+        :return: an input for Evo-ROS for execution
         """
         # ramp inclines
         ramp_inclines = [
@@ -62,7 +51,7 @@ class AutoRallyInclineExecutable(EnkiEvoROSExecutable):
             enki_input['incline5']
         ]
 
-        # convert to EvoROS input
+        # convert to Evo-ROS input
         evoros_input = {
             'genome': PID_SETTINGS,
             'enki_genome': ramp_inclines
@@ -70,9 +59,9 @@ class AutoRallyInclineExecutable(EnkiEvoROSExecutable):
         return evoros_input
 
     def convert_from_evoros_result(self, evoros_result):
-        """Converts an execution result from EvoROS into a format for Enki.
+        """Converts an execution result from Evo-ROS into a format for Enki.
 
-        :param evoros_result: a result from an EvoROS execution
+        :param evoros_result: a result from an Evo-ROS execution
         :return: a result for Enki
         """
         error = np.abs(np.array(evoros_result['Actual Speed']) - np.array(evoros_result['Goal Speed']))

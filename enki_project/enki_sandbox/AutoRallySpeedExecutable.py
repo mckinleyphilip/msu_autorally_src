@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import matplotlib.pyplot as plt
 import numpy as np
 import os
-import pprint
 import sys
-from enki.core.io import ArchiveFileReader
 from enki.core.interface import EnkiEvoROSExecutable
-from sklearn.metrics import mean_squared_error
-
-DEFAULT_IP_ADDRESS = '35.9.26.204 '
-DEFAULT_SENDER_PORT = 5023
-DEFAULT_RECEIVER_PORT = 5033
 
 PID_SETTINGS = [0.2, 0.0, 0.001, 0.15]
 MIN_SPEED = 0.0
-MAX_SPEED = 10.0
+MAX_SPEED = 5.0
 TIME_START = 0.0
 TIME_END = 60.0
 TIME_STEP = 0.1
@@ -64,18 +56,11 @@ class AutoRallySpeedExecutable(EnkiEvoROSExecutable):
             'error': [0.0, 10.0]
         }
 
-    def __init__(self):
-        """Initializes an instance of the executable.
-
-        Uses the base EnkiEvoROSExecutable class to execute the individual on a remote system running EvoROS.
-        """
-        super().__init__(ip_address=DEFAULT_IP_ADDRESS, sender_port=DEFAULT_SENDER_PORT, receiver_port=DEFAULT_RECEIVER_PORT)
-
     def convert_to_evoros_input(self, enki_input):
-        """Converts an executable input from Enki into a format for EvoROS.
+        """Converts an executable input from Enki into a format for Evo-ROS.
 
         :param enki_input: an input from Enki for execution
-        :return: an input for EvoROS for execution
+        :return: an input for Evo-ROS for execution
         """
         # create and sample piecewise speed function
         f_segments = [
@@ -88,7 +73,7 @@ class AutoRallySpeedExecutable(EnkiEvoROSExecutable):
         ]
         speed = sample_piecewise_function(f_segments, TIME_START, TIME_END, TIME_STEP)
 
-        # convert to EvoROS input
+        # convert to Evo-ROS input
         evoros_input = {
             'genome': PID_SETTINGS,
             'enki_genome': speed
@@ -96,15 +81,15 @@ class AutoRallySpeedExecutable(EnkiEvoROSExecutable):
         return evoros_input
 
     def convert_from_evoros_result(self, evoros_result):
-        """Converts an execution result from EvoROS into a format for Enki.
+        """Converts an execution result from Evo-ROS into a format for Enki.
 
-        :param evoros_result: a result from an EvoROS execution
+        :param evoros_result: a result from an Evo-ROS execution
         :return: a result for Enki
         """
-        # get actual speed from EvoROS
+        # get actual speed from Evo-ROS
         actual_speed = np.array(evoros_result['Actual Speed'])
 
-        # get goal speed from EvoROS
+        # get goal speed from Evo-ROS
         goal_speed = np.array(evoros_result['Goal Speed'])
 
         # compute the error
@@ -173,14 +158,26 @@ def main(args):
     :param args:
     :return:
     """
+    _process_archive(args.archive_path, args.output_path)
+
+
+def _process_archive(archive_path, output_path):
+    """
+
+    :param archive_path:
+    :param output_path:
+    :return:
+    """
     print('Enki Archive Plotter')
 
-    if not os.path.exists(args.archive_path):
+    if not os.path.exists(archive_path):
         print('ERROR: Invalid archive path.')
         sys.exit(1)
     else:
+        archive_name = os.path.splitext(os.path.basename(archive_path))[0]
+
         # read archive object from file
-        reader = ArchiveFileReader(args.archive_path)
+        reader = ArchiveFileReader(archive_path)
         interface = reader.read_interface()
         archive = reader.read(interface)
 
@@ -189,79 +186,245 @@ def main(args):
             print('ERROR: Archive is empty.')
             sys.exit(1)
         else:
-            pp = pprint.PrettyPrinter(indent=3)
-
             # create output path
-            if not os.path.exists(args.output_path):
-                print('Creating output directory {}...'.format(args.output_path))
-                os.makedirs(args.output_path)
+            if not os.path.exists(output_path):
+                print('Creating output directory {}...'.format(output_path))
+                os.makedirs(output_path)
 
-            # get individuals from the last generation in the archive and iterate through each
-            individuals = archive.generations[0]
-            for i in range(len(individuals)):
-                # get input from individual
-                try:
-                    print('Reading individual input values...')
-                    enki_input = individuals[i].genome.values
-                    pp.pprint(enki_input)
+            # plot novelty curve
+            file_path = os.path.join(output_path, '{}_novelty_curve.png'.format(archive_name))
+            print('Plotting to {}...'.format(file_path))
+            novelties = list()
+            for generation in archive.generations:
+                gen_novelties = [individual.novelty for individual in generation]
+                if gen_novelties:
+                    novelties.append((
+                        np.min(gen_novelties),
+                        np.mean(gen_novelties),
+                        np.max(gen_novelties),
+                    ))
+            img_stream = plot.novelty_curve(novelties)
+            img = Image.open(img_stream)
+            img.save(file_path)
 
-                    print('Converting to speed signal...')
-                    f_segments = [
-                        [enki_input['speed_f1_type'], enki_input['speed_f1_min'], enki_input['speed_f1_max']],
-                        [enki_input['speed_f2_type'], enki_input['speed_f2_min'], enki_input['speed_f2_max']],
-                        [enki_input['speed_f3_type'], enki_input['speed_f3_min'], enki_input['speed_f3_max']],
-                        [enki_input['speed_f4_type'], enki_input['speed_f4_min'], enki_input['speed_f4_max']],
-                        [enki_input['speed_f5_type'], enki_input['speed_f5_min'], enki_input['speed_f5_max']],
-                        [enki_input['speed_f6_type'], enki_input['speed_f6_min'], enki_input['speed_f6_max']],
-                    ]
-                    input_speed = sample_piecewise_function(f_segments, TIME_START, TIME_END, TIME_STEP)
-                except KeyError:
-                    print('ERROR: Incompatible archive file.')
-                    sys.exit(1)
-
-                # get output from individual
-                try:
-                    print('Reading individual output values...')
-                    enki_output = individuals[i].phenome.values
-
-                    actual_speed = None
-                    if 'actual_speed' in enki_output:
-                        actual_speed = enki_output['actual_speed']
-
-                    goal_speed = None
-                    if 'goal_speed' in enki_output:
-                        goal_speed = enki_output['goal_speed']
-
-                    error = None
-                    if 'error' in enki_output:
-                        error = enki_output['error']
-                except KeyError:
-                    print('ERROR: Incompatible archive file.')
-                    sys.exit(1)
-
-                # plot the results
-                file_path = os.path.join(args.output_path, '{:03d}.jpg'.format(i))
+            # plot each individual in the last generation of the archive
+            data = _read_data(archive.generations[-1])
+            for record in data:
+                file_path = os.path.join(output_path, '{}_individual_{:03d}.png'.format(archive_name, record['index']))
                 print('Plotting to {}...'.format(file_path))
                 fig = plt.figure(figsize=(6.4, 4.8), dpi=100)
                 ax = fig.gca()
-                if actual_speed is not None and goal_speed is not None:
-                    mse = mean_squared_error(actual_speed, goal_speed)
-                    ax.set_title('Individual {:03d}, MSE={:0.4f}'.format(i, mse))
+                if 'mse' in record:
+                    ax.set_title('Individual {:03d}, MSE={:0.4f}'.format(record['index'], record['mse']))
                 else:
-                    ax.set_title('Individual {:03d}'.format(i))
+                    ax.set_title('Individual {:03d}'.format(record['index']))
                 ax.set_ylim(MIN_SPEED, MAX_SPEED)
-                if actual_speed is not None:
-                    ax.plot(np.arange(len(actual_speed)), actual_speed, label='Actual Speed')
-                if goal_speed is not None:
-                    ax.plot(np.arange(len(goal_speed)), goal_speed, label='Goal Speed')
-                if error is not None:
-                    ax.plot(np.arange(len(error)), error, label='Error')
+                if 'actual_speed' in record:
+                    ax.plot(np.arange(len(record['actual_speed'])), record['actual_speed'], label='Actual Speed')
+                if 'goal_speed' in record:
+                    ax.plot(np.arange(len(record['goal_speed'])), record['goal_speed'], label='Goal Speed')
+                if 'error' in record:
+                    ax.plot(np.arange(len(record['error'])), record['error'], label='Error')
                 ax.legend()
                 fig.savefig(file_path)
                 plt.close(fig)
 
+            # display individuals ranked by mse
+            print('----------------------------')
+            print('Individuals by MSE')
+            print('----------------------------')
+            sorted_data = [{k: v for k, v in record.items()} for record in data]
+            sorted_data.sort(key=lambda x: x['mse'])
+            sorted_data = sorted_data[::-1]
+            for record in sorted_data:
+                print('Individual {:03d}, MSE: {:0.3f}'.format(record['index'], record['mse']))
+            print('----------------------------')
 
-def read_commandline():
+            archived_data = _read_data(archive.generations[-1])
+            archived_mses = [record['mse'] for record in archived_data]
+            evaluated_data = _read_data(interface.evaluated_individuals)
+            evaluated_mses = [record['mse'] for record in evaluated_data]
+
+            mse_min = np.min(evaluated_mses)
+            mse_max = np.max(evaluated_mses)
+            q1 = np.percentile(evaluated_mses, 25)
+            q3 = np.percentile(evaluated_mses, 75)
+
+            archived_colors = ['green' if mse <= q1 else 'red' if mse >= q3 else 'blue' for mse in archived_mses]
+            evaluated_colors = ['green' if mse <= q1 else 'red' if mse >= q3 else 'blue' for mse in evaluated_mses]
+
+            file_path = os.path.join(output_path, '{}_mse_distribution.png'.format(archive_name))
+            print('Plotting to {}...'.format(file_path))
+            img = _plot_distribution(archived_data, evaluated_data, x_min=mse_min, x_max=mse_max)
+            img.save(file_path)
+
+            file_path = os.path.join(output_path, '{}_phenome_mds.png'.format(archive_name))
+            print('Plotting to {}...'.format(file_path))
+            behaviors = BehaviorComputer.compute_phenome_matrix(archive.generations[-1] + interface.evaluated_individuals)
+            distance_matrix = DistanceComputer.compute_distance_matrix(behaviors, archive.settings.distance_metric)
+            img = _plot_mds(
+                distance_matrix,
+                title='MDS Plot of Individuals based on Phenome',
+                num_labeled=len(archive.generations[-1]),
+                labeled_colors=archived_colors,
+                unlabeled_colors=evaluated_colors,
+                radius=0.3
+            )
+            img.save(file_path)
+
+            file_path = os.path.join(output_path, '{}_genome_mds.png'.format(archive_name))
+            print('Plotting to {}...'.format(file_path))
+            behaviors = BehaviorComputer.compute_genome_matrix(archive.generations[-1] + interface.evaluated_individuals)
+            distance_matrix = DistanceComputer.compute_distance_matrix(behaviors, archive.settings.distance_metric)
+            img = _plot_mds(
+                distance_matrix,
+                title='MDS Plot of Individuals based on Genome',
+                num_labeled=len(archive.generations[-1]),
+                labeled_colors=archived_colors,
+                unlabeled_colors=evaluated_colors,
+                radius=1.0
+            )
+            img.save(file_path)
+
+
+def _plot_distribution(archived_data, evaluated_data, x_min=None, x_max=None, image_format='png'):
+    """
+
+    :param archived_data:
+    :param evaluated_data:
+    :param x_min:
+    :param x_max:
+    :param image_format:
+    :return:
+    """
+    archived_mses = [record['mse'] for record in archived_data]
+    evaluated_mses = [record['mse'] for record in evaluated_data]
+
+    y_min = 0.0
+    y_max = 100.0
+    if (x_min is not None) and (x_max is not None) and (x_min == x_max):
+        x_min -= x_min * 0.5
+        x_max += x_max * 0.5
+    if (y_min is not None) and (y_max is not None) and (y_min == y_max):
+        y_min -= y_min * 0.5
+        y_max += y_max * 0.5
+
+    # prepare the plot
+    plt.rc('font', family='Courier New', weight='bold')
+    fig = plt.figure(figsize=(6.4, 4.8), dpi=100)
+    ax = fig.gca()
+    ax.set_title('MSE Distribution', fontweight='bold')
+    ax.set_xlabel('MSE', fontweight='bold')
+    ax.set_ylabel('Density', fontweight='bold')
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.grid(True)
+
+    # plot density curve
+    try:
+        density = gaussian_kde(evaluated_mses)
+        density.covariance_factor = lambda: 0.25
+        density._compute_covariance()
+
+        x = np.linspace(min(evaluated_mses), max(evaluated_mses), 100)
+        y = density.evaluate(x)
+        ax.plot(x, y * 100.0, 'g-')
+        ax.fill_between(x, y * 100.0, 0.0, color='#00e673')
+    except np.linalg.LinAlgError:
+        pass
+    except ValueError:
+        pass
+
+    # plot median and interquartile ranges
+    ax.vlines(np.percentile(evaluated_mses, 25), 0.0, 100.0, linestyles='--', colors='#444444')
+    ax.vlines(np.percentile(evaluated_mses, 50), 0.0, 100.0, linestyles='-', colors='#444444')
+    ax.vlines(np.percentile(evaluated_mses, 75), 0.0, 100.0, linestyles='--', colors='#444444')
+
+    # plot rug plot
+    ax.vlines(archived_mses, 0.0, 5.0, linestyles='-', colors='g')
+
+    # create image and close plot
+    img_stream = io.BytesIO()
+    fig.savefig(img_stream, format=image_format)
+    img = Image.open(img_stream)
+    plt.close(fig)
+
+    return img
+
+
+def _plot_mds(distance_matrix, title=None, num_labeled=None, labeled_colors='blue', unlabeled_colors='gray', radius=1.0, image_format='png'):
+    """
+
+    :param distance_matrix:
+    :param title:
+    :param num_labeled:
+    :param labeled_colors:
+    :param unlabeled_colors:
+    :param radius:
+    :param image_format:
+    :return:
+    """
+    # prepare the plot
+    plt.rc('font', family='Courier New', weight='bold')
+    fig = plt.figure(figsize=(6.4, 4.8), dpi=100)
+    ax = fig.gca()
+    if title is None:
+        ax.set_title('Distance Projection (Multi-Dimensional Scaling)', fontweight='bold')
+    else:
+        ax.set_title(title)
+    ax.set_xlim([-radius, radius])
+    ax.set_ylim([-radius, radius])
+    ax.grid(True)
+
+    # perform multidimensional scaling
+    mds = manifold.MDS(n_components=2, dissimilarity='precomputed', random_state=1)
+    results = mds.fit(distance_matrix)
+    coords = results.embedding_
+
+    # plot points and label them
+    fig.subplots_adjust(bottom=0.1)
+
+    if num_labeled is None:
+        num_labeled = distance_matrix.shape[0]
+
+    ax.scatter(coords[num_labeled:, 0], coords[num_labeled:, 1], marker='.', color=unlabeled_colors, alpha=0.5)
+    ax.scatter(coords[:num_labeled, 0], coords[:num_labeled, 1], marker='o', color=labeled_colors, edgecolor='black')
+    labels = list(range(1, num_labeled + 1))
+    for label, x, y in zip(labels, coords[:num_labeled, 0], coords[:num_labeled, 1]):
+        ax.annotate(label, xy=(x, y), xytext=(10, -10), textcoords='offset points', ha='right', va='bottom')
+
+    # create image and close plot
+    img_stream = io.BytesIO()
+    fig.savefig(img_stream, format=image_format)
+    img = Image.open(img_stream)
+    plt.close(fig)
+
+    return img
+
+
+def _read_data(individuals):
+    """
+
+    :param individuals:
+    :return:
+    """
+    data = list()
+    for i in range(len(individuals)):
+        # get output from individual
+        try:
+            enki_output = individuals[i].phenome.values
+            record = {k: v for k, v in enki_output.items()}
+            record['index'] = i + 1
+            if 'actual_speed' and 'goal_speed' in record:
+                record['mse'] = mean_squared_error(record['actual_speed'], record['goal_speed'])
+            data.append(record)
+        except KeyError:
+            print('ERROR: Incompatible archive file.')
+            sys.exit(1)
+    return data
+
+
+def _read_commandline():
     """Reads command-line arguments.
 
     :return: command-line arguments
@@ -285,4 +448,14 @@ def read_commandline():
 
 
 if __name__ == '__main__':
-    main(read_commandline())
+    import io
+    from enki.core.io import ArchiveFileReader
+    from enki.core.plotting import plot
+    from enki.core.misc import BehaviorComputer
+    from enki.core.misc import DistanceComputer
+    from PIL import Image
+    from scipy.stats import gaussian_kde
+    from sklearn import manifold
+    from sklearn.metrics import mean_squared_error
+    import matplotlib.pyplot as plt
+    main(_read_commandline())

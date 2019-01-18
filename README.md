@@ -1,3 +1,4 @@
+
 # msu_autorally_src
 
 This repo contains the extension work performed by Michigan State University on AutoRally platform, which was developed by Georgia Tech. 
