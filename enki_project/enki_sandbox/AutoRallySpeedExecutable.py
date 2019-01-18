@@ -8,7 +8,7 @@ from enki.core.interface import EnkiEvoROSExecutable
 
 PID_SETTINGS = [0.2, 0.0, 0.001, 0.15]
 MIN_SPEED = 0.0
-MAX_SPEED = 10.0
+MAX_SPEED = 5.0
 TIME_START = 0.0
 TIME_END = 60.0
 TIME_STEP = 0.1
