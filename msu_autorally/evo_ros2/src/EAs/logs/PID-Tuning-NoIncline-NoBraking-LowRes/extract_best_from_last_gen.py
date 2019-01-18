@@ -39,6 +39,9 @@ class plot_generator():
 		run_multiple = True
 		self.number_runs = 40
 		
+		best_overall_fitness = 100
+		best_overall_ind = []
+		best_run_number = -1
 		
 		if run_multiple:
 			for i in range(1,self.number_runs+1):
@@ -50,7 +53,12 @@ class plot_generator():
 				filename = '{}log.json'.format(self.run_directory)
 			
 				self.import_file(filename)
-				self.create_csv_of_best()
+				fitness, ind = self.create_csv_of_best()
+				
+				if fitness < best_overall_fitness:
+					best_overall_fitness = fitness
+					best_overall_ind = ind
+					best_run_number = self.run_number
 		else:
 			self.run_number = 1
 			
@@ -59,11 +67,15 @@ class plot_generator():
 		
 			self.import_file(filename)
 			self.create_csv_of_best()
+			
+		
+		print('\n\n Best overall is: \n\tRun: {} \n\tFitness: {} \n\tInd: {}'.format(best_run_number,best_overall_fitness,best_overall_ind))
 		
 		
 	def create_csv_of_best(self):
 		
 		highest_gen = 0
+	
 		for ind in self.detailed_log:
 			if self.detailed_log[ind]['gen'] > highest_gen:
 				highest_gen = self.detailed_log[ind]['gen']
@@ -95,6 +107,8 @@ class plot_generator():
 		best['run_number'] = self.run_number
 		with open( self.run_directory + '/best_from_last_gen' + '.json', 'w+') as outfile:
 			json.dump(best, outfile, indent=2)
+		
+		return best_fitness, best_ind
 			
 				
 		
