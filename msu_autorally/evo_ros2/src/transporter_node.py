@@ -78,8 +78,10 @@ class Transporter():
 				print(key)
 				if isinstance(self.results[key], (list,)):
 					for item in self.results[key]:
-						if isinstance(item, (list,)):
+						if isinstance(item, (list, )):
 							print('\t{}...'.format(item[0:2]))
+						elif isinstance(item, (tuple, )):
+							print('\t{}...'.format(item[0]))
 						else:
 							print('\t{}'.format(item))
 			
