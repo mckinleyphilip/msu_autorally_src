@@ -64,7 +64,7 @@ class Transporter():
 	
 	def send_result(self, msg):
 		self.results = dict()
-		self.results['result'] = dict()
+		self.results['result'] = list()
 		self.results['genome'] = self.raw_genome
 		self.results['metadata'] = self.metadata
 		self.results['enki_genome'] = self.enki_genome
@@ -74,11 +74,14 @@ class Transporter():
 		if self.debug:
 			rospy.loginfo('\n\n Transporter Result sent')
 			print('Send Msg Contents:')
-			for key, value in self.results.iteritems:
+			for key in self.results.keys():
 				print(key)
-				if type(key) is dict():
-					for key2, value2, in key.iteritems:
-						print('\t{}'.format(key2))
+				if isinstance(self.results[key], (list,)):
+					for item in self.results[key]:
+						if isinstance(item, (list,)):
+							print('\t{}...'.format(item[0:2]))
+						else:
+							print('\t{}'.format(item))
 			
 			#rospy.loginfo(self.results)
 		
