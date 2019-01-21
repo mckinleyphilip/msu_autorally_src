@@ -7,14 +7,14 @@ class TestExecutable(EnkiExecutable):
 
     """
     @property
-    def input_parameters(self):
+    def input_definition(self):
         return {
             'radius': [0.0, 1.0],
             'angle': [0.0, 2.0 * np.pi]
         }
 
     @property
-    def output_parameters(self):
+    def output_definition(self):
         return {
             'x': [0.0, 1.0],
             'y': [0.0, 1.0]
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     exe_instance = TestExecutable()
     print('Selecting random inputs...')
     exe_inputs = dict()
-    for k, v in exe_instance.input_parameters.items():
+    for k, v in exe_instance.input_definition.items():
         try:
             exe_inputs[k] = np.random.rand() * (v[1] - v[0]) + v[0]
             if type(v[0]) == int:

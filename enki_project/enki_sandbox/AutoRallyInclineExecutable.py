@@ -13,7 +13,7 @@ class AutoRallyInclineExecutable(EnkiEvoROSExecutable):
     For conducting experiments with variable inclines on an AutoRally platform with a fixed PID setting.
     """
     @property
-    def input_parameters(self):
+    def input_definition(self):
         """Defines the boundaries the executable inputs.
 
         :return: the parameter definition of an encoded input
@@ -27,7 +27,7 @@ class AutoRallyInclineExecutable(EnkiEvoROSExecutable):
         }
 
     @property
-    def output_parameters(self):
+    def output_definition(self):
         """Defines the boundaries of an the observed system behavior.
 
         :return: the parameter definition of an encoded system behavior
@@ -115,40 +115,3 @@ def compute_ramps(ramp_angles, ramp_length=20.0, x_pos=0.0, y_pos=0.0, z_pos=0.0
         ramp_params[i, :3] = pos4[:3]
 
     return ramp_params
-
-
-def main():
-    """Runs a single instance of the executable with random inputs.
-
-    """
-    import pprint
-    import time
-
-    exe_instance = AutoRallyInclineExecutable()
-    print('Selecting random inputs...')
-    exe_inputs = dict()
-    for k, v in exe_instance.input_parameters.items():
-        try:
-            exe_inputs[k] = np.random.rand() * (v[1] - v[0]) + v[0]
-            if type(v[0]) == int:
-                exe_inputs[k] = int(exe_inputs[k])
-        except TypeError:
-            exe_inputs[k] = v[np.random.randint(len(v))]
-
-    print('Inputs:')
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(exe_inputs)
-
-    print('Executing...')
-    start_time = time.time()
-    exe_outputs = exe_instance.execute(exe_inputs)
-    elapsed_time = time.time() - start_time
-    print('Done. ({:02.0f}m {:02.0f}s)'.format(*divmod(elapsed_time, 60.0)))
-
-    print('Outputs:')
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(exe_outputs)
-
-
-if __name__ == '__main__':
-    main()
