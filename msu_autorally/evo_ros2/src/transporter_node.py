@@ -168,9 +168,7 @@ class Transporter():
 			self.metadata = msg['metadata']
 		else:
 			self.metadata = ''
-			
-		input('hold here')
-			
+					
 			
 			
 			
