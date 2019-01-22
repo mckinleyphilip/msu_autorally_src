@@ -3,7 +3,8 @@
 import numpy as np
 from enki.core.interface import EnkiEvoROSExecutable
 
-PID_SETTINGS = [0.2, 0.0, 0.001, 0.15]
+#PID_SETTINGS = [0.2, 0.0, 0.001, 0.15]
+PID_SETTINGS = [0.20265782426571877, 0.04511272454084714, 0.09175407739115371, 0.5108063459986618 ] # Run 3 evolved settings
 MIN_SPEED = 0.0
 MAX_SPEED = 10.0
 TIME_START = 0.0
@@ -86,10 +87,7 @@ class AutoRallySpeedExecutable(EnkiEvoROSExecutable):
 		:param evoros_result: a result from an Evo-ROS execution
 		:return: a result for Enki
 		"""
-		
-		print('Recieved result..')
-		for entry, value in evoros_result.iteritems:
-			print(entry)
+		evoros_result = dict(evoros_result)
 		# get actual speed from Evo-ROS
 		if 'Actual Speed' in evoros_result:
 			actual_speed = np.array(evoros_result['Actual Speed'])
