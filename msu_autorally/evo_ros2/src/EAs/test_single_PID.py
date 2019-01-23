@@ -45,6 +45,9 @@ import threading
 import pprint
 
 
+# For importing enki speed signals
+from import_enki_speed_signals import EnkiSpeedSignalImporter
+
 class DEAP_EA():
 	def __init__(self, cmd_args):
 		self.debug = cmd_args.debug
@@ -56,6 +59,15 @@ class DEAP_EA():
 		#self.ind = [0.978905837000845, 0.07513378343124555, 0.04569592282669355, 0.5116667627180238] # Run 2 
 		#self.ind =[0.36668979013531144, 0.8424649533363158, 0.20881916594532024, 0.914542700310715] # Run 9 
 		#self.ind = [0.20265782426571877, 1.244295400759123, 0.09175407739115371, 0.7188801125834188] # Run 3
+		
+		
+		# If integrating with Enki
+		self.enki = True
+		if self.enki:
+			enki_importer = EnkiSpeedSignalImporter()
+			filename = "enki_speed_signals/exp2_c1_enki_run_10ms_top5_novel_signals.json"
+			self.enki_genome = enki_importer.import_signals(filename)
+			print('Found enki genome of length: {}'.format(len(self.enki_genome)))
 		
 		
 		# Socket Communication Params      
@@ -95,8 +107,8 @@ class DEAP_EA():
 		msg = dict()
 		msg['genome'] = self.ind
 		msg['metadata'] = 'test'
-		msg['enki_genome'] = [[0,1,2,3,4,5], [0,1,2,3,4,5], [0,1,2,3,4,5]]
-		#msg['enki_genome'] = [0,1,2,3,4,5]
+		if self.enki:
+			msg['enki_genome'] = self.enki_genome
 		self.socket.send_json(msg)
 		
 		print('Waiting Result')

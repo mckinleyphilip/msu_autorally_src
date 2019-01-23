@@ -158,7 +158,7 @@ class Transporter():
 				number_genomes = len(msg['enki_genome'])
 				print('number_genomes {}'.format(number_genomes))
 				flat_list = [item for sublist in msg['enki_genome'] for item in sublist]
-				print(flat_list)
+				#print(flat_list)
 				rospy.set_param('ENKI_GENOME', flat_list)
 				
 			else:

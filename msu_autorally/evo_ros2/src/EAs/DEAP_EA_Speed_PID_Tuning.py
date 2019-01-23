@@ -47,6 +47,9 @@ import copy
 
 import traceback
 
+# For importing enki speed signals
+from import_enki_speed_signals import EnkiSpeedSignalImporter
+
 
 
 class DEAP_EA():
@@ -64,12 +67,22 @@ class DEAP_EA():
 		
 		#Running Params
 		self.timeout = 350 * 1000
+		
+		
+		# If integrating with Enki
+		self.enki = True
+		if self.enki:
+			enki_importer = EnkiSpeedSignalImporter()
+			filename = "enki_speed_signals/exp2_c1_enki_run_10ms_top5_novel_signals.json"
+			self.enki_genome = enki_importer.import_signals(filename)
+			print('Found enki genome of length: {}'.format(len(self.enki_genome)))
 
 		
 		
 		# Socket Communication Params      
 		#self.ip_addr = '127.0.0.1'
-		self.ip_addr = '35.9.28.201'
+		#self.ip_addr = '35.9.28.201'
+		self.ip_addr = '35.9.26.204'
 		self.send_port = 5023
 		self.recv_port = 5033
 
@@ -278,7 +291,9 @@ class DEAP_EA():
 			msg = dict()
 			msg['genome'] = ind
 			msg['metadata'] = 'test'
-			msg['enki_genome'] = self.build_enki_genome()
+			if self.enki:
+				msg['enki_genome'] = self.enki_genome
+			
 			self.socket.send_json(msg)
 			
 		#print('All individuals sent')
@@ -523,13 +538,7 @@ class DEAP_EA():
 		colors = [self.toolbox.evaluate(self.history.genealogy_history[i])[0] for i in graph]
 		networkx.draw(graph, node_color=colors)
 		plt.show()
-		
-	def build_enki_genome(self):
-		list_of_speed_signals = []
-		list_of_speed_signals.append([1,2,3,4,5])
-		list_of_speed_signals.append([1,2,3,4,5])
-		list_of_speed_signals.append([1,2,3,4,5])
-		return list_of_speed_signals
+
 
 if __name__ == '__main__':
 	# Parse arguments
