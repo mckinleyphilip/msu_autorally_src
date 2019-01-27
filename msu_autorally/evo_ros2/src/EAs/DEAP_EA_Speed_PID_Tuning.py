@@ -23,7 +23,6 @@ from email.mime.text import MIMEText
 
 # For showing DEAP plots
 import matplotlib.pyplot as plt
-import networkx
 
 # For EA running time
 import time
@@ -57,16 +56,16 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-evol-against-multiple-signals"
+		self.experiment_name = "Enki-Signals-PID-Evolution"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
 		starting_run_number = 1
-		number_of_runs = 2
+		number_of_runs = 1
 		
 		#Running Params
-		self.timeout = 350 * 1000
+		self.timeout = 500 * 1000
 		
 		
 		# If integrating with Enki
@@ -313,6 +312,7 @@ class DEAP_EA():
 			else:
 				print('Timeout on receiver socket occured!')
 				non_resolved_ind = fitnesses.index(float('Inf'))
+				print('\n\n{}\n\n'.format(individuals[non_resolved_ind]))
 				self.socket.send_json(individuals[non_resolved_ind])
 				continue
 			
@@ -531,13 +531,6 @@ class DEAP_EA():
 		
 	
 	
-	def print_genealogy_tree(self):
-		graph = networkx.DiGraph(self.history.genealogy_tree)
-		graph = graph.reverse()     # Make the grah top-down
-		print(graph)
-		colors = [self.toolbox.evaluate(self.history.genealogy_history[i])[0] for i in graph]
-		networkx.draw(graph, node_color=colors)
-		plt.show()
 
 
 if __name__ == '__main__':

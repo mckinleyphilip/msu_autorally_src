@@ -140,6 +140,7 @@ class Transporter():
 				rospy.signal_shutdown('Transporter: Received ending signal from server')
 				return
 			else:
+				print('Genome received: {}'.format(msg['genome']))
 				self.raw_genome = msg['genome']
 				self.parse_genome(self.raw_genome)
 		else:
