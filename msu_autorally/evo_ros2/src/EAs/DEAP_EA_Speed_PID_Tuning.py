@@ -313,7 +313,14 @@ class DEAP_EA():
 				print('Timeout on receiver socket occured!')
 				non_resolved_ind = fitnesses.index(float('Inf'))
 				print('\n\n{}\n\n'.format(individuals[non_resolved_ind]))
-				self.socket.send_json(individuals[non_resolved_ind])
+				msg = dict()
+				msg['genome'] = individuals[non_resolved_ind]
+				msg['metadata'] = 'test'
+				if self.enki:
+					msg['enki_genome'] = self.enki_genome
+			
+				self.socket.send_json(msg)
+				#self.socket.send_json(individuals[non_resolved_ind])
 				continue
 			
 			
