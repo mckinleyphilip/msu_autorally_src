@@ -22,9 +22,8 @@ for worker in cfg['worker_list']:
 	print(str(worker))
 	cmds = """echo 'Cleaning gazebo logs from vms';
 		rm -rf ~/.gazebo/log/*;
-		rm ~/simulation/ardupilot/APMrover2/logs/*;
 		rosclean purge;
-		df;
+		df -h;
 		exec bash
 		"""
 	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {}.cse.msu.edu "{}"&'.format(worker,worker,cmds)

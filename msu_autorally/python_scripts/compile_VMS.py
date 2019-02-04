@@ -15,7 +15,6 @@ print('Starting update scripts on robo nodes...')
 
 work_nodes_file_name = 'all_nodes.yml'
 #work_nodes_file_name = 'test_nodes.yml'
-git_branch = "PID_evol_experiment"
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
