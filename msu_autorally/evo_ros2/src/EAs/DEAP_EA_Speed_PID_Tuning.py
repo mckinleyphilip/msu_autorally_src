@@ -52,7 +52,7 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-tuning-no-mutation"
+		self.experiment_name = "PID-tuning-mutation-only-positive-fitness"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
@@ -66,7 +66,7 @@ class DEAP_EA():
 		
 		
 		# Socket Communication Params      
-		self.ip_addr = '127.0.0.1'
+		#self.ip_addr = '127.0.0.1'
 		self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
@@ -122,7 +122,7 @@ class DEAP_EA():
 		self.population = self.toolbox.population(n=self.pop_size)
 		self.history.update(self.population)
 
-		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.0)
+		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.0, mutpb=0.5)
 		self.end_time = time.time()
 		print('\n\nRun {} finished at: {} \n\tTaking: {} seconds'.format(self.run_number, datetime.datetime.now(), (self.end_time - self.start_time)))
 		
@@ -212,8 +212,9 @@ class DEAP_EA():
 		
 		
 		
-		fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
+		#fitness = mean_squared_error(df['Actual Speed'],  df['Goal Speed'])
 
+		fitness = (2 - mean_squared_error(df['Actual Speed'],  df['Goal Speed']))**3
 		print('Fitness: {}'.format(fitness))
 		
 		
@@ -342,7 +343,7 @@ class DEAP_EA():
 	def set_up_EA(self):
 		creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 		creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-		creator.create("Individual", list, fitness=creator.FitnessMin)
+		creator.create("Individual", list, fitness=creator.FitnessMax)
 
 		self.toolbox = base.Toolbox()
 		self.toolbox.register("attr_float", random.random)

@@ -1,0 +1,5 @@
+mutation only
+guasian
+0.5 prob
+25 gen 25 pop
+fitness min = mean squared error
