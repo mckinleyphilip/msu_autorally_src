@@ -34,12 +34,29 @@ class plot_generator():
 		self.debug = cmd_args.debug
 		
 		
-		self.title = 'C1 - No Braking - Evolved '
-		self.run_directory = './'
-		filename = '{}log.json'.format(self.run_directory)
-	
-		self.import_file(filename)
-		self.create_run_plots()
+		run_multiple = False
+		self.number_runs = 10
+		
+		
+		if run_multiple:
+			for i in range(1,self.number_runs+1):
+				
+				print('Processesing run {}'.format(i))
+				self.run_number = i
+			
+				self.run_directory = 'run{}/'.format(self.run_number)
+				filename = '{}log.json'.format(self.run_directory)
+			
+				self.import_file(filename)
+				self.create_run_plots()
+		else:
+			self.run_number = 1
+			
+			self.run_directory = 'run{}/'.format(self.run_number)
+			filename = '{}log.json'.format(self.run_directory)
+		
+			self.import_file(filename)
+			self.create_run_plots()
 		
 		
 		
@@ -78,10 +95,23 @@ class plot_generator():
 		gen = self.summary_log_dict['gen']
 		avg_fit = self.summary_log_dict['avg']
 		best_fit = self.summary_log_dict['min']
+
+		print('Preparing plot 1...')
+		fig, ax1 = plt.subplots()
+		line1 = ax1.plot(gen, best_fit, "b-", label="Minimum (Best) Fitness")
+		ax1.set_xlabel("Generation")
+		ax1.set_ylabel("Fitness")
+		line2 = ax1.plot(gen, avg_fit, "r-", label="Average Fitness")
+		lns = line1 + line2
+		labs = [l.get_label() for l in lns]
+		ax1.legend(lns, labs, loc="best")
+		ax1.set_title('Run {} Fitnesses over Generations'.format(self.run_number))
+
+		print('Saving plot 1')
+		fig.savefig('{}/fitness_best_avg_graph.png'.format(self.run_directory), bbox_inches='tight')
 		
 		# Speed Signal of Best Ind
 		print('Preparing plot 2...')
-		plt.rcParams.update({'font.size': 16})
 		details_of_best_ind = self.detailed_log[str(self.hof[0])]
 		self.df = pd.read_json(details_of_best_ind['dataFrame'], orient='columns')
 		self.df = self.df.sort_index()
@@ -91,16 +121,35 @@ class plot_generator():
 		#ax2.legend(['Actual Speed', 'Error', 'Goal Speed'], loc="upper right")
 		ax2.legend(['Actual Speed', 'Goal Speed', 'Error'], bbox_to_anchor=(1.0, 0.8))
 		plt.ylabel('meters / second')
-		ax2.set_title('{} Speed Signal'.format(self.title))
+		ax2.set_title('Run {} Best Individuals Speed Signal'.format(self.run_number))
 		plt.text(0.5, 0.03, 'Fitness: {}'.format(self.best_fitness), horizontalalignment='center', verticalalignment='center', transform=ax2.transAxes)
 		fig2 = ax2.get_figure()
 		plt.margins(x = 0.0, y = 0.1)
 		print('Saving plot 2')
-		
 		fig2.savefig('{}/best_ind_speed_plot.png'.format(self.run_directory), bbox_inches='tight')
-		plt.show()
 		
+		# Just best fitness over generations
+		print('Preparing plot 3...')
+		fig3, ax3 = plt.subplots()
+		line1 = ax3.plot(gen, best_fit, "b-", label="Minimum (Best) Fitness")
+		ax3.set_xlabel("Generation")
+		ax3.set_ylabel("Fitness")
+		lns = line1
+		labs = [l.get_label() for l in lns]
+		ax3.legend(lns, labs, loc="best")
+		ax3.set_title('Run {} Fitnesses over Generations'.format(self.run_number))
+
+		print('Saving plot 3')
+		fig3.savefig('{}/fitness_best_graph.png'.format(self.run_directory), bbox_inches='tight')
 	
+	
+	def print_genealogy_tree(self):
+		graph = networkx.DiGraph(self.history.genealogy_tree)
+		graph = graph.reverse()     # Make the grah top-down
+		print(graph)
+		colors = [self.toolbox.evaluate(self.history.genealogy_history[i])[0] for i in graph]
+		networkx.draw(graph, node_color=colors)
+		plt.show()
 	
 	
 if __name__ == '__main__':
