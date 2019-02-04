@@ -1,3 +1,0 @@
-speed_signals:
-   transition_times: [0, 5, 10, 20, 25, 30]
-   speed_function: [x, 5, -x+15,  
