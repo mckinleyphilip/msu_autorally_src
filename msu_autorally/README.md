@@ -24,6 +24,15 @@ Contains the start_evo_ros.yaml script for starting all of the Evo-ROS instances
 ## File Discriptions ##
 ### EA_environment_details.yml ###
 Detailed description of the required packages for running the DEAP_EA script. These are installed on the MSU desktop machines.
+To activate use:
+
+```source activate front-end```
+
+### enki_environment_details.txt ###
+Detailed description of the required packages for running Enki. These are installed on the MSU desktop machine.
+To activate use:
+
+```source activate enki```
 
 ### gazebo7_install.sh ###
 Script for installing Gazebo 7. Usaged details are included in the installation steps found here: https://github.com/gsimon2/msu_autorally_src/wiki/Software-Installation-Instructions
