@@ -31,7 +31,7 @@ for worker in cfg['worker_list']:
 		source ~/autorally_catkin_ws/devel/setup.sh;
 		source ~/autorally_catkin_ws/src/autorally/autorally_util/setupEnvLocal.sh;
 		cd autorally_catkin_ws/;
-		catkin_make --pkg autorally_control;
+		catkin_make;
 		exec bash
 		"""
 	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
