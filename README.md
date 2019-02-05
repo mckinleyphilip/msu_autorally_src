@@ -6,6 +6,7 @@ This repo is configured to use Git LFS (large file storage) for the following fi
 - .josn
 - .tar.gz
 - .pickle
+
 To install and configure Git LFS please see the following link:
 https://git-lfs.github.com/
 
