@@ -1,14 +1,3 @@
-{
-  "hall_of_fame_fitnesses": [
-    0.006436569497019107
-  ], 
-  "hall_of_fame": [
-    [
-      0.8774613930469316, 
-      -0.17978138251532794, 
-      0.15060590679829122, 
-      2.146772787390095
-    ]
-  ], 
-  "run_number": 5
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:f3a89f34de9526b2733636e1ec00f6138f901bc0e7b767d21d8f28ba92101519
+size 228
