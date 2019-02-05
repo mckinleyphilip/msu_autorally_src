@@ -9,6 +9,7 @@
 import rospy
 import argparse
 import numpy as np
+import pprint
 
 import zmq
 
@@ -63,16 +64,32 @@ class Transporter():
 	
 	def send_result(self, msg):
 		self.results = dict()
-		self.results['Result'] = list()
-		
-		
-		self.results['Genome'] = self.raw_genome
+		self.results['result'] = list()
+		self.results['genome'] = self.raw_genome
+		self.results['metadata'] = self.metadata
+		self.results['enki_genome'] = self.enki_genome
 		for index, result in enumerate(msg.result):
-			self.results['Result'].append((msg.result[index].header, msg.result[index].data))
+			self.results['result'].append((msg.result[index].header, msg.result[index].data))
 		
 		if self.debug:
-			rospy.loginfo('\n\n Transporter Result received')
+			rospy.loginfo('\n\n Transporter Result sent')
+			print('Send Msg Contents:')
+			for key in self.results.keys():
+				print(key)
+				if isinstance(self.results[key], (list,)):
+					for item in self.results[key]:
+						if isinstance(item, (list, )):
+							print('\t{}...'.format(item[0:2]))
+						elif isinstance(item, (tuple, )):
+							print('\t{}...'.format(item[0]))
+						else:
+							print('\t{}'.format(item))
+			
 			#rospy.loginfo(self.results)
+		
+		#pp = pprint.PrettyPrinter(indent=4)
+		#pp.pprint(self.results['result'])
+		
 		
 		self.result_sender.send_json(self.results)
 			
@@ -98,7 +115,7 @@ class Transporter():
 			rospy.logwarn('{} - In state: {}'.format(self.node_name, msg.state))
 			
 		if msg.state == 0:
-			self.recv_genome(self.genome_receiver.recv_json())
+			self.recv_genome(dict(self.genome_receiver.recv_json()))
 			self.set_evo_ros2_state(1)
 		
 		if msg.state == 3:
@@ -106,6 +123,7 @@ class Transporter():
 			self.set_evo_ros2_state(4)
 			
 		if msg.state == 6:
+			
 			self.send_result(msg)
 		
 		if msg.state == 7:
@@ -113,14 +131,53 @@ class Transporter():
 			self.set_evo_ros2_state(0)
 
 	
-	def recv_genome(self, raw_genome):
-		if raw_genome == 'end':
-			rospy.logerr('Transporter: Ending signal has been received from server')
-			rospy.signal_shutdown('Transporter: Received ending signal from server')
-			return
+	def recv_genome(self, msg):		
+		
+		# Parse received message
+		if "genome" in msg:
+			if msg['genome'] == 'end':
+				rospy.logerr('Transporter: Ending signal has been received from server')
+				rospy.signal_shutdown('Transporter: Received ending signal from server')
+				return
+			else:
+				print('Genome received: {}'.format(msg['genome']))
+				self.raw_genome = msg['genome']
+				self.parse_genome(self.raw_genome)
 		else:
-			self.raw_genome = raw_genome
-			self.parse_genome(raw_genome)
+			rospy.logerr('Transporter: Received message did not contain a genome!')
+			self.set_evo_ros2_state(0)
+		
+		
+		# Check if enki is being used as a front-end to manipulate world traits
+		if "enki_genome" in msg:
+			print('Found enki genome!')
+			rospy.set_param('ENKI_INT', True)
+			self.enki_genome = msg['enki_genome']
+			
+			# Check for multiple enki genomes and flatten them
+			if any(isinstance(i, list) for i in msg['enki_genome']):
+				number_genomes = len(msg['enki_genome'])
+				print('number_genomes {}'.format(number_genomes))
+				flat_list = [item for sublist in msg['enki_genome'] for item in sublist]
+				#print(flat_list)
+				rospy.set_param('ENKI_GENOME', flat_list)
+				
+			else:
+				rospy.set_param('ENKI_GENOME', msg['enki_genome'])
+			
+		else:
+			self.enki_genome = ''
+			
+			
+		if "metadata" in msg:
+			print('Found metadata {}'.format(msg['metadata']))
+			self.metadata = msg['metadata']
+		else:
+			self.metadata = ''
+					
+			
+			
+			
 	
 	
 	def parse_genome(self, raw_genome):

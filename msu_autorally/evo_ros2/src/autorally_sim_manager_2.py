@@ -39,7 +39,10 @@ class AutorallySimManagerNode():
 		self.debug = (cmd_args.debug or rospy.get_param('/DEBUG',False))
 		
 		# Get ros params
-		self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
+		if rospy.has_param('ENKI_INT') and rospy.get_param('ENKI_INT') and rospy.has_param('sim_manager/ENKI_MISSION_LAUNCH_FILE'):
+			self.mission_launch_info = rospy.get_param('sim_manager/ENKI_MISSION_LAUNCH_FILE')
+		else:
+			self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
 		self.utility_monitors_launch_info = rospy.get_param('sim_manager/UTILITY_MONITORS_LAUNCH_FILE')
 		self.logging_rate = rospy.get_param('LOGGING_RATE', 10)
 		self.world_properties_service = rospy.get_param('ROS_GAZEBO_WORLD_PROPERTIES_SERVICE')
@@ -68,6 +71,8 @@ class AutorallySimManagerNode():
 		
 		# Set up other member variables
 		self.sim_start_time = 0
+
+
 
 		
 		while not rospy.is_shutdown():
@@ -170,8 +175,8 @@ class AutorallySimManagerNode():
 		for x in range(len(self.log)):
 			msg.result.append(Float64Array())
 		
-		print(self.log)
-		print(self.result_headers)
+		#print(self.log)
+		#print(self.result_headers)
 		
 		for index, log_array in enumerate(self.log):
 			msg.result[index].header = self.result_headers[index]

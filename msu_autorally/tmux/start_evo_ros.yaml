@@ -111,10 +111,10 @@ windows:
         - ssh -X 35.9.28.231
         - roslaunch evo_ros2 evo_ros2.launch
         - exec bash
-    - shell_command:           # pane no. 2
-        - ssh -X 35.9.28.232
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash
+    #- shell_command:           # pane no. 2
+        #- ssh -X 35.9.28.232
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
     - shell_command:           # pane no. 3
         - ssh -X 35.9.28.233
         - roslaunch evo_ros2 evo_ros2.launch
@@ -356,43 +356,43 @@ windows:
         - exec bash 
 
 
-- window_name: robo9
-  layout: tiled
-  shell_command_before:
-    - cd ~/                    # run as a first command in all panes
-  panes:
-    - shell_command:           # pane no. 1
-        - ssh -X 35.9.28.198
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash
-    - shell_command:           # pane no. 2
-        - ssh -X 35.9.28.199
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash
-    - shell_command:           # pane no. 3
-        - ssh -X 35.9.28.200
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash
-    - shell_command:           # pane no. 4
-        - ssh -X 35.9.28.160
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash        
-    - shell_command:           # pane no. 5
-        - ssh -X 35.9.28.218
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash        
-    - shell_command:           # pane no. 6
-        - ssh -X 35.9.28.219
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash      
-    - shell_command:           # pane no. 7
-        - ssh -X 35.9.28.220
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash      
-    - shell_command:           # pane no. 8
-        - ssh -X 35.9.28.239
-        - roslaunch evo_ros2 evo_ros2.launch
-        - exec bash        
+#- window_name: robo9
+  #layout: tiled
+  #shell_command_before:
+    #- cd ~/                    # run as a first command in all panes
+  #panes:
+    #- shell_command:           # pane no. 1
+        #- ssh -X 35.9.28.198
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    #- shell_command:           # pane no. 2
+        #- ssh -X 35.9.28.199
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    #- shell_command:           # pane no. 3
+        #- ssh -X 35.9.28.200
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    #- shell_command:           # pane no. 4
+        #- ssh -X 35.9.28.160
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash        
+    #- shell_command:           # pane no. 5
+        #- ssh -X 35.9.28.218
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash        
+    #- shell_command:           # pane no. 6
+        #- ssh -X 35.9.28.219
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash      
+    #- shell_command:           # pane no. 7
+        #- ssh -X 35.9.28.220
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash      
+    #- shell_command:           # pane no. 8
+        #- ssh -X 35.9.28.239
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash        
         
         
         

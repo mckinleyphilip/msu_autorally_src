@@ -14,7 +14,9 @@ print('Starting update scripts on robo nodes...')
 
 
 work_nodes_file_name = 'all_nodes.yml'
+
 #work_nodes_file_name = 'test_nodes.yml'
+
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -29,9 +31,9 @@ for worker in cfg['worker_list']:
 		source ~/autorally_catkin_ws/devel/setup.sh;
 		source ~/autorally_catkin_ws/src/autorally/autorally_util/setupEnvLocal.sh;
 		cd autorally_catkin_ws/;
-		catkin_make;
+		catkin_make --pkg autorally_control;
 		exec bash
-		""".format(git_branch)
+		"""
 	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
 	os.system(cmd_str)
 

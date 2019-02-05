@@ -23,7 +23,6 @@ from email.mime.text import MIMEText
 
 # For showing DEAP plots
 import matplotlib.pyplot as plt
-import networkx
 
 # For EA running time
 import time
@@ -45,6 +44,11 @@ import threading
 # For copying parts of the run log into the email log
 import copy
 
+import traceback
+
+# For importing enki speed signals
+from import_enki_speed_signals import EnkiSpeedSignalImporter
+
 
 
 class DEAP_EA():
@@ -52,22 +56,33 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		self.experiment_name = "PID-tuning-mutation-only-positive-fitness"
+		#self.experiment_name = "PID-tuning-mutation-only-positive-fitness"
+		self.experiment_name = "Enki-Signals-PID-Evolution"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
 		self.number_generations = 25
 		starting_run_number = 1
-		number_of_runs = 10
+		number_of_runs = 1
 		
 		#Running Params
-		self.timeout = 350 * 1000
+		self.timeout = 500 * 1000
+		
+		
+		# If integrating with Enki
+		self.enki = True
+		if self.enki:
+			enki_importer = EnkiSpeedSignalImporter()
+			filename = "enki_speed_signals/exp2_c1_enki_run_10ms_top5_novel_signals.json"
+			self.enki_genome = enki_importer.import_signals(filename)
+			print('Found enki genome of length: {}'.format(len(self.enki_genome)))
 
 		
 		
 		# Socket Communication Params      
-		#self.ip_addr = '127.0.0.1'
-		self.ip_addr = '35.9.28.201'
+		#self.ip_addr = '127.0.0.1' # Local Host
+		#self.ip_addr = '35.9.28.201' # Robo1 Vm 1
+		self.ip_addr = '35.9.26.204' # MSU SENS Desktop
 		self.send_port = 5023
 		self.recv_port = 5033
 
@@ -109,8 +124,10 @@ class DEAP_EA():
 				
 				self.email_notification(json.dumps(self.email_log, indent=2))
 				print('Email notification sent!')
+		except Exception:
+			traceback.print_exc()
+			print('\n\n')
 		finally:
-
 			self.socket.close()
 			self.receiver.close()
 			self.context.destroy()
@@ -272,7 +289,13 @@ class DEAP_EA():
 		
 		# Send out individuals to be evaluated
 		for ind in individuals:
-			self.socket.send_json(ind)
+			msg = dict()
+			msg['genome'] = ind
+			msg['metadata'] = 'test'
+			if self.enki:
+				msg['enki_genome'] = self.enki_genome
+			
+			self.socket.send_json(msg)
 			
 		#print('All individuals sent')
 		
@@ -291,12 +314,20 @@ class DEAP_EA():
 			else:
 				print('Timeout on receiver socket occured!')
 				non_resolved_ind = fitnesses.index(float('Inf'))
-				self.socket.send_json(individuals[non_resolved_ind])
+				print('\n\n{}\n\n'.format(individuals[non_resolved_ind]))
+				msg = dict()
+				msg['genome'] = individuals[non_resolved_ind]
+				msg['metadata'] = 'test'
+				if self.enki:
+					msg['enki_genome'] = self.enki_genome
+			
+				self.socket.send_json(msg)
+				#self.socket.send_json(individuals[non_resolved_ind])
 				continue
 			
 			
-			ind = list(return_data['Genome'])
-			result = dict(return_data['Result'])
+			ind = list(return_data['genome'])
+			result = dict(return_data['result'])
 			fitness = self.evaluate_result(ind, result)
 			
 			# Write the fitness into the spot in fitnesses corresponding to the position of the individual
@@ -509,13 +540,7 @@ class DEAP_EA():
 		
 	
 	
-	def print_genealogy_tree(self):
-		graph = networkx.DiGraph(self.history.genealogy_tree)
-		graph = graph.reverse()     # Make the grah top-down
-		print(graph)
-		colors = [self.toolbox.evaluate(self.history.genealogy_history[i])[0] for i in graph]
-		networkx.draw(graph, node_color=colors)
-		plt.show()
+
 
 if __name__ == '__main__':
 	# Parse arguments

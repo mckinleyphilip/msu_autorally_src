@@ -17,7 +17,8 @@ work_nodes_file_name = 'all_nodes.yml'
 #work_nodes_file_name = 'update_nodes.yml'
 
 #git_branch = "nav_stack_tuning"
-git_branch = "PID_evol_experiment"
+#git_branch = "PID_evol_experiment"
+git_branch = "enki_support"
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -33,7 +34,9 @@ for worker in cfg['worker_list']:
 	
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
 		cd autorally_catkin_ws/src/;
-		git checkout {};
+		git checkout origin/enki_support;
+		git checkout -b {};
+		git branch --set-upstream-to=origin/enki_support enki_support;
 		git log -1;
 		exec bash
 		""".format(git_branch)
