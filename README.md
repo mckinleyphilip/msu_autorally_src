@@ -3,7 +3,7 @@
 This repo contains the extension work performed by Michigan State University on AutoRally platform, which was originally developed by Georgia Tech. The main focus of this repo is the improvement of control software on the AutoRally platform by integrating the ROS Navigation Stack (contained in msu_autorally/msu_autorally_helper) and providing Evo-ROS a framework developed to allow evolutionary algorithms be ran utilizing ROS and Gazebo as an evaluation environment (contained in msu_autorally/evo_ros2).
 
 This repo is configured to use Git LFS (large file storage) for the following file types:
-- .josn
+- .json
 - .tar.gz
 - .pickle
 
