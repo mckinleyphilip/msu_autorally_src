@@ -7,12 +7,15 @@ Wiki: https://github.com/gsimon2/msu_autorally_src/wiki
 
 ## Tmux Commands ##
 To start the Evo-ROS instances on the VMs use the following command:
+
 ```tmuxp load start_evo_ros.yaml```
 
 To kill the session once finished detach the tmux session (ctrl-b then d) and use the following command:
+
 ```tmux kill-session -t evo-ros-workers```
 
 Ensure that no sessions are running with:
+
 ```tmux ls```
 
 A Tmux cheatsheet can be found here:
