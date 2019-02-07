@@ -8,6 +8,7 @@ catkin_package()
 install(PROGRAMS
   nodes/autorally_controller.py
   nodes/ground_truth_republisher.py
+  nodes/autorally_controller_reverse.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch/

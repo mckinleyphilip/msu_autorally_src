@@ -1,6 +1,6 @@
 session_name: tiles 
 windows:
-- window_name: robo10
+- window_name: robo10_1
   layout: tiled
   shell_command_before:
     - pwd
@@ -13,5 +13,20 @@ windows:
       - ssh -X jared@35.9.28.219
     - shell_command:
       - ssh -X jared@35.9.28.220
+  options_after:
+    synchronize-panes: on
+- window_name: robo10_2
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.198
+    - shell_command:
+      - ssh -X jared@35.9.28.199
+    - shell_command:
+      - ssh -X jared@35.9.28.200
+    - shell_command:
+      - ssh -X jared@35.9.28.160
   options_after:
     synchronize-panes: on

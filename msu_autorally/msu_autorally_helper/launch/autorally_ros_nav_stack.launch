@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <launch>
-	
-	<!-- <arg name="map_file" default="$(find msu_autorally_helper)/maps/base_oval_track_map_clean.yaml"/> -->
-	<arg name="map_file" default="$(find msu_autorally_helper)/maps/blank_map.yaml"/>
-	
-	
+
+	<arg name="map_file" default="$(find msu_autorally_helper)/maps/base_oval_track_map_clean.yaml"/>
+	<!-- <arg name="map_file" default="$(find msu_autorally_helper)/maps/blank_map.yaml"/> -->
+
+
 	<!-- Start the Base Controller Nodelet -->
 	<include file="$(find msu_autorally_helper)/launch/base_controller_nodelet.launch" />
-	
+
 	<!-- Possible Mapping launch files -->
 	<!-- <include file="$(find msu_autorally_helper)/launch/msu_gmapping.launch"/> -->
 	<!-- <include file="$(find msu_autorally_helper)/launch/msu_hector_mapping.launch"/> -->
-	
+
 	<!-- AMCL localization node -->
 	<node name="autorally_amcl_node" pkg="amcl" type="amcl">
 		<remap from="scan" to="lidar_front"/>
@@ -19,8 +19,8 @@
 		<param name="initial_pose_y" value="-25"/>
 		<param name="initial_pose_a" value="0.75"/>
 	</node>
-	
-	
+
+
 	<!-- Move_base node -->
 	<node name="autorally_move_base" pkg="move_base" type="move_base">
 		<remap from="scan" to="lidar_front"/>
@@ -31,14 +31,14 @@
 		<!-- <rosparam file="$(find msu_autorally_helper)/config/base_local_planner_params.yaml" command="load" />--> <!-- Base local planner config -->
 		<rosparam file="$(find msu_autorally_helper)/config/teb_local_planner_params.yaml" command="load" /> <!-- teb local planner config -->
 		<rosparam file="$(find msu_autorally_helper)/config/move_base_params.yaml" command="load" />
-		<param name="base_local_planner" value="TebLocalPlannerROS" /> <!-- TrajectoryPlannerROS   TebLocalPlannerROS -->
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /> <!-- TrajectoryPlannerROS   TebLocalPlannerROS -->
 	</node>
-	
-	
+
+
 	<!-- Run the map server -->
 	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
-	
-	
 
-	
+
+
+
 </launch>

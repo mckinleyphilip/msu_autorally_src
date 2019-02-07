@@ -39,6 +39,8 @@ add_subdirectory(src/ConstantSpeedController)
 add_subdirectory(src/joystick)
 add_subdirectory(src/gpsWaypoint)
 add_subdirectory(src/path_integral)
+add_subdirectory(src/tele_op_nodelet)
+add_subdirectory(src/base_controller_nodelet)
 
 install(DIRECTORY launch/
    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch

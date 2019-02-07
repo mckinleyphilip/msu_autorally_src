@@ -5,15 +5,15 @@
 	<arg name="namespace" default="autorally_platform"/>
 	<arg name="world_name" default="model://urdf/ramp_world.world"/>
 	<arg name="cmd_timeout" default="0.5"/>
-	<arg name="gui" default="false"/>
+	<arg name="gui" default="true"/>
 	<arg name="spawn_track" default="false"/>
-	
+
 	  <!-- Remap to same topics as the actual robot -->
 	<remap from="/$(arg namespace)/imu" to="/imu/imu" />
 	<remap from="/$(arg namespace)/gpsRoverStatus" to="/gpsRoverStatus" />
 	<remap from="/$(arg namespace)/camera/left" to="/left_camera" />
 	<remap from="/$(arg namespace)/camera/right" to="/right_camera" />
-	
+
 	<group ns="$(arg namespace)">
 		<!-- Create the world. -->
 		<include file="$(find autorally_gazebo)/launch/autoRallyTrackWorld_scaled.launch">
@@ -23,7 +23,7 @@
 			<arg name="spawn_track" value="$(arg spawn_track)"/>
 		</include>
 	</group>
-	
+
 	<!-- Empty required node. Kill this and ROS will clean up all nodes spawned as a result of this whole launch file -->
 	<!-- <node name = "gazebo_empty_required_node" pkg="msu_autorally_helper" type="empty_node.py" required="true"/> -->
 </launch>
