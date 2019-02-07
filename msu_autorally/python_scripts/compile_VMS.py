@@ -40,7 +40,7 @@ for worker in cfg['worker_list']:
 print('Script finished! \n')
 
 print('Press enter to close all xterm windows and close this script...')
-_ = raw_input()
+raw_input()
 cmd_str = "pkill xterm"
 os.system(cmd_str)
 

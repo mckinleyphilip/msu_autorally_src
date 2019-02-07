@@ -3,6 +3,7 @@ import subprocess
 import os
 import yaml
 import re
+import sys
 
 parser = argparse.ArgumentParser(description='Script used for updating the ros_catkin_ws code on all of the robo VMs from the github repo')
 #parser.add_argument('-r', '--remote', action='store_true', help='Use when not on MSU Engineering network. SSH\'s into arctic server before going to robo servers')
@@ -46,6 +47,6 @@ for worker in cfg['worker_list']:
 print('Script finished! \n')
 
 print('Press enter to close all xterm windows and close this script...')
-_ = raw_input()
+var = raw_input("...")
 cmd_str = "pkill xterm"
 os.system(cmd_str)

@@ -18,7 +18,8 @@ work_nodes_file_name = 'all_nodes.yml'
 
 #git_branch = "nav_stack_tuning"
 #git_branch = "PID_evol_experiment"
-git_branch = "enki_support"
+#git_branch = "enki_support"
+git_branch = "master"
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -34,9 +35,7 @@ for worker in cfg['worker_list']:
 	
 	cmds = """echo 'Forcing all ros_catkin_ws/src code to match Github';
 		cd autorally_catkin_ws/src/;
-		git checkout origin/enki_support;
-		git checkout -b {};
-		git branch --set-upstream-to=origin/enki_support enki_support;
+		git checkout {};
 		git log -1;
 		exec bash
 		""".format(git_branch)
@@ -46,6 +45,6 @@ for worker in cfg['worker_list']:
 print('Script finished! \n')
 
 print('Press enter to close all xterm windows and close this script...')
-_ = raw_input()
+raw_input()
 cmd_str = "pkill xterm"
 os.system(cmd_str)
