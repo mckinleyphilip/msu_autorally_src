@@ -2,7 +2,7 @@
 #
 # Autorally Sim Manager Node
 #
-#	
+#	This Evo-ROS simulation manager is used for the AutoRally throttle PID tuning experiments.
 #
 # GAS 2018-08-21
 
@@ -43,6 +43,7 @@ class AutorallySimManagerNode():
 			self.mission_launch_info = rospy.get_param('sim_manager/ENKI_MISSION_LAUNCH_FILE')
 		else:
 			self.mission_launch_info = rospy.get_param('sim_manager/MISSION_LAUNCH_FILE')
+			
 		self.utility_monitors_launch_info = rospy.get_param('sim_manager/UTILITY_MONITORS_LAUNCH_FILE')
 		self.logging_rate = rospy.get_param('LOGGING_RATE', 10)
 		self.world_properties_service = rospy.get_param('ROS_GAZEBO_WORLD_PROPERTIES_SERVICE')
@@ -71,9 +72,6 @@ class AutorallySimManagerNode():
 		
 		# Set up other member variables
 		self.sim_start_time = 0
-
-
-
 		
 		while not rospy.is_shutdown():
 			
@@ -88,6 +86,9 @@ class AutorallySimManagerNode():
 			if self.debug:
 				rospy.logwarn('{} - in main thread and state {}'.format(self.node_name, state))
 			
+			if state == 2:
+				self.set_evo_ros2_state(3)
+				
 			if state == 4:
 				# start sim
 				self.start_sim()
@@ -205,7 +206,8 @@ class AutorallySimManagerNode():
 			rospy.logwarn('{} - In state: {}'.format(self.node_name, msg.state))
 			
 		if msg.state == 2:
-			self.set_evo_ros2_state(3)
+			self.event.set()
+			#self.set_evo_ros2_state(3)
 			
 		if msg.state == 4:
 			self.event.set()

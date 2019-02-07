@@ -47,13 +47,14 @@ class SpeedSignalPublisherNode():
 			self.speed_pub.publish(self.enki_speed_signal_function(time_step))
 			self.sleep_rate.sleep()
 			
-	# Publishes elements from the enki genome as the speed setting for every milisecond
+	# Publishes elements from the enki genome as the speed setting for every tenth of a second
 	def enki_speed_signal_function(self, time_step):
 		current_time = 0
 		while current_time == 0:
 			current_time = rospy.get_time()
 		time = (current_time - self.start_time)
 		
+		# Convert current time to the correspond index
 		rounding_pos = int(math.log10(1/time_step))
 		index = int(round(time, rounding_pos) * (1/time_step))
 		

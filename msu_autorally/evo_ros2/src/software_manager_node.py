@@ -2,7 +2,8 @@
 #
 # Software Manager Node
 #
-#	Base ROS node
+#	The Evo-ROS2 software manager is responsible for starting the simulation environment, spawning the specified platform, and launching the simulation manager.
+#	
 #
 # GAS 2018-08-20
 
@@ -71,13 +72,12 @@ class SoftwareManagerNode():
 			
 			if state == 1:
 				self.start_sim_env()
-				
 				self.set_evo_ros2_state(2)
 				continue
 			
 			if state == 2:
 				self.start_sim_manager()
-				# Software manager will set new state when ready
+				# Simulation manager will set new state when ready
 				continue
 				
 			if state == 6:
@@ -108,18 +108,12 @@ class SoftwareManagerNode():
 		
 		if msg.state == 1:
 			self.event.set()
-			#self.start_sim_env()
-			#self.set_evo_ros2_state(2)
 		
 		if msg.state == 2:
 			self.event.set()
-			#self.start_sim_manager()
-			# Software manager will set new state when ready
 			
 		if msg.state == 6:
 			self.event.set()
-			#self.hard_reset()
-			#self.set_evo_ros2_state(7)
 			
 		
 	

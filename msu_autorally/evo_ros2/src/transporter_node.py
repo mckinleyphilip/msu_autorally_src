@@ -2,7 +2,20 @@
 #
 # Evo-ROS2 Transporter
 #
-#	Base ROS node
+#	The Evo-ROS2 transporter is responsible for interfacing with any front-ends used with Evo-ROS.
+#	It accepts a msg of the following format
+#		msg:
+#			genome: -Required
+#			enki_genome: -Optional
+#			metadata:	-Optional
+#
+#	It sends a msg of the following format
+#		msg:
+#			result:
+#			genome:
+#			metadata:
+#			enki_genome:
+#			
 #
 # GAS 2018-08-15
 
@@ -13,10 +26,12 @@ import pprint
 
 import zmq
 
+
 from evo_ros2.msg import EvoROS2State
 
 class Transporter():
 	def __init__(self, cmd_args):
+		#import pdb; pdb.set_trace()
 		
 		# Init Node
 		self.node_name = 'transporter_node'
@@ -61,48 +76,21 @@ class Transporter():
 
 		rospy.spin()
 		
-	
-	def send_result(self, msg):
-		self.results = dict()
-		self.results['result'] = list()
-		self.results['genome'] = self.raw_genome
-		self.results['metadata'] = self.metadata
-		self.results['enki_genome'] = self.enki_genome
-		for index, result in enumerate(msg.result):
-			self.results['result'].append((msg.result[index].header, msg.result[index].data))
-		
-		if self.debug:
-			rospy.loginfo('\n\n Transporter Result sent')
-			print('Send Msg Contents:')
-			for key in self.results.keys():
-				print(key)
-				if isinstance(self.results[key], (list,)):
-					for item in self.results[key]:
-						if isinstance(item, (list, )):
-							print('\t{}...'.format(item[0:2]))
-						elif isinstance(item, (tuple, )):
-							print('\t{}...'.format(item[0]))
-						else:
-							print('\t{}'.format(item))
-			
-			#rospy.loginfo(self.results)
-		
-		#pp = pprint.PrettyPrinter(indent=4)
-		#pp.pprint(self.results['result'])
-		
-		
-		self.result_sender.send_json(self.results)
-			
-		
 		
 			
 	def set_up_evo_ros2_communications(self):
+		"""
+			Set up Evo-ROS internal communication topics
+		"""
 		self.evo_ros2_comm_topic = rospy.get_param('EVO_ROS_COMM_TOPIC')
 		self.evo_ros2_comm_pub = rospy.Publisher(self.evo_ros2_comm_topic, EvoROS2State, queue_size=10, latch = True)
 		self.evo_ros2_comm_sub = rospy.Subscriber(self.evo_ros2_comm_topic, EvoROS2State, self.on_evo_ros2_state_change)
 	
 	
 	def set_evo_ros2_state(self, new_state_value):
+		"""
+			Evo-ROS state change procedure
+		"""
 		rospy.set_param('evo_ros2_state', new_state_value)
 		msg = EvoROS2State()
 		msg.sender = self.node_name
@@ -111,6 +99,9 @@ class Transporter():
 		
 	
 	def on_evo_ros2_state_change(self, msg):
+		"""
+			Defines the actions taking by this node during each state that Evo-ROS is in
+		"""
 		if self.debug:
 			rospy.logwarn('{} - In state: {}'.format(self.node_name, msg.state))
 			
@@ -123,7 +114,6 @@ class Transporter():
 			self.set_evo_ros2_state(4)
 			
 		if msg.state == 6:
-			
 			self.send_result(msg)
 		
 		if msg.state == 7:
@@ -131,7 +121,11 @@ class Transporter():
 			self.set_evo_ros2_state(0)
 
 	
-	def recv_genome(self, msg):		
+	def recv_genome(self, msg):	
+		"""
+			Receive a genome message from the front-end and parse it
+			The message must have a 'genome' tag. It can optionally have 'metadata' and 'enki_genome'
+		"""	
 		
 		# Parse received message
 		if "genome" in msg:
@@ -168,19 +162,17 @@ class Transporter():
 		else:
 			self.enki_genome = ''
 			
-			
 		if "metadata" in msg:
 			print('Found metadata {}'.format(msg['metadata']))
 			self.metadata = msg['metadata']
 		else:
 			self.metadata = ''
 					
-			
-			
-			
-	
-	
+					
 	def parse_genome(self, raw_genome):
+		"""
+			Parse the received genome according to the genome mapping file
+		"""
 		for index, element in enumerate(self.genome_mapping):
 			self.current_genome[element] = raw_genome[index]
 		
@@ -188,12 +180,46 @@ class Transporter():
 			rospy.loginfo(self.current_genome)
 			
 	def write_genome_to_ros_params(self):
+		"""
+			Write all elements of the parsed genome to the ROS parameter served with parameter names specifed by the genome mapping file
+		"""
+		
 		for element in self.current_genome:
 			#if not rospy.has_param(element):
 			rospy.set_param(element, self.current_genome[element])
-			
+	
+	def send_result(self, msg):
+		"""
+			Construct the result simulation message and send it back to the front end.
+			If debugging is on, we can preview the message before it is sent.
+		"""
+		self.results = dict()
+		self.results['result'] = list()
+		self.results['genome'] = self.raw_genome
+		self.results['metadata'] = self.metadata
+		self.results['enki_genome'] = self.enki_genome
+		for index, result in enumerate(msg.result):
+			self.results['result'].append((msg.result[index].header, msg.result[index].data))
+		
+		if self.debug:
+			rospy.loginfo('\n\n Transporter Result sent')
+			print('Send Msg Contents:')
+			for key in self.results.keys():
+				print(key)
+				if isinstance(self.results[key], (list,)):
+					for item in self.results[key]:
+						if isinstance(item, (list, )):
+							print('\t{}...'.format(item[0:2]))
+						elif isinstance(item, (tuple, )):
+							print('\t{}...'.format(item[0]))
+						else:
+							print('\t{}'.format(item))
+		self.result_sender.send_json(self.results)
 		
 	def on_shutdown(self):
+		"""
+			Close sockets and destory ZMQ context before killing this node
+		"""
 		self.result_sender.close()
 		self.genome_receiver.close()
 		self.context.destroy()

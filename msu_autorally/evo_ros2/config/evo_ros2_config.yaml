@@ -3,8 +3,8 @@
 
 # Common Params
 #SERVER_IP_ADDR: '35.9.28.201'
-#SERVER_IP_ADDR: '127.0.0.1'
-SERVER_IP_ADDR: '35.9.26.204'
+SERVER_IP_ADDR: '127.0.0.1'
+#SERVER_IP_ADDR: '35.9.26.204'
 GENOME_PORT: 5023
 RESULT_PORT: 5033
 DEBUG: True
@@ -32,4 +32,3 @@ sim_manager:
    MISSION_LAUNCH_FILE: ['msu_autorally_helper','speed_signal_publisher.launch']
    ENKI_MISSION_LAUNCH_FILE: ['msu_autorally_helper','enki_speed_signal_publisher.launch']
    UTILITY_MONITORS_LAUNCH_FILE: ['evo_ros2','utility_monitors.launch']
-   MAX_SIM_TIME: 540 # simulation seconds a simulation is allowed to run before ending 

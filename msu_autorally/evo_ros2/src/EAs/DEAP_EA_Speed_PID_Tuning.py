@@ -56,8 +56,8 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 		
 		# EA Params
-		#self.experiment_name = "PID-tuning-mutation-only-positive-fitness"
-		self.experiment_name = "Enki-Signals-PID-Evolution"
+		self.experiment_name = "test"
+		#self.experiment_name = "Enki-Signals-PID-Evolution"
 		self.genome_size = 4
 		self.tourn_size = 2
 		self.pop_size = 25
@@ -65,8 +65,8 @@ class DEAP_EA():
 		starting_run_number = 1
 		number_of_runs = 1
 		
-		#Running Params
-		self.timeout = 500 * 1000
+		#Running Params 
+		self.timeout = 500 * 1000 #ms
 		
 		
 		# If integrating with Enki
@@ -80,9 +80,9 @@ class DEAP_EA():
 		
 		
 		# Socket Communication Params      
-		#self.ip_addr = '127.0.0.1' # Local Host
+		self.ip_addr = '127.0.0.1' # Local Host
 		#self.ip_addr = '35.9.28.201' # Robo1 Vm 1
-		self.ip_addr = '35.9.26.204' # MSU SENS Desktop
+		#self.ip_addr = '35.9.26.204' # MSU SENS Desktop
 		self.send_port = 5023
 		self.recv_port = 5033
 
@@ -161,10 +161,6 @@ class DEAP_EA():
 
 		# Evaluate the individuals with an invalid fitness
 		invalid_ind = [ind for ind in population if not ind.fitness.valid]
-		
-		
-		
-		#fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
 		fitnesses = self.custom_eval_fit_mapping(invalid_ind)
 		
 		
