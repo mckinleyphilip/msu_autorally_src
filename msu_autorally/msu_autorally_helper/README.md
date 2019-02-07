@@ -25,8 +25,7 @@ The maps directory contain several occupancy maps that are supplied to the ROS N
 ### src directory ###
 The src directory contains any of the source code for the msu_autorally_helper package.
 
-#### Directory breakdown ####
-Markup: 
+#### Directory breakdown #### 
 * controllers
 	* enki_speed_signal_publisher.py
 		* This is used by Evo-ROS for the AutoRally throttle PID experiments to turn the provided Enki Genome into a Goal Speed Reference Signal.
