@@ -6,6 +6,10 @@ windows:
   shell_command_before:
     - cd ~/                    # run as a first command in all panes
   panes:
+    - shell_command:           # pane no. 0
+        - ssh -X 35.9.28.201
+
+        - exec bash
     - shell_command:           # pane no. 1
         - ssh -X 35.9.28.202
 
