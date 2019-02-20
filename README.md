@@ -15,7 +15,7 @@ Please see the msu_autorally_src wiki, link below, for more detailed installatio
 Wiki: https://github.com/gsimon2/msu_autorally_src/wiki
 
 
-## Directory Discriptions ##
+## Directory Descriptions ##
 ### autorally directory ###
 The autorally directory was cloned from:https://github.com/AutoRally/autorally and modified slightly to suit the needs of the MSU research efforts. An exact list of changed files can be found https://github.com/gsimon2/msu_autorally_src/blob/master/autorally/msu_change_list.txt
 For more details about the AutoRally platform please read the Readme contained in that directory.
@@ -27,7 +27,7 @@ The imu_3dm_gx4 directory was cloned from:https://github.com/AutoRally/imu_3dm_g
 A few helpful diagrams can be found in the diagrams directory. These are generally used by various wiki pages.
 
 ### hector_gazebo directory ###
-This is the source for the hector_gazebo sensors package. Installing via pip or apt-get can often causes errors, so the source is included in this repo so that these packages can be easily installed using catkin_make.
+This is the source for the hector_gazebo sensors package. Installing via pip or apt-get often causes errors, so the source is included in this repo so that these packages can be easily installed using catkin_make.
 
 ### msu_autorally directory ###
 The msu_autorally directory contains the source code for Evo-ROS2 and much of the work to integrate the ROS Navigation Stack with the AutoRally platform.
