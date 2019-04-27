@@ -6,7 +6,7 @@ Please see the msu_autorally_src wiki, link below, for more detailed installatio
 Wiki: https://github.com/gsimon2/msu_autorally_src/wiki
 
 
-## Directory Discriptions ##
+## Directory Descriptions ##
 ### evo_ros2 directory ###
 Source code for Evo-ROS2. Includes various EA source codes and experiment logs/results.
 
@@ -21,7 +21,7 @@ A set of python scripts for managing the robonodes.
 Contains the start_evo_ros.yaml script for starting all of the Evo-ROS instances on the robonodes when using tmuxp.
 
 
-## File Discriptions ##
+## File Descriptions ##
 ### EA_environment_details.yml ###
 Detailed description of the required packages for running the DEAP_EA script. These are installed on the MSU desktop machines.
 To activate use:
