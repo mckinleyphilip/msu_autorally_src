@@ -1,0 +1,60 @@
+session_name: tiles 
+windows:
+- window_name: robo9_1
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.10
+    - shell_command:
+      - ssh -X jared@35.9.28.11
+    - shell_command:
+      - ssh -X jared@35.9.28.12
+    - shell_command:
+      - ssh -X jared@35.9.28.13
+  options_after:
+    synchronize-panes: on
+- window_name: robo9_2
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.14
+    - shell_command:
+      - ssh -X jared@35.9.28.15
+    - shell_command:
+      - ssh -X jared@35.9.28.21
+    - shell_command:
+      - ssh -X jared@35.9.28.22
+  options_after:
+    synchronize-panes: on
+- window_name: robo9_3
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.23
+    - shell_command:
+      - ssh -X jared@35.9.28.24
+    - shell_command:
+      - ssh -X jared@35.9.28.25
+    - shell_command:
+      - ssh -X jared@35.9.28.26
+  options_after:
+    synchronize-panes: on
+- window_name: robo9_4
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.27
+    - shell_command:
+      - ssh -X jared@35.9.28.28
+    - shell_command:
+      - ssh -X jared@35.9.28.29
+  options_after:
+    synchronize-panes: on
