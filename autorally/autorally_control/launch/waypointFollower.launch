@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find autorally_core)/launch/hardware.machine" />
   
-  <arg name="waypoint_file" default="$(find autorally_control)/launch/waypoints_scaled"/>
+  <arg name="waypoint_file" default="$(find autorally_control)/launch/waypoints"/>
 
   <node name="waypointFollower" pkg="autorally_control" type="gpsWaypoint" output="screen" machine="autorally-master">
     <param name="WaypointFile" value="$(arg waypoint_file)"/>
