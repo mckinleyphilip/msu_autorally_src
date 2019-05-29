@@ -9,3 +9,5 @@
 'joystick': 5
 'OCS': 6
 'RC': 7
+# extra priorities added for mkz to autorally conversion
+'autorallyTwistController': 8
