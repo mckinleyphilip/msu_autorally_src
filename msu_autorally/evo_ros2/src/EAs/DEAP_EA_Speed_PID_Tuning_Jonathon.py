@@ -120,8 +120,8 @@ class DEAP_EA():
 				print('Run log created.')
 				self.write_run_log()
 				print('Log saved!')
-				#self.create_run_plots()
-				#print('Plots saved!')
+				self.create_run_plots()
+				print('Plots saved!')
 				
 				self.email_notification(json.dumps(self.email_log, indent=2))
 				print('Email notification sent!')
