@@ -55,7 +55,7 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 
 		# EA Params
-		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon"
+		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon/may-30_pop50"
 		#self.experiment_name = "Enki-Signals-PID-Evolution"
 		self.genome_size = 4
 		self.tourn_size = 2
