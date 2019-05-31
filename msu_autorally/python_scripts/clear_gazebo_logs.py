@@ -15,7 +15,8 @@ print('Starting cleaning scripts on robo nodes...')
 
 
 #work_nodes_file_name = 'active_nodes.yml'
-work_nodes_file_name = 'all_nodes.yml'
+#work_nodes_file_name = 'all_nodes.yml'
+work_nodes_file_name = 'robo9_robo10_nodes.yml'
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -30,7 +31,7 @@ for worker in cfg['worker_list']:
 		df -h;
 		exec bash
 		"""
-	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
+	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X jared@{} "{}"&'.format(worker,ip,cmds)
 	os.system(cmd_str)
 
 print('Script finished! \n')
