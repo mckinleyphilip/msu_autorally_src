@@ -55,7 +55,7 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 
 		# EA Params
-		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon/may-30_pop50"
+		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon/may-31_pop50"
 		#self.experiment_name = "Enki-Signals-PID-Evolution"
 		self.genome_size = 4
 		self.tourn_size = 2
@@ -370,7 +370,7 @@ class DEAP_EA():
 	def set_up_EA(self):
 		creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 		creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-		creator.create("Individual", list, fitness=creator.FitnessMax)
+		creator.create("Individual", list, fitness=creator.FitnessMin)
 
 		self.toolbox = base.Toolbox()
 		self.toolbox.register("attr_float", random.random)
