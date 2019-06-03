@@ -31,6 +31,7 @@ for worker in cfg['worker_list']:
 	#print(str(ip))
 	cmds = """echo 'Cleaning gazebo logs from vms';
 		rm -rf ~/.gazebo/log/*;
+                source ~/.bashrc;
 		rosclean purge;
 		df -h;
 		exec bash
