@@ -1,0 +1,404 @@
+session_name: tmux-session
+windows:
+
+- window_name: robo1
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 0
+        - ssh -X 35.9.28.201
+
+        - exec bash
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.202
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.203
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.204
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.205
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.206
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.207
+
+        - exec bash           
+        
+        
+- window_name: robo2
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.211
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.212
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.213
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.214
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.215
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.216
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.217
+
+        - exec bash               
+
+
+- window_name: robo3
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.221
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.222
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.223
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.224
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.225
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.226
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.227
+
+        - exec bash    
+        
+        
+- window_name: robo4
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.231
+
+        - exec bash
+    #- shell_command:           # pane no. 2
+        #- ssh -X 35.9.28.232
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.233
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.234
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.235
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.236
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.237
+
+        - exec bash         
+        
+        
+- window_name: robo5
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.208
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.209
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.210
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.228
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.229
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.230
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.238
+
+        - exec bash            
+        
+        
+- window_name: robo6
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.161
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.162
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.163
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.164
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.165
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.166
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.167
+
+        - exec bash            
+        
+  
+  
+- window_name: robo7
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.168
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.169
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.170
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.171
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.172
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.173
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.174
+
+        - exec bash      
+  
+  
+- window_name: robo7-5
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.175
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.176
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.177
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.178
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.179
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.180
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.181
+
+        - exec bash      
+    - shell_command:           # pane no. 8
+        - ssh -X 35.9.28.182
+
+        - exec bash    
+  
+
+- window_name: robo8
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.183
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.184
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.185
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.186
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.187
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.188
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.189
+
+        - exec bash      
+  
+        
+- window_name: robo8-5
+  layout: tiled
+  shell_command_before:
+    - cd ~/                    # run as a first command in all panes
+  panes:
+    - shell_command:           # pane no. 1
+        - ssh -X 35.9.28.190
+
+        - exec bash
+    - shell_command:           # pane no. 2
+        - ssh -X 35.9.28.191
+
+        - exec bash
+    - shell_command:           # pane no. 3
+        - ssh -X 35.9.28.192
+
+        - exec bash
+    - shell_command:           # pane no. 4
+        - ssh -X 35.9.28.193
+
+        - exec bash        
+    - shell_command:           # pane no. 5
+        - ssh -X 35.9.28.194
+
+        - exec bash        
+    - shell_command:           # pane no. 6
+        - ssh -X 35.9.28.195
+
+        - exec bash      
+    - shell_command:           # pane no. 7
+        - ssh -X 35.9.28.196
+
+        - exec bash      
+    - shell_command:           # pane no. 8
+        - ssh -X 35.9.28.197
+
+        - exec bash 
+
+
+#- window_name: robo9
+  #layout: tiled
+  #shell_command_before:
+    #- cd ~/                    # run as a first command in all panes
+  #panes:
+    #- shell_command:           # pane no. 1
+        #- ssh -X 35.9.28.198
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    #- shell_command:           # pane no. 2
+        #- ssh -X 35.9.28.199
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    #- shell_command:           # pane no. 3
+        #- ssh -X 35.9.28.200
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash
+    #- shell_command:           # pane no. 4
+        #- ssh -X 35.9.28.160
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash        
+    #- shell_command:           # pane no. 5
+        #- ssh -X 35.9.28.218
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash        
+    #- shell_command:           # pane no. 6
+        #- ssh -X 35.9.28.219
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash      
+    #- shell_command:           # pane no. 7
+        #- ssh -X 35.9.28.220
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash      
+    #- shell_command:           # pane no. 8
+        #- ssh -X 35.9.28.239
+        #- roslaunch evo_ros2 evo_ros2.launch
+        #- exec bash        
+        
+        
+        
+        
+        
