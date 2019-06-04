@@ -55,14 +55,14 @@ class DEAP_EA():
 		self.debug = cmd_args.debug
 
 		# EA Params
-		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon/june_3_pop25"
+		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon/june_4_pop50--twopt"
 		#self.experiment_name = "Enki-Signals-PID-Evolution"
 		self.genome_size = 4
 		self.tourn_size = 2
-		self.pop_size = 25
+		self.pop_size = 50
 		self.number_generations = 25
 		starting_run_number = 1
-		number_of_runs = 5
+		number_of_runs = 1
 
 		#Running Params
 		self.timeout = 500 * 1000 #ms
@@ -379,7 +379,7 @@ class DEAP_EA():
 		self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
 		# Set up Evo Algo operators
-		self.toolbox.register("mate", tools.cxOnePoint)
+		self.toolbox.register("mate", tools.cxTwoPoint)
 		self.toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 		self.toolbox.register("select", tools.selTournament, tournsize=self.tourn_size)
 		self.toolbox.register("evaluate", self.evaluate_ind)
