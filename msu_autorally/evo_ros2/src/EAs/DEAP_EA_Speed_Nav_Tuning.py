@@ -57,20 +57,21 @@ class DEAP_EA():
 		self.number_generations = 25
 		
 		
-		starting_run_number = 2
-		number_of_runs = 10
+		starting_run_number = 1#2
+		number_of_runs = 1#10
 		
 		#Running Params
 		self.timeout = 500 * 1000
 
 		# Socket Communication Params      
 		#self.ip_addr = '127.0.0.1'
-		self.ip_addr = '35.9.28.201'
+                self.ip_addr = '35.9.128.222'
+		#self.ip_addr = '35.9.28.201'
 		self.send_port = 5023
 		self.recv_port = 5033
 
 		# Email Notification Params
-		self.email_receiver_list = ['glen.a.simon@gmail.com']
+		self.email_receiver_list = ['fleckjo1@msu.edu'] #['glen.a.simon@gmail.com']
 		
 		# Multi-threading Params
 		self.lock = threading.Lock()
