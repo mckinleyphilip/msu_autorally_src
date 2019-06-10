@@ -75,7 +75,7 @@ namespace autorally_core
 {
 
   StateEstimator::StateEstimator() :
-    Diagnostics("StateEstimator", "", ""),
+    Diagnostics("StateEstimator", "none", ""),
     nh_("~"),
     lastImuT_(0.0),
     lastImuTgps_(0.0),
@@ -124,7 +124,7 @@ namespace autorally_core
     bool fixedInitialPose;
     double initialRoll, intialPitch, initialYaw;
 
-    nh_.param<bool>("FixedInitialPose", fixedInitialPose, true);
+    nh_.param<bool>("FixedInitialPose", fixedInitialPose, false);
     nh_.param<double>("initialRoll", initialRoll, 0);
     nh_.param<double>("intialPitch", intialPitch, 0);
     nh_.param<double>("initialYaw", initialYaw, 0);
@@ -176,8 +176,7 @@ namespace autorally_core
     optimizedTime_ = 0;
 
     imu_3dm_gx4::FilterOutputConstPtr ip;
-    
-    /*if (!fixedInitialPose)
+    if (!fixedInitialPose)
     {
       while (!ip)
       {
@@ -186,8 +185,7 @@ namespace autorally_core
       }
       initialPose_ = *ip;
     }
-    else */
-    if (1)
+    else
     {
       ROS_WARN("Using fixed initial pose");
       Rot3 initialRotation = Rot3::Ypr(initialYaw, intialPitch, initialRoll);
@@ -537,7 +535,7 @@ namespace autorally_core
     else dt = TIME(imu) - lastImuT_;
 
     lastImuT_ = TIME(imu);
-    ros::Time before = ros::Time::now();
+    //ros::Time before = ros::Time::now();
 
     // Push the IMU measurement to the optimization thread
     int qSize = imuOptQ_.size();
@@ -626,7 +624,7 @@ namespace autorally_core
 
     posePub_.publish(poseNew);
 
-    ros::Time after = ros::Time::now();
+    //ros::Time after = ros::Time::now();
     geometry_msgs::Point delays;
     delays.x = TIME(imu);
     delays.y = (ros::Time::now() - imu->header.stamp).toSec();
