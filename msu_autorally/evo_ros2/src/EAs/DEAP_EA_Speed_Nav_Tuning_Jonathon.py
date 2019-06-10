@@ -35,7 +35,7 @@ class Nav_Tuning_DEAP_EA():
         self.debug = cmd_args.debug
         
         # EA Params
-        self.experiment_name = "nav_tuning_Jonathon"
+        self.experiment_name = "nav_tuning_Jonathon--TEST"
         
         self.pop_size = 50
         self.num_generations = 25
