@@ -149,7 +149,7 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   command->sender = m_node_name;
   command->steering = m_steering_command;
   command->frontBrake = 0.0;
-  command->reverse = m_reverse;
+  //command->reverse = m_reverse;
   
   double abs_goal_speed = std::abs(m_mostRecentSpeedCommand.data);
   double abs_front_wheel_speed = std::abs(m_frontWheelsSpeed);

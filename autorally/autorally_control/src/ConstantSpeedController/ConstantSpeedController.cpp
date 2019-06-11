@@ -126,7 +126,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   float speed = m_mostRecentSpeedCommand.data;
   if ((-99 < m_mostRecentSpeedCommand.data) &&  (m_mostRecentSpeedCommand.data < 0))
   {
-    command->reverse = true;
+    //command->reverse = true;
     speed = -1 * m_mostRecentSpeedCommand.data;
   }
   
