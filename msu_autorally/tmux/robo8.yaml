@@ -1,0 +1,75 @@
+session_name: robo8
+windows:
+- window_name: robo8_1
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.183
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.184
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.185
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.186
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo8_2
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.187
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.188
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.189
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.190
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo8_3
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.191
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.192
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.193
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.194
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo8_4
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.195
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.196
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.197
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on

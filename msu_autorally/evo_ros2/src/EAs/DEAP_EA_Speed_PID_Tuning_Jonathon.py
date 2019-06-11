@@ -49,30 +49,32 @@ import traceback
 # For importing enki speed signals
 from import_enki_speed_signals import EnkiSpeedSignalImporter
 
-
 class DEAP_EA():
 	def __init__(self, cmd_args):
 		self.debug = cmd_args.debug
 
 		# EA Params
-		self.experiment_name = "Enki-Signals-PID-Evolution-Jonathon/june_4_pop50--twopt"
-		#self.experiment_name = "Enki-Signals-PID-Evolution"
+		self.experiment_name = "Enki-Signals-PID-Evolution_Jonathon/SEAMS-repeat/C_2-pop25"
 		self.genome_size = 4
 		self.tourn_size = 2
-		self.pop_size = 50
+		self.pop_size = 25
 		self.number_generations = 25
-		starting_run_number = 1
-		number_of_runs = 1
+		starting_run_number = 2
+		number_of_runs = 5
 
 		#Running Params
 		self.timeout = 500 * 1000 #ms
-
+                
+                # simple list used to determine time remaining
+                self.gen_start_time = []
+                self.gen_times = []
 
 		# If integrating with Enki
 		self.enki = True
 		if self.enki:
 			enki_importer = EnkiSpeedSignalImporter()
-			filename = "enki_speed_signals/exp2_c1_enki_run_10ms_top5_novel_signals.json"
+			#filename = "enki_speed_signals/exp2_c1_enki_run_10ms_top5_novel_signals.json"
+			filename = "/home/jonathon/enki_project/s1_run/top-5_score.json"#"~/enki_project/s1_run/top-5_score.json"
 			self.enki_genome = enki_importer.import_signals(filename)
 			print('Found enki genome of length: {}'.format(len(self.enki_genome)))
 
@@ -110,6 +112,9 @@ class DEAP_EA():
 				self.set_up_dirs()
 
 				print('\nAbout to start exp: {} \n\t run: {}'.format(self.experiment_name, self.run_number))
+                                if len(self.gen_times) > 0:
+                                    seconds_left = np.mean(self.gen_times) * (number_of_runs+1 - self.run_number) * (self.number_generations+1)
+                                    print('Total ETR: %s' % seconds_to_time_str(seconds_left))
 				# Run
 				self.start_time = time.time()
 				self.run()
@@ -119,11 +124,11 @@ class DEAP_EA():
 				print('Run log created.')
 				self.write_run_log()
 				print('Log saved!')
-				self.create_run_plots()
-				print('Plots saved!')
 
-				self.email_notification(json.dumps(self.email_log, indent=2))
-				print('Email notification sent!')
+                                # Temporarily disabled so runs will continue throughout the night...
+                                # ran into odd issue here with name resolution
+				#self.email_notification(json.dumps(self.email_log, indent=2))
+				#print('Email notification sent!')
 		except Exception:
 			traceback.print_exc()
 			print('\n\n')
@@ -139,9 +144,11 @@ class DEAP_EA():
 		self.population = self.toolbox.population(n=self.pop_size)
 		self.history.update(self.population)
 
-		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.0, mutpb=0.5)
+		self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
 		self.end_time = time.time()
-		print('\n\nRun {} finished at: {} \n\tTaking: {} seconds'.format(self.run_number, datetime.datetime.now(), (self.end_time - self.start_time)))
+
+                seconds = self.end_time - self.start_time
+		print('\n\nRun {} finished at: {} \n\tTaking: {}'.format(self.run_number, datetime.datetime.now(), seconds_to_time_str(seconds)))
 
 
 
@@ -159,6 +166,8 @@ class DEAP_EA():
 		logbook = tools.Logbook()
 		logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
+                self.gen_start_time = time.time()
+
 		# Evaluate the individuals with an invalid fitness
 		invalid_ind = [ind for ind in population if not ind.fitness.valid]
 		fitnesses = self.custom_eval_fit_mapping(invalid_ind)
@@ -173,10 +182,14 @@ class DEAP_EA():
 		record = stats.compile(population) if stats else {}
 		logbook.record(gen=0, nevals=len(invalid_ind), **record)
 
+                self.gen_times.append(time.time() - self.gen_start_time)
+
 		# Begin the generational process
 		for gen in range(1, ngen + 1):
-			print('\n\n###### GENERATION {} ######'.format(gen))
-			self.gen = gen
+                        self.gen_start_time = time.time()
+                        seconds_left = np.mean(self.gen_times) * (ngen+1 - gen)
+                        print('\n\nGENERATION {}: Run ETR {}'.format(gen,
+                            seconds_to_time_str(np.mean(seconds_left))))
 
 			# Select the next generation individuals
 			offspring = toolbox.select(population, len(population))
@@ -206,6 +219,10 @@ class DEAP_EA():
 			# Append the current generation statistics to the logbook
 			record = stats.compile(population) if stats else {}
 			logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+
+                        self.gen_times.append(time.time() - self.gen_start_time)
+                        
+                        print('Generation time: %s' % seconds_to_time_str(self.gen_times[-1]))
 
 		return population, logbook
 
@@ -359,7 +376,7 @@ class DEAP_EA():
 							break
 			num_evaluated += 1
 			#print('fitnesses: {}'.format(fitnesses))
-			print('{}/{} individuals evaluated'.format(num_evaluated, len(individuals)))
+                        print('{}/{}: {}'.format(num_evaluated, len(individuals), fitness[0]))
 		return fitnesses
 
 
@@ -534,6 +551,31 @@ class DEAP_EA():
 		print('Saving plot 2')
 		fig2.savefig('{}/best_ind_speed_plot.png'.format(self.run_directory), bbox_inches='tight')
 
+
+def seconds_to_time_str(seconds, dec_precision=0, hrs_flag=True, min_flag=True, sec_flag=True):
+    int_seconds = int(seconds)
+    frac_seconds = seconds - int_seconds
+
+    result_str = ''
+
+    if int_seconds / 3600 > 0 and hrs_flag:
+        hours = int(int_seconds / 3600)
+        int_seconds %= 3600
+        result_str += '%d hrs ' % hours
+    if int_seconds / 60 > 0 and min_flag:
+        minutes = int(int_seconds / 60)
+        int_seconds %= 60
+        result_str += '%d min ' % minutes
+    
+    if sec_flag:
+        if dec_precision > 0:
+            result_str += ('%.{}f sec'.format(dec_precision)) % (int_seconds + frac_seconds)
+        else:
+            result_str += '%d sec' % int_seconds
+    else:
+       result_str = result_str[:-1]
+
+    return result_str
 
 
 

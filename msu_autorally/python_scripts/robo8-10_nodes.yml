@@ -1,0 +1,94 @@
+# List of nodes to be connected
+# GAS 10-30-18
+
+worker_list:
+    robo8vm1u16:
+        ip: '35.9.28.183'
+    robo8vm2u16:
+        ip: '35.9.28.184'
+    robo8vm3u16:
+        ip: '35.9.28.185'
+    robo8vm4u16:
+        ip: '35.9.28.186'
+    robo8vm5u16:
+        ip: '35.9.28.187'
+    robo8vm6u16:
+        ip: '35.9.28.188'
+    robo8vm7u16:
+        ip: '35.9.28.189'
+    robo8vm8u16:
+        ip: '35.9.28.190'
+    robo8vm9u16:
+        ip: '35.9.28.191'
+    robo8vm10u16:
+        ip: '35.9.28.192'
+    robo8vm11u16:
+        ip: '35.9.28.193'
+    robo8vm12u16:
+        ip: '35.9.28.194'
+    robo8vm13u16:
+        ip: '35.9.28.195'
+    robo8vm14u16:
+        ip: '35.9.28.196'
+    robo8vm15u16:
+        ip: '35.9.28.197'
+    
+    robo9vm1u16:
+        ip: '35.9.28.10'
+    robo9vm2u16:
+        ip: '35.9.28.11'
+    robo9vm3u16:
+        ip: '35.9.28.12'
+    robo9vm4u16:
+        ip: '35.9.28.13'
+    robo9vm5u16:
+        ip: '35.9.28.14'
+    robo9vm6u16:
+        ip: '35.9.28.15'
+    robo9vm7u16:
+        ip: '35.9.28.21'
+    robo9vm8u16:
+        ip: '35.9.28.22'
+    robo9vm9u16:
+        ip: '35.9.28.23'
+    robo9vm10u16:
+        ip: '35.9.28.24'
+    robo9vm11u16:
+        ip: '35.9.28.25'
+    robo9vm12u16:
+        ip: '35.9.28.26'
+    robo9vm13u16:
+        ip: '35.9.28.27'
+    robo9vm14u16:
+        ip: '35.9.28.28'
+    robo9vm15u16:
+        ip: '35.9.28.29'
+    
+    robo10vm1u16:
+        ip: '35.9.28.160'
+    robo10vm2u16:
+        ip: '35.9.28.239'
+    robo10vm3u16:
+        ip: '35.9.28.218'
+    robo10vm4u16:
+        ip: '35.9.28.219'
+    robo10vm5u16:
+        ip: '35.9.28.220'
+    robo10vm6u16:
+        ip: '35.9.28.198'
+    robo10vm7u16:
+        ip: '35.9.28.199'
+    robo10vm8u16:
+        ip: '35.9.28.200'
+    robo10vm9u16:
+        ip: '35.9.28.104'
+    robo10vm10u16:
+        ip: '35.9.28.105'
+    robo10vm11u16:
+        ip: '35.9.28.106'
+    robo10vm12u16:
+        ip: '35.9.28.107'
+    robo10vm13u16:
+        ip: '35.9.28.108'
+    robo10vm14u16:
+        ip: '35.9.28.109'

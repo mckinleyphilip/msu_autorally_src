@@ -1,0 +1,72 @@
+session_name: robo10 
+windows:
+- window_name: robo10_1
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.239
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.218
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.219
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.220
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo10_2
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.198
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.199
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.200
+      - roslaunch evo_ros2 evo_ros2.launch
+  #    - shell_command:
+  #    - ssh -X jared@35.9.28.160
+  #    - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo10_3
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.104
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.105
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.106
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.107
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo10_4
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh -X jared@35.9.28.108
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh -X jared@35.9.28.109
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
