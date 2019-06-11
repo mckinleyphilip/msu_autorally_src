@@ -50,7 +50,7 @@ class Nav_Tuning_DEAP_EA():
         self.timeout = 500 * 1000
         
         # Socket Communication Params
-        self.ip_addr = '127.0.0.1'
+        self.ip_addr = '35.9.32.156'
         self.send_port = 5023
         self.recv_port = 5033
         

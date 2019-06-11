@@ -128,7 +128,7 @@ void tele_op_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConst
   command->sender = "tele_op_nodelet";
   command->steering = -5.0;
   command->frontBrake = 0.0;
-  //command->reverse = m_reverse;
+  command->reverse = m_reverse;
   
   double abs_goal_speed = abs(m_mostRecentSpeedCommand.data);
   double abs_front_wheel_speed = abs(m_frontWheelsSpeed);
