@@ -33,6 +33,7 @@ limitations under the License.
   <xacro:property name="degrees_45" value="0.785398163"/>
   <xacro:property name="degrees_21" value="0.3665191429"/>
   <xacro:property name="degrees_90" value="1.57079633"/>
+  <xacro:property name="M_PI" value="3.1415926535897931" />
 
   <!-- chassis_length is measured along the x axis, chassis_width
        along the y axis, and chassis_height along the z axis. -->
@@ -368,15 +369,17 @@ limitations under the License.
       <geometry>
         <mesh filename="package://autorally_description/urdf/Vehicle_Texture.dae" scale="1 1 1" />
       </geometry>
+
     </visual>
 
-    <collision>
+    <collision name="chassis_collision">
       <origin xyz="${-chassis_length/2 + 0.2} 0 ${-chassis_cm_height}"
               rpy="0 0 0"/>
-      
+
       <geometry>
         <mesh filename="package://autorally_description/urdf/Vehicle_Texture.dae" scale="1 1 1" />
       </geometry>
+      
     </collision>
 
     <inertial>
@@ -614,6 +617,41 @@ limitations under the License.
                     wheel_mass="${rear_wheel_mass}"
                     axle_eff_limit="${rear_axle_eff_limit}"/>
 
+  <!--  MSU Sensors -->
+  
+  <!-- Contact sensor on the chassis of the rover -->
+  <gazebo reference="chassis">
+    <sensor name="chassis_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>base_link_fixed_joint_lump__chassis_collision_collision</collision>
+      </contact>
+      <plugin name="chassis_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>chassis_contact_sensor_state</bumperTopicName>
+        <frameName>chassis</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+  
+  <!-- Forward facing Lidar Sensor -->
+  <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/lidar_sensor.urdf.xacro" />
+  <xacro:lidar_sensor
+    name="lidar_front"
+    parent="base_link"
+    ros_topic="lidar_front"
+    update_rate="10"
+    min_range="0.06"
+    max_range="20.0"
+    field_of_view_horizontal="${180*M_PI/180}"
+    field_of_view_vertical="${1*M_PI/180}"
+    ray_count_horizontal="542" 
+    ray_count_vertical="1"
+    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+    <origin xyz="0.5 0 0.1" rpy="0 0 0"/>
+  </xacro:lidar_sensor>
+  
+  
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/autorally_platform</robotNamespace>
@@ -666,5 +704,8 @@ limitations under the License.
     </plugin> -->
 
   </gazebo>
-
+  
+  
+  
+  
 </robot>

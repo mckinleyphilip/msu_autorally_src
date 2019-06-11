@@ -6,6 +6,7 @@ bool runstopMotionEnabled
 
 string steeringCommander
 float64 steering
+bool reverse
 
 string throttleCommander
 float64 throttle

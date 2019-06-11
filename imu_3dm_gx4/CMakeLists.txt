@@ -18,7 +18,7 @@ catkin_package(
 find_package(Boost REQUIRED)
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
-add_definitions("-std=c++0x -Wall -Werror")
+add_definitions("-std=c++0x -Wall")# -Werror")
 
 add_executable(${PROJECT_NAME} src/imu_3dm_gx4.cpp src/imu.cpp)
 target_link_libraries(${PROJECT_NAME}

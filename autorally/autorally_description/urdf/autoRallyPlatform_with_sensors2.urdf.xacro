@@ -28,11 +28,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
+
+
 <robot name="autorally_platform" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- sensor Configuration -->
+  <xacro:property name="use_cameras" value="false"/>
+  
+  
+  
   <!-- Degree-to-radian conversions -->
   <xacro:property name="degrees_45" value="0.785398163"/>
   <xacro:property name="degrees_21" value="0.3665191429"/>
   <xacro:property name="degrees_90" value="1.57079633"/>
+  <xacro:property name="M_PI" value="3.1415926535897931" />
 
   <!-- chassis_length is measured along the x axis, chassis_width
        along the y axis, and chassis_height along the z axis. -->
@@ -368,15 +377,17 @@ limitations under the License.
       <geometry>
         <mesh filename="package://autorally_description/urdf/Vehicle_Texture.dae" scale="1 1 1" />
       </geometry>
+
     </visual>
 
-    <collision>
+    <collision name="chassis_collision">
       <origin xyz="${-chassis_length/2 + 0.2} 0 ${-chassis_cm_height}"
               rpy="0 0 0"/>
-      
+
       <geometry>
         <mesh filename="package://autorally_description/urdf/Vehicle_Texture.dae" scale="1 1 1" />
       </geometry>
+      
     </collision>
 
     <inertial>
@@ -419,6 +430,10 @@ limitations under the License.
     <parent link="base_link"/>
     <child link="imu_link"/>
   </joint>
+
+
+
+<xacro:if value="${use_cameras}">
 
   <joint name="camera_joint" type="fixed">
     <axis xyz="0 0 -1" />
@@ -485,16 +500,12 @@ limitations under the License.
   </link>
 
 
-
-
-
-
   <!-- camera -->
   <gazebo reference="camera_link">
     <sensor type="multicamera" name="stereo_camera">
       <update_rate>30.0</update_rate>
       <camera name="left">
-        <pose>0 0.07 0 0 0 0</pose>
+        <pose>0.3 0.07 0 0 0 0</pose>
         <horizontal_fov>1.3962634</horizontal_fov>
         <image>
           <width>1280</width>
@@ -588,7 +599,7 @@ limitations under the License.
       </plugin>
     </sensor>
   </gazebo>
-
+</xacro:if>
 
 
 
@@ -614,6 +625,126 @@ limitations under the License.
                     wheel_mass="${rear_wheel_mass}"
                     axle_eff_limit="${rear_axle_eff_limit}"/>
 
+  <!--  MSU Sensors -->
+  
+  
+  <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+    <alwaysOn>true</alwaysOn>
+    <updateRate>50.0</updateRate>
+    <bodyName>base_link</bodyName>
+    <topicName>ground_truth/state</topicName>
+    <gaussianNoise>0.01</gaussianNoise>
+    <frameName>world</frameName>
+    <xyzOffsets>0 0 0</xyzOffsets>
+    <rpyOffsets>0 0 0</rpyOffsets>
+  </plugin>
+  
+  
+  
+  
+  <!-- Contact sensor on the chassis of the rover -->
+  <gazebo reference="chassis">
+    <sensor name="chassis_sensor" type="contact">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <contact>
+        <collision>base_link_fixed_joint_lump__chassis_collision_collision</collision>
+      </contact>
+      <plugin name="chassis_plugin" filename="libgazebo_ros_bumper.so">
+        <bumperTopicName>chassis_contact_sensor_state</bumperTopicName>
+        <frameName>chassis</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+  
+  
+  <!-- Hokuo Laser Joint -->
+  <joint name="hokuyo_joint" type="fixed">
+    <axis xyz="0 0 -1" />
+    <origin xyz=".17 0 .2" rpy="0 0 0"/>
+
+    <parent link="base_link"/>
+    <child link ="hokuyo"/>
+  </joint>
+
+  <!-- Hokuyo Laser -->
+  <link name="hokuyo">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.1 0.1 0.1"/>
+
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://autorally_description/urdf/hokuyo.dae"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <gazebo reference="hokuyo">
+    <sensor type="ray" name="laser">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="hokuyo_node" filename="libgazebo_ros_laser.so">
+        <topicName>/lidar_front</topicName>
+         <frameName>hokuyo</frameName>
+      </plugin>
+    </sensor>
+</gazebo>
+
+  <!-- Forward facing Lidar Sensor -->
+<!--
+  <xacro:include filename="$(find ardupilot_sitl_gazebo_plugin)/urdf/sensors/lidar_sensor.urdf.xacro" />
+  <xacro:lidar_sensor
+    name="lidar_front"
+    parent="base_link"
+    ros_topic="lidar_front"
+    update_rate="10"
+    min_range="0.06"
+    max_range="20.0"
+    field_of_view_horizontal="${180*M_PI/180}"
+    field_of_view_vertical="${1*M_PI/180}"
+    ray_count_horizontal="542" 
+    ray_count_vertical="1"
+    sensor_mesh="lidar_lite_v2_withRay/meshes/lidar_lite_v2_withRay.dae">
+    <origin xyz="0.5 0 0.1" rpy="0 0 0"/>
+  </xacro:lidar_sensor>
+-->
+  
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/autorally_platform</robotNamespace>
@@ -666,5 +797,8 @@ limitations under the License.
     </plugin> -->
 
   </gazebo>
-
+  
+  
+  
+  
 </robot>

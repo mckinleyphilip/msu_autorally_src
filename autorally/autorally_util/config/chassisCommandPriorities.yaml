@@ -4,3 +4,4 @@
 'joystick': 4
 'OCS': 5
 'RC': 7
+'base_controller_nodelet': 8
