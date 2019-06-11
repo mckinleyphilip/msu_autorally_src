@@ -34,12 +34,6 @@
 #ifndef MPPI_CONTROLLER_CUH_
 #define MPPI_CONTROLLER_CUH_ 
 
-#include "managed.cuh"
-
-#include <autorally_control/ddp/ddp_model_wrapper.h>
-#include <autorally_control/ddp/ddp_tracking_costs.h>
-#include <autorally_control/ddp/ddp.h>
-
 #include <eigen3/Eigen/Dense>
 #include <cuda_runtime.h>
 #include <curand.h>
@@ -62,28 +56,14 @@ public:
   static const int STATE_DIM = DYNAMICS_T::STATE_DIM;
   static const int CONTROL_DIM = DYNAMICS_T::CONTROL_DIM;
 
-  cudaStream_t stream_;
-
-  int numTimesteps_;
+  int num_timesteps_;
   int hz_;
-  int optimizationStride_;
+  double total_iter_time_;
 
   DYNAMICS_T *model_; ///< Model of the autorally system dynamics. 
   COSTS_T *costs_; ///< Autorally system costs.
-
-  //Define DDP optimizer for computing feedback gains around MPPI solution
-  ModelWrapperDDP<DYNAMICS_T> *ddp_model_;
-  TrackingCostDDP<ModelWrapperDDP<DYNAMICS_T>> *run_cost_;
-  TrackingTerminalCost<ModelWrapperDDP<DYNAMICS_T>> *terminal_cost_;
-  DDP<ModelWrapperDDP<DYNAMICS_T>> *ddp_solver_;
-  typename TrackingCostDDP<ModelWrapperDDP<DYNAMICS_T>>::StateCostWeight Q_;
-  typename TrackingTerminalCost<ModelWrapperDDP<DYNAMICS_T>>::Hessian Qf_;
-  typename TrackingCostDDP<ModelWrapperDDP<DYNAMICS_T>>::ControlCostWeight R_;
-  Eigen::Matrix<float, CONTROL_DIM, 1> U_MIN_;
-  Eigen::Matrix<float, CONTROL_DIM, 1> U_MAX_;
-  OptimizerResult<ModelWrapperDDP<DYNAMICS_T>> result_;
-
-
+  float* traj_costs_; ///< Array of the trajectory costs.
+  float* nominal_traj_; ///< Host array for keeping track of the nomimal trajectory.
   /**
   * @brief Constructor for mppi controller class.
   * @param num_timesteps The number of timesteps to look ahead for.
@@ -93,15 +73,12 @@ public:
   * @param mppi_node Handle to a ros node with mppi parameters available as ros params.
   */
   MPPIController(DYNAMICS_T* model, COSTS_T* costs, int num_timesteps, int hz, float gamma,
-                 float* exploration_var, float* init_control, int num_optimization_iters = 1,
-                 int opt_stride = 1, cudaStream_t = 0);
+                 float* exploration_var, float* init_control, int num_optimization_iters = 1);
 
   /**
   * @brief Destructor for mppi controller class.
   */
   ~MPPIController();
-
-  void setCudaStream(cudaStream_t stream);
 
   /**
   * @brief Allocates cuda memory for all of the controller's device array fields.
@@ -112,12 +89,6 @@ public:
   * @brief Frees the cuda memory allocated by allocateCudaMem()
   */
   void deallocateCudaMem();
-
-  void initDDP();
-  
-  void computeFeedbackGains(Eigen::MatrixXf state);
-
-  OptimizerResult<ModelWrapperDDP<DYNAMICS_T>> getFeedbackGains();
 
   /*
   * @brief Resets the control commands to there initial values.
@@ -130,42 +101,36 @@ public:
 
   void computeNominalTraj(Eigen::Matrix<float, STATE_DIM, 1> state);
 
-  void slideControlSeq(int stride);
-
   /**
   * @brief Compute the control given the current state of the system.
   * @param state The current state of the autorally system.
   */
-  void computeControl(Eigen::Matrix<float, STATE_DIM, 1> state);
-
-  std::vector<float> getControlSeq();
-
-  std::vector<float> getStateSeq();
+  Eigen::MatrixXf computeControl(Eigen::Matrix<float, STATE_DIM, 1> state);
 
 private:
-  int num_iters_;
   float gamma_; ///< Value of the temperature in the softmax.
+  int num_iters_;
   float normalizer_; ///< Variable for the normalizing term from sampling.
+
+  Eigen::Matrix<float, CONTROL_DIM, 1> u_; ///< Control input to be computed.
 
   curandGenerator_t gen_;
 
-  std::vector<float> traj_costs_; ///< Array of the trajectory costs.
-  std::vector<float> state_solution_; ///< Host array for keeping track of the nomimal trajectory.
-  std::vector<float> control_solution_;
-  std::vector<float> control_hist_;
-  std::vector<float> U_;
-  std::vector<float> du_; ///< Host array for computing the optimal control update.
-  std::vector<float> nu_;
-  std::vector<float> init_u_;
+  float* U_; ///< Host array for keeping track of the nominal control input.
+  Eigen::MatrixXf U_smoothed_;
+  float* du_; ///< Host array for computing the optimal control update.
 
+  float* nu_;
+  float* init_u_;
   float* state_d_;
   float* nu_d_;
   float* traj_costs_d_;
   float* U_d_;
   float* du_d_;
+  float* nominal_traj_d_;
 };
 
-#include "mppi_controller.cu"
+#include "mppi_controller.cut"
 
 }
 

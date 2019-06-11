@@ -36,7 +36,7 @@
 
 namespace autorally_control {
 
-__global__ void debugCostKernel(float x, float y, float heading, int width_m ,int height_m, int ppm,
+__global__ void debugCostKernel(float x, float y, int width_m ,int height_m, int ppm,
                                 cudaTextureObject_t tex, float* debug_data_d, float3 c1, 
                                 float3 c2, float3 trs)
 {
@@ -56,35 +56,30 @@ __global__ void debugCostKernel(float x, float y, float heading, int width_m ,in
   v = c1.y*x_pos + c2.y*y_pos + trs.y;
   w = c1.z*x_pos + c2.z*y_pos + trs.z;
   //Compute the cost for the current position
-  float cost = tex2D<float4>(tex, u/w, v/w).x;
+  float cost = tex2D<float>(tex, u/w, v/w);
   //Write the cost to the debug data array
   if (x_idx < width_m*ppm && (height_m*ppm - y_idx) < height_m*ppm) {
-    float x_transformed = cosf(heading)*(x_pos - x) + sinf(heading)*(y_pos - y);
-    float y_transformed = -sinf(heading)*(x_pos - x) + cosf(heading)*(y_pos - y);
-    float dist = 0.25*fabs(x_transformed) + fabs(y_transformed);
-    if ( dist < .15 && x_transformed > 0){
-      if ( dist < .1 && x_transformed > 0.05){
+    if ( (x_pos - x)*(x_pos - x) + (y_pos - y)*(y_pos - y) < .125*.125){
+     if ((x_idx + y_idx) % 2 == 0){
         cost = 1;
-      } else{
+     } else{
         cost = 0;
      }
     }
-    int idx = (height_m*ppm - (y_idx+1))*(width_m*ppm) + x_idx;
-    if ((idx > 0) && (idx < (width_m*ppm)*(height_m*ppm)) ){
-      debug_data_d[idx] = cost;
-    }
+    debug_data_d[(height_m*ppm - y_idx)*(width_m*ppm) + x_idx] = cost;
   }
 }
 
-void launchDebugCostKernel(float x, float y, float heading, int width_m, int height_m, int ppm,
+void launchDebugCostKernel(float x, float y, int width_m, int height_m, int ppm,
                            cudaTextureObject_t tex, float* debug_data_d, float3 c1,
-                           float3 c2, float3 trs, cudaStream_t stream)
+                           float3 c2, float3 trs)
 {
   dim3 dimBlock(16, 16, 1);
   dim3 dimGrid((width_m*ppm - 1)/16 + 1, (height_m*ppm - 1)/16 + 1, 1);
-  debugCostKernel<<<dimGrid, dimBlock, 0, stream>>>(x, y, heading, width_m, height_m, ppm, tex, debug_data_d,
+  debugCostKernel<<<dimGrid, dimBlock>>>(x, y, width_m, height_m, ppm, tex, debug_data_d,
                                          c1, c2, trs);
-  HANDLE_ERROR( cudaStreamSynchronize(stream) );
+  CudaCheckError();
+  HANDLE_ERROR( cudaDeviceSynchronize() );
 }
 
 };

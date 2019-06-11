@@ -34,6 +34,7 @@
 #ifndef CAR_GL_CUH_
 #define CAR_GL_CUH_
 
+#include "generalized_linear.cuh"
 #include "car_bfs.cuh"
 #include "managed.cuh"
 
