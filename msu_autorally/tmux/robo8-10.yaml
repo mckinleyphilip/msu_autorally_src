@@ -6,16 +6,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.183
+      - ssh jared@35.9.28.183
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.184
+      - ssh jared@35.9.28.184
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.185
+      - ssh jared@35.9.28.185
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.186
+      - ssh jared@35.9.28.186
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -25,16 +25,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.187
+      - ssh jared@35.9.28.187
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.188
+      - ssh jared@35.9.28.188
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.189
+      - ssh jared@35.9.28.189
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.190
+      - ssh jared@35.9.28.190
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -44,16 +44,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.191
+      - ssh jared@35.9.28.191
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.192
+      - ssh jared@35.9.28.192
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.193
+      - ssh jared@35.9.28.193
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.194
+      - ssh jared@35.9.28.194
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -63,13 +63,13 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.195
+      - ssh jared@35.9.28.195
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.196
+      - ssh jared@35.9.28.196
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.197
+      - ssh jared@35.9.28.197
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -79,16 +79,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.10
+      - ssh jared@35.9.28.10
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.11
+      - ssh jared@35.9.28.11
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.12
+      - ssh jared@35.9.28.12
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.13
+      - ssh jared@35.9.28.13
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -98,16 +98,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.14
+      - ssh jared@35.9.28.14
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.15
+      - ssh jared@35.9.28.15
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.21
+      - ssh jared@35.9.28.21
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.22
+      - ssh jared@35.9.28.22
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -117,16 +117,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.23
+      - ssh jared@35.9.28.23
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.24
+      - ssh jared@35.9.28.24
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.25
+      - ssh jared@35.9.28.25
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.26
+      - ssh jared@35.9.28.26
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -136,13 +136,13 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.27
+      - ssh jared@35.9.28.27
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.28
+      - ssh jared@35.9.28.28
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.29
+      - ssh jared@35.9.28.29
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -152,16 +152,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.239
+      - ssh jared@35.9.28.239
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.218
+      - ssh jared@35.9.28.218
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.219
+      - ssh jared@35.9.28.219
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.220
+      - ssh jared@35.9.28.220
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -171,16 +171,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.198
+      - ssh jared@35.9.28.198
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.199
+      - ssh jared@35.9.28.199
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.200
+      - ssh jared@35.9.28.200
       - roslaunch evo_ros2 evo_ros2.launch
   #    - shell_command:
-  #    - ssh -X jared@35.9.28.160
+  #    - ssh jared@35.9.28.160
   #    - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -190,16 +190,16 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.104
+      - ssh jared@35.9.28.104
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.105
+      - ssh jared@35.9.28.105
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.106
+      - ssh jared@35.9.28.106
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.107
+      - ssh jared@35.9.28.107
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
@@ -209,10 +209,10 @@ windows:
     - pwd
   panes:
     - shell_command:
-      - ssh -X jared@35.9.28.108
+      - ssh jared@35.9.28.108
       - roslaunch evo_ros2 evo_ros2.launch
     - shell_command:
-      - ssh -X jared@35.9.28.109
+      - ssh jared@35.9.28.109
       - roslaunch evo_ros2 evo_ros2.launch
   options_after:
     synchronize-panes: on
