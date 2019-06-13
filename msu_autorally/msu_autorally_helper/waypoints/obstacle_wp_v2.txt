@@ -1,0 +1,19 @@
+
+
+Starting/Ending Pos: [14.5216197968, -11.9415893555, -0.00338745117188] # maybe set z to 0...
+      [11.1291055679, -11.0161132812, 0.0]
+      
+Middle Pos: [-12.6062440872, 13.4237794876, 0.00042724609375] # maybe set z to 0
+      [-10.3909425735, 10.5125026703, 0.0]
+
+Counter-clockwise waypoints:
+    # during first goal (to middle pos)
+    [23.6383209229, 23.5519962311, -0.00347900390625]
+    # during second goal (to end pos)
+    [-24.1981258392, -22.4348621368, 0.00247192382812]
+
+Clockwise waypoints:
+    # during first goal (to middle pos)
+    [-24.1981258392, -22.4348621368, 0.00247192382812]
+    # during second goal (to end pos)
+    [23.6383209229, 23.5519962311, -0.00347900390625]

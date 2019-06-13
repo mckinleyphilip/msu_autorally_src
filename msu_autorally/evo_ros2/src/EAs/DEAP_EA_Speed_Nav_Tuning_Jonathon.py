@@ -1,3 +1,5 @@
+import signal
+
 # For cmd line arg parsing
 import argparse
 
@@ -35,12 +37,12 @@ class Nav_Tuning_DEAP_EA():
         self.debug = cmd_args.debug
         
         # EA Params
-        self.experiment_name = "nav_tuning_Jonathon--TEST"
+        self.experiment_name = "nav_tuning_Jonathon_new_params"
         
         self.pop_size = 50
         self.num_generations = 25
         
-        self.genome_size = 11
+        self.genome_size = 18 # could make this automatic...
         self.tourn_size = 2
         
         starting_run_number = 1
@@ -50,16 +52,19 @@ class Nav_Tuning_DEAP_EA():
         self.timeout = 500 * 1000
         
         # Socket Communication Params
-        self.ip_addr = '35.9.32.156'
+        self.ip_addr = '35.9.128.222'
         self.send_port = 5023
         self.recv_port = 5033
         
         # Email Notification Params
         self.email_reciever_list = ['fleckjo1@msu.edu']
         
-        
+        self.gen_start_time = 0
+        self.gen_time_list = []
+
         try:
             self.setup_sockets()
+            signal.signal(signal.SIGINT, self.shutdown_handler)
             
             print('About to start {} runs of experiment {}'.format(num_runs,
                 self.experiment_name))
@@ -69,6 +74,14 @@ class Nav_Tuning_DEAP_EA():
             raw_input('Press enter to run')
             
             for i in range(starting_run_number, starting_run_number + num_runs):
+                if self.gen_time_list:
+                    avg_gen_time = np.mean(self.gen_time_list)
+                else:
+                    avg_gen_time = 2 * 200
+                seconds_left = avg_gen_time * (self.num_generations+1) *\
+                    (starting_run_number+num_runs+1 - i)
+                time_left_str = seconds_to_time_str(seconds_left)
+
                 self.run_number = i
                 
                 # Set up for run
@@ -76,8 +89,8 @@ class Nav_Tuning_DEAP_EA():
                 self.setup_EA()
                 self.setup_dirs()
                 
-                print('\nStarting run #{} of experiment {}'.format(self.run_number,
-                    self.experiment_name))
+                print('\nStarting run #{} of experiment {}: ETR {}'.format(self.run_number,
+                    self.experiment_name, time_left_str))
                 
                 # Run
                 self.start_time = time.time()
@@ -97,6 +110,14 @@ class Nav_Tuning_DEAP_EA():
             self.sender.close()
             self.reciever.close()
             self.context.destroy()
+
+    def shutdown_handler(self, sig, frame):
+        print('\nShutdown handler called...')
+        self.sender.close()
+        self.reciever.close()
+        self.context.destroy()
+        print('Shutdown handler finished')
+        sys.exit(0)
    
     def setup_sockets(self):
         self.context = zmq.Context()
@@ -173,8 +194,9 @@ class Nav_Tuning_DEAP_EA():
         stats = self.stats
         hall_of_fame = self.hof
         num_gens = self.num_generations
-        
+
         self.gen = 0
+        self.gen_start_time = time.time()
         
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
@@ -192,10 +214,16 @@ class Nav_Tuning_DEAP_EA():
         record = stats.compile(population) if stats else {}
         logbook.record(gen=0, nevals=len(invalid_ind), **record)
         
+        self.gen_time_list.append(time.time() - self.gen_start_time)
+        
         # Begin generational process
         for gen in range(1, num_gens+1):
-            print('\n\n###### GENERATION {} ######'.format(gen))
+            seconds_left = np.mean(self.gen_time_list) * (num_gens+1-gen)
+            time_left_str = seconds_to_time_str(seconds_left)
+
+            print('\n\nGENERATION {}: ETR {}'.format(gen, time_left_str))
             self.gen = gen
+            self.gen_start_time = time.time()
             
             # Select offspring
             offspring = toolbox.select(population, len(population))
@@ -220,6 +248,8 @@ class Nav_Tuning_DEAP_EA():
             # Append stats and logs
             record = stats.compile(population) if stats else {}
             logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+
+            self.gen_time_list.append(time.time() - self.gen_start_time)
         
         return population, logbook
 
@@ -285,8 +315,11 @@ class Nav_Tuning_DEAP_EA():
             raw_fit_str = raw_fit_str[:-2] + ']'
             fit_str = '%.2f'%fitness
 
-            print('{}/{}: {} -- {}'.format(num_evaluated, len(individuals), fit_str,
-                raw_fit_str))
+            time_elapsed = time.time() - self.gen_start_time
+            time_elapsed_str = seconds_to_time_str(time_elapsed)
+
+            print('{:>2}/{}: {} -- {:34} Time Elapsed: {}'.format(num_evaluated,
+                len(individuals), fit_str, raw_fit_str, time_elapsed_str))
         
         return fitnesses
 
@@ -327,7 +360,7 @@ class Nav_Tuning_DEAP_EA():
         raw_fit = [avg_speed, max_speed, waypoints_achieved, time_elapsed, total_dist]
         norm_fit = [norm_avg_speed * 2, norm_max_speed * 2, norm_wp * 3, norm_time_elapsed,
                 norm_dist]
-        fit = sum(norm_fit)
+        fit = (sum(norm_fit),)
         
         # Add individual to detailed log
         if str(ind) not in self.detailed_log.keys():
@@ -338,7 +371,7 @@ class Nav_Tuning_DEAP_EA():
                     'dataFrame': df.to_json()
                     }
         
-        return (raw_fit, fit)
+        return raw_fit, fit
 
     def create_run_log(self):
         self.run_log = collections.OrderedDict()
@@ -388,6 +421,27 @@ class Nav_Tuning_DEAP_EA():
         
         SERVER.sendmail(sender, self.email_reciever_list, msg.as_string())
         SERVER.quit()
+    
+def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
+    int_sec = int(seconds)
+    frac_sec = seconds - int_sec
+    
+    result_str = ''
+    if int(int_sec / 3600) and not no_hrs:
+        int_hrs = int(int_sec / 3600)
+        int_sec %= 3600
+        result_str += '%d hrs ' % int_hrs
+    if int(int_sec / 60) and not no_min:
+        int_min = int(int_sec / 60)
+        int_sec %= 60
+        result_str += '%d min ' % int_min
+    
+    if not dec_precision:
+        result_str += '%d sec' % int_sec
+    else:
+        result_str += '%.{}f'.format(dec_precision) % (int_sec + float_sec)
+    
+    return result_str
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Front end DEAP EA for nav tuning Study')
