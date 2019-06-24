@@ -309,16 +309,13 @@ class Nav_Tuning_DEAP_EA():
                             break
             num_evaluated += 1
             
-            raw_fit_str = '['
-            for val in raw_fit:
-                raw_fit_str += '%.2f, '%val
-            raw_fit_str = raw_fit_str[:-2] + ']'
+            raw_fit_str = '[%.2f, %.2f, %.2f, %6.2f, %6.2f]' % tuple(raw_fit)
             fit_str = '%.2f'%fitness
 
             time_elapsed = time.time() - self.gen_start_time
             time_elapsed_str = seconds_to_time_str(time_elapsed)
 
-            print('{:>2}/{}: {} -- {:34} Time Elapsed: {}'.format(num_evaluated,
+            print('{:>2}/{}: {} -- {} Time Elapsed: {}'.format(num_evaluated,
                 len(individuals), fit_str, raw_fit_str, time_elapsed_str))
         
         return fitnesses
