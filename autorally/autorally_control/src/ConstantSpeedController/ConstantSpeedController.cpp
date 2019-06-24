@@ -60,13 +60,13 @@ ConstantSpeedController::~ConstantSpeedController()
 
 void ConstantSpeedController::onInit()
 {
-  //NODELET_INFO("ConstantSpeedController initialization");
+  NODELET_INFO("ConstantSpeedController initialization");
   ros::NodeHandle nh = getNodeHandle();
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
 
   loadThrottleCalibration();
 
-  m_mostRecentSpeedCommand.data = -99;
+  m_mostRecentSpeedCommand.data = 0;
 
   m_speedCommandSub = nh.subscribe("constantSpeedController/speedCommand", 1,
                           &ConstantSpeedController::speedCallback, this);
@@ -88,18 +88,12 @@ void ConstantSpeedController::onInit()
   }
 
   //m_accelerationProfile = generateAccelerationProfile(100);
-  
-  //dynamic_reconfigure::Server<constantSpeedControllerPIDParamsConfig>::CallbackType cb;
-
-  //cb = boost::bind(&ConstantSpeedController::ConfigCallback, this, _1, _2);
-  //m_dynServer.setCallback(cb);
-    
 
   m_controlTimer = nh.createTimer(ros::Rate(1),
                       &ConstantSpeedController::controlCallback, this);
   /*m_controlEnableTimer = nh.createTimer(ros::Rate(0.2),
                       &ConstantSpeedController::enableControlCallback, this);*/
-  //NODELET_INFO("ConstantSpeedController initialization complete");
+  NODELET_INFO("ConstantSpeedController initialization complete");
 
 }
 
@@ -107,7 +101,7 @@ void ConstantSpeedController::speedCallback(const std_msgs::Float64ConstPtr& msg
 {
   if (m_mostRecentSpeedCommand.data != msg->data)
   {
-    //NODELET_INFO_STREAM("ConstantSpeedController: new speed setpoint:" << msg->data);
+    NODELET_INFO_STREAM("ConstantSpeedController: new speed setpoint:" << msg->data);
   }
   m_mostRecentSpeedCommand = *msg;
 }
@@ -123,38 +117,12 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
   command->steering = -5.0;
   command->frontBrake = 0.0;
 
-  float speed = m_mostRecentSpeedCommand.data;
-  if ((-99 < m_mostRecentSpeedCommand.data) &&  (m_mostRecentSpeedCommand.data < 0))
-  {
-    command->reverse = true;
-    speed = -1 * m_mostRecentSpeedCommand.data;
-  }
-  
-  
-  double abs_goal_speed = std::abs(m_mostRecentSpeedCommand.data);
-  double abs_front_wheel_speed = std::abs(m_frontWheelsSpeed);
-  
-  
-  
-  // braking
-  /*
-  double speed_diff = abs_goal_speed - abs_front_wheel_speed;
-  if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
-  //if (!((0 > m_mostRecentSpeedCommand.data) == (0 > m_frontWheelsSpeed)) )
-  {
-	  //command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
-	  command->frontBrake = 1.0;
-  }
-  */
-  
-  
-
-  if (abs_goal_speed > 0.1 && abs_goal_speed < 99)
+  if (m_mostRecentSpeedCommand.data > 0.1)
   {
     double p;
-    if(m_throttleMappings.interpolateKey(abs_goal_speed, p))
+    if(m_throttleMappings.interpolateKey(m_mostRecentSpeedCommand.data, p))
     {
-      m_integralError += abs_goal_speed - abs_front_wheel_speed;
+      m_integralError += m_mostRecentSpeedCommand.data - m_frontWheelsSpeed;
       if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
       {
         m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
@@ -166,7 +134,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
       }
 
       command->throttle = p +
-                 m_constantSpeedKP*(abs_goal_speed - abs_front_wheel_speed);
+                 m_constantSpeedKP*(m_mostRecentSpeedCommand.data - m_frontWheelsSpeed);
       command->throttle += m_constantSpeedKI * m_integralError;
       command->throttle = std::max(0.0, std::min(1.0, command->throttle));
 
@@ -175,7 +143,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
     }
     else
     {
-      NODELET_WARN("base_controller_nodelet could not interpolate speed %f", m_mostRecentSpeedCommand.data);
+      NODELET_WARN("ConstantSpeedController could not interpolate speed %f", m_mostRecentSpeedCommand.data);
       command->throttle = 0;
     }
   }
@@ -184,13 +152,7 @@ void ConstantSpeedController::wheelSpeedsCallback(const autorally_msgs::wheelSpe
     command->throttle = 0;
     
   }
-  
-  //command->throttle = 1.0;
-  //ROS_ERROR("Speed command: %f", command->throttle);
-  if (abs_goal_speed != -99)
-  {
-    m_chassisCommandPub.publish(command);
-  }
+  m_chassisCommandPub.publish(command);
 }
 
 /*void ConstantSpeedController::enableControlCallback(const ros::TimerEvent& time)
@@ -209,22 +171,12 @@ void ConstantSpeedController::controlCallback(const ros::TimerEvent& time)
   nhPvt.getParam("KD", m_constantSpeedKD);
   nhPvt.getParam("KI", m_constantSpeedKI);
   nhPvt.getParam("IMax", m_constantSpeedIMax);
-  //std::cout << "ConstantSpeedController:: Got a config!!" << std::endl << "	  " << m_constantSpeedKP <<  "," << m_constantSpeedKD <<  "," << m_constantSpeedKI <<  "," << m_constantSpeedIMax << std::endl;
-}
 
-void ConstantSpeedController::ConfigCallback(const constantSpeedControllerPIDParamsConfig &config, uint32_t level)
-  {
-	  // Disable the controlCallback for this to work
-    m_constantSpeedKP = config.KP;
-    m_constantSpeedKD = config.KD;
-	m_constantSpeedKI = config.KI;
-	m_constantSpeedIMax = config.IMax;
-    std::cout << "ConstantSpeedController:: Got a config!!" << std::endl << "	  " << m_constantSpeedKP <<  "," << m_constantSpeedKD <<  "," << m_constantSpeedKI <<  "," << m_constantSpeedIMax << std::endl;
-  }
+}
 
 void ConstantSpeedController::loadThrottleCalibration()
 {
-  //NODELET_INFO("Loading calibration");
+  NODELET_INFO("Loading calibration");
   ros::NodeHandle nhPvt = getPrivateNodeHandle();
   XmlRpc::XmlRpcValue v;
   nhPvt.param("throttleCalibration", v, v);
@@ -236,8 +188,8 @@ void ConstantSpeedController::loadThrottleCalibration()
       std::pair<double, double> toAdd(std::pair<double, double>(
                                       boost::lexical_cast<double>(mapIt->first),
                                       static_cast<double>(mapIt->second)));
-      //NODELET_INFO_STREAM("ConstantSpeedController added to add mapping " <<
-      //                       toAdd.first << ":" << toAdd.second);
+      NODELET_INFO_STREAM("ConstantSpeedController added to add mapping " <<
+                             toAdd.first << ":" << toAdd.second);
       if(!m_throttleMappings.update(toAdd))
       {
         NODELET_ERROR_STREAM("ConstantSpeedController Failed to add mapping " <<
@@ -248,9 +200,9 @@ void ConstantSpeedController::loadThrottleCalibration()
       NODELET_ERROR("ConstantSpeedController: XmlRpc throttle calibration formatted incorrectly");
     }
   }
-  //NODELET_INFO_STREAM("ConstantSpeedController: Loaded " <<
-  //                    m_throttleMappings.size() <<
-  //                    " throttle mappings");
+  NODELET_INFO_STREAM("ConstantSpeedController: Loaded " <<
+                      m_throttleMappings.size() <<
+                      " throttle mappings");
 }
 
 }

@@ -22,7 +22,13 @@
   </class>
 </library>
 
-<!-- MSU Additions -->
+<library path="lib/libmppi_nodelet">
+  <class name="autorally_control/MPPINodelet" type="autorally_control::MPPINodelet" base_class_type="nodelet::Nodelet">
+    <description>
+    Nodeletized MPPI 
+    </description>
+  </class>
+</library>
 
 <library path="lib/libtele_op_nodelet">
   <class name="autorally_control/tele_op_nodelet" type="autorally_control::tele_op_nodelet" base_class_type="nodelet::Nodelet">

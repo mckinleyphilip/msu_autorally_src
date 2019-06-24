@@ -18,7 +18,7 @@
 
 GENOME_MAPPING: [
     '/autorally_move_base/TebLocalPlannerROS/acc_lim_x',
-    '/autorally_move_base/TebLocalPlannerROS/acc_lim_theta'
+    '/autorally_move_base/TebLocalPlannerROS/acc_lim_theta',
     '/autorally_move_base/TebLocalPlannerROS/max_vel_theta',
     '/autorally_move_base/TebLocalPlannerROS/min_turning_radius',
     '/autorally_move_base/TebLocalPlannerROS/min_obstacle_dist', # new
@@ -34,7 +34,7 @@ GENOME_MAPPING: [
     '/autorally_move_base/TebLocalPlannerROS/weight_inflation', # new
     '/autorally_move_base/TebLocalPlannerROS/weight_adapt_factor', # new
     '/autorally_move_base/global_costmap/inflation_layer/inflation_radius', 
-    '/autorally_move_base/local_costmap/inflation_layer/inflation_radius',
+    '/autorally_move_base/local_costmap/inflation_layer/inflation_radius']
 GENOME_WEIGHTS: [10, 10, 10, 10.0,
     2.5, 10, 1, # new
     100, 100, 100, 
