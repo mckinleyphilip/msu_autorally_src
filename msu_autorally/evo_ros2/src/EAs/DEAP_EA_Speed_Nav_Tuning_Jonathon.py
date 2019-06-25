@@ -37,7 +37,7 @@ class Nav_Tuning_DEAP_EA():
         self.debug = cmd_args.debug
         
         # EA Params
-        self.experiment_name = "nav_tuning_new_params_rand_dir-TEST"
+        self.experiment_name = "nav_tuning_new_params_rand_dir"
         
         self.pop_size = 50
         self.num_generations = 25
@@ -77,7 +77,10 @@ class Nav_Tuning_DEAP_EA():
                 if self.gen_time_list:
                     avg_gen_time = np.mean(self.gen_time_list)
                 else:
-                    avg_gen_time = 2 * 200
+                    # Static Estimate:
+                    # observed avg: ~10 min/gen + ~20 min for first eval
+                    avg_gen_time = (600*self.num_generations*25 + 1200) / 26 
+
                 seconds_left = avg_gen_time * (self.num_generations+1) *\
                     (starting_run_number+num_runs+1 - i)
                 time_left_str = seconds_to_time_str(seconds_left)
