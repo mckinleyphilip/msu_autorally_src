@@ -5,12 +5,13 @@
 	
 	<!-- Spawn the simulated platform model -->
 	<include file="$(find msu_autorally_helper)/launch/spawn_autorally_model.launch">
-		<arg name="x" value="0"/>
-		<arg name="y" value="-25.5"/>
-		<arg name="z" value="0.3"/>
+        <!-- Start configuration -->
+		<arg name="x" value="15.5"/>
+		<arg name="y" value="-14.5"/>
+		<arg name="z" value="0.0"/>
 		<arg name="roll" value="0.0"/>
 		<arg name="pitch" value="0.0"/>
-		<arg name="yaw" value="0.785398"/>
+		<arg name="yaw" value="2.356194"/>
 	</include>
 	
 	<!-- Start the ROS Navigation Stack -->

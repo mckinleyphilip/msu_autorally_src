@@ -8,6 +8,7 @@
 import rospy
 import math
 import argparse
+import random
 
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -45,7 +46,38 @@ class MoveBaseSeq():
 		#	 Unpacking(*) the sequence of point coordinates into a Point constructor
 		#	 Unpacking(*) the sequence of quaternions into a Quaternion constructor
 		#	 And feeding both into a Pose constructor
-		for index, point in enumerate(points):
+
+                # RANDOMIZE DIRECTION
+                if random.random() < 0.5:
+                    print('moving clockwise')
+                    
+                    # reverse all points except last -- "complicated" because of duplicates
+
+                    # GENERALIZED ROUTINE for points
+                    #upper_bnd = int((len(points)-2)/4)*2
+                    #for i in range(0, upper_bnd, 2):
+                    #    tmp = points[i]
+                    #    j = len(points)-2 - (i+2)
+                    #    points[i] = points[i+1] = points[j]
+                    #    points[j] = points[j+1] = tmp
+
+                    # hard coded version
+                    points[0] = points[5]
+                    points[4] = points[1]
+                    
+                    points[1] = points[0]
+                    points[5] = points[4]
+
+                    quat_seq[2] = quat_seq[7]
+                    quat_seq[6] = quat_seq[3]
+
+                    quat_seq[3] = quat_seq[2]
+                    quat_seq[7] = quat_seq[6]
+                else:
+                    # move counter-clockwise -- default order
+                    print('moving counter-clockwise')
+
+                for index, point in enumerate(points):
 			print("\tGoal: {}\nPos:\n{}\nQuat:\n{}\n".format(index, Point(*point),Quaternion(*quat_seq[index]) ) )
 			self.pose_seq.append(Pose(Point(*point),Quaternion(*quat_seq[index])))
 			
