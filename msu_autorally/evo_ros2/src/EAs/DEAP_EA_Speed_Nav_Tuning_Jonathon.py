@@ -39,8 +39,8 @@ class Nav_Tuning_DEAP_EA():
         # EA Params
         self.experiment_name = "nav_tuning_new_params_rand_dir-TEST"
         
-        self.pop_size = 5
-        self.num_generations = 1
+        self.pop_size = 50
+        self.num_generations = 25
         
         self.genome_size = 18 # could make this automatic...
         self.tourn_size = 2
@@ -209,12 +209,8 @@ class Nav_Tuning_DEAP_EA():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
-        if hall_of_fame:
+        if hall_of_fame is not None:
             hall_of_fame.update(population)
-            print('hall of fame exists:')
-            print('hall_of_fame: %s, hof: %s' % hall_of_fame, self.hof)
-        else:
-            print('hall of fame does not exist...')
         
         record = stats.compile(population) if stats else {}
         logbook.record(gen=0, nevals=len(invalid_ind), **record)
@@ -244,10 +240,8 @@ class Nav_Tuning_DEAP_EA():
                 ind.fitness.values = fit
             
             # Update hall_of_fame if it exists
-            if hall_of_fame:
+            if hall_of_fame is not None:
                 hall_of_fame.update(offspring)
-                print('hall of fame exists:')
-                print('hall_of_fame: %s, hof: %s' % hall_of_fame, self.hof)
             
             # Replace the current population
             population[:] = offspring
@@ -378,37 +372,29 @@ class Nav_Tuning_DEAP_EA():
         return raw_fit, fit
 
     def create_run_log(self):
-        print('begin create_run_log...')
         self.run_log = collections.OrderedDict()
         
         self.hof_fitnesses = list()
         for ind in self.hof:
             self.hof_fitnesses.append(ind.fitness.values)
-        print('done getting hof ftinesses')
 
         self.run_log['experiment_name'] = self.experiment_name
         self.run_log['run_number'] = self.run_number
         self.run_log['run_date'] = str(datetime.datetime.now())
         self.run_log['running_time'] = (self.run_time)
-        print('trying to access best...')
         self.run_log['best_ind'] = self.hof[0]
         self.run_log['best_ind_fitness'] = self.hof[0].fitness.values
-        print('done accessing best')
         self.run_log['summary_log'] = self.summary_log
-        
         self.email_log = copy.deepcopy(self.run_log)
-        
         self.run_log['hall_of_fame'] = list(self.hof)
         self.run_log['hall_of_fame_fitnesses'] = self.hof_fitnesses
         self.run_log['detailed_log'] = self.detailed_log
-
-        print('end create_run_log')
 
     def write_run_log(self):
         with open('{}/log.json'.format(self.run_directory), 'w+') as outfile:
             json.dump(self.run_log, outfile, indent=2)
         details_of_best_ind = self.detailed_log[str(self.hof[0])]
-        df = pd.read_json(detailed_of_best_ind['dataFrame'], orient='columns')
+        df = pd.read_json(details_of_best_ind['dataFrame'], orient='columns')
         df = df.sort_index()
         df.to_csv(self.run_directory + '/best_ind_details.csv')
 
@@ -419,7 +405,7 @@ class Nav_Tuning_DEAP_EA():
         msg['TO'] = str(self.email_reciever_list)
         msg['Subject'] = 'EA Results'
         
-        HOST = 'smpt.gmail.com'
+        HOST = 'smtp.gmail.com'
         PORT = '587'
         SERVER = smtplib.SMTP()
         SERVER.connect(HOST, PORT)
