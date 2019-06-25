@@ -110,7 +110,7 @@ void base_controller_nodelet::speedCallback(const geometry_msgs::TwistPtr& msg)
 	
 	
 	// Handle Throttle
-	double speed_multiplier = 1.5;
+	double speed_multiplier = 1.0; // used to be 1.5 -- JF
 	m_mostRecentSpeedCommand.data = speed_multiplier * float(msg->linear.x);
 	
 	
