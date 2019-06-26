@@ -103,12 +103,12 @@ class MoveBaseSeq():
 		pass
 		
 	def active_cb(self):
-		rospy.loginfo("Goal pose "+str(self.goal_cnt+1)+" is now being processed by the Action Server...")
+		rospy.loginfo("Goal pose %s is now being processed by the Action Server..."%self.goal_cnt)
 
 	def feedback_cb(self, feedback):
 		#To print current pose at each feedback:
 		#rospy.loginfo("Feedback for goal "+str(self.goal_cnt)+": "+str(feedback))
-		#rospy.loginfo("Feedback for goal pose "+str(self.goal_cnt+1)+" received")
+		#rospy.loginfo("Feedback for goal pose "+str(self.goal_cnt)+" received")
 		pass
 
 	def done_cb(self, status, result):
@@ -119,48 +119,38 @@ class MoveBaseSeq():
 		# 2 - PREEMPTED - The goal received a cancel request after it started executing
 		#		and has since completed its execution (Terminal State)
 		if status == 2:
-			rospy.loginfo("PREEMPTED: Goal pose "+str(self.goal_cnt)+" received a cancel request after it started executing, completed execution!")
-
-
+			rospy.loginfo("PREEMPTED: Goal pose %s received a cancel request after it started executing, completed execution!" % (self.goal_cnt-1))
 		# 3 - SUCCEEDED - The goal was achieved successfully by the action server (Terminal State)
-		if status == 3:
+		elif status == 3:
 			
-			rospy.loginfo("SUCCEEDED: Goal pose "+str(self.goal_cnt)+" reached") 
-			self.goal_status_pub.publish(self.goal_cnt)
+			rospy.loginfo("SUCCEEDED: Goal pose %s reached" % (self.goal_cnt-1)) 
+			self.goal_status_pub.publish(self.goal_cnt-1)
 			if self.goal_cnt < len(self.pose_seq):
 				next_goal = MoveBaseGoal()
 				next_goal.target_pose.header.frame_id = "map"
 				next_goal.target_pose.header.stamp = rospy.Time.now()
 				next_goal.target_pose.pose = self.pose_seq[self.goal_cnt]
-				rospy.loginfo("Sending goal pose "+str(self.goal_cnt+1)+" to Action Server")
-				#rospy.loginfo(str(self.pose_seq[self.goal_cnt]))
+				rospy.loginfo("Sending goal pose %s to Action Server"%self.goal_cnt)
+				rospy.loginfo(str(self.pose_seq[self.goal_cnt]))
 				self.client.send_goal(next_goal, self.done_cb, self.active_cb, self.feedback_cb) 
 			else:
 				rospy.loginfo("Final goal pose reached!")
 				rospy.signal_shutdown("Final goal pose reached!")
-				self.goal_status_pub.publish(self.goal_cnt)
+				#self.goal_status_pub.publish(self.goal_cnt)
 				rospy.sleep(1.0)
-				return
-
 		# 4 - ABORTED - The goal was aborted during execution by the action server due
 		#    	to some failure (Terminal State)
-		if status == 4:
+		elif status == 4:
 			rospy.logerr("ABORTED: Goal pose "+str(self.goal_cnt)+" was aborted by the Action Server")
 			rospy.signal_shutdown("Goal pose "+str(self.goal_cnt)+" aborted, shutting down!")
-			return
-
-
 		# 5 - REJECTED - The goal was rejected by the action server without being processed,
 		#    	because the goal was unattainable or invalid (Terminal State)
-		if status == 5:
+		elif status == 5:
 			rospy.logerr("REJECTED: Goal pose "+str(self.goal_cnt)+" has been rejected by the Action Server")
 			rospy.signal_shutdown("Goal pose "+str(self.goal_cnt)+" rejected, shutting down!")
-			return
-
-
 		# 8 - RECALLED -The goal received a cancel request before it started executing
 		#    		and was successfully cancelled (Terminal State)
-		if status == 8:
+		elif status == 8:
 			rospy.loginfo("RECALLED: Goal pose "+str(self.goal_cnt)+" received a cancel request before it started executing, successfully cancelled!")
 
 	def movebase_client(self):
@@ -168,7 +158,7 @@ class MoveBaseSeq():
 		goal.target_pose.header.frame_id = "map"
 		goal.target_pose.header.stamp = rospy.Time.now()
 		goal.target_pose.pose = self.pose_seq[self.goal_cnt]
-		rospy.loginfo("Sending goal pose "+str(self.goal_cnt+1)+" to Action Server")
+		rospy.loginfo("Sending goal pose %s to Action Server" % self.goal_cnt)
 		rospy.loginfo(str(self.pose_seq[self.goal_cnt]))
 		self.client.send_goal(goal, self.done_cb, self.active_cb, self.feedback_cb)
 		rospy.spin()

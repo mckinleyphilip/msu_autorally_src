@@ -201,8 +201,8 @@ class AutorallySimManagerNode():
 		for x in range(len(self.log)):
 			msg.result.append(Float64Array())
 		
-		print(self.log)
-		print(self.result_headers)
+		#print(self.log)
+		#print(self.result_headers)
 		
 		for index, log_array in enumerate(self.log):
 			msg.result[index].header = self.result_headers[index]
