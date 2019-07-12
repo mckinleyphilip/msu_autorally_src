@@ -13,9 +13,9 @@ args= parser.parse_args()
 print('Starting update scripts on robo nodes...')
 
 
-work_nodes_file_name = 'active_nodes.yml'
+work_nodes_file_name = 'robo8-10_nodes.yml'
 #work_nodes_file_name = 'test_nodes.yml'
-git_branch = "PID_evol_experiment"
+git_branch = "nav_stack_tuning_kinetic"
 
 with open(os.path.dirname(os.path.abspath(__file__)) + '/{}'.format(work_nodes_file_name), 'r') as ymlfile:
 	cfg = yaml.load(ymlfile)
@@ -30,9 +30,11 @@ for worker in cfg['worker_list']:
 		git fetch --all;
 		git reset --hard origin/{};
 		git log -1;
+                cd ~/autorally_catkin_ws;
+                catkin_make;
 		exec bash
 		""".format(git_branch)
-	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X {} "{}"&'.format(worker,ip,cmds)
+	cmd_str = 'xterm -title "Connection to {}" -hold -e ssh -t -X jared@{} "{}"&'.format(worker,ip,cmds)
 	os.system(cmd_str)
 
 print('Script finished! \n')

@@ -48,7 +48,7 @@ class plot_generator():
 				self.import_file(filename)
 				self.create_run_plots()
 		else:
-			self.run_number = 2
+			self.run_number = 1
 			
 			self.run_directory = '../run{}/'.format(self.run_number)
 			filename = '{}log.json'.format(self.run_directory)

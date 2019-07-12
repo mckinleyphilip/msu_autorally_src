@@ -39,7 +39,7 @@ class Nav_Tuning_DEAP_EA():
         self.debug = cmd_args.debug
         
         # EA Params
-        self.experiment_name = "nav_tuning_new_params_rand_dir"
+        self.experiment_name = "nav_tuning_18params_rand_dir-no_speed_mult"
         
         self.pop_size = 50
         self.num_generations = 25
@@ -109,11 +109,16 @@ class Nav_Tuning_DEAP_EA():
                     avg_gen_time = np.mean(self.gen_time_list)
                 else:
                     # Static Estimate:
-                    # observed avg: ~10 min/gen + ~20 min for first eval
-                    avg_gen_time = (600*self.num_generations*25 + 1200) / 26 
+                    # observed avg: ~20 min / 50 evals (generations eval approx 3/5 pop_size)
+                    avg_gen_time = (1200*self.pop_size/50 * (1 + self.num_generations*0.6)) /\
+                            (self.num_generations+1) 
 
                 seconds_left = avg_gen_time * (self.num_generations+1) *\
+<<<<<<< HEAD
                     (self.starting_run_number+self.num_runs+1 - i)
+=======
+                    (starting_run_number+num_runs - i)
+>>>>>>> 82e3080a841795f712d6f1983a28fe7cb3b7dd0c
                 time_left_str = seconds_to_time_str(seconds_left)
 
                 self.run_number = i
@@ -310,7 +315,9 @@ class Nav_Tuning_DEAP_EA():
         record = stats.compile(population) if stats else {}
         logbook.record(gen=0, nevals=len(invalid_ind), **record)
         
-        self.gen_time_list.append(time.time() - self.gen_start_time)
+        # Only store of this time since, on avg, in each generation only 3/5
+        # the pop size is evaluated.
+        self.gen_time_list.append((time.time() - self.gen_start_time)*0.6)
         
         # Begin generational process
         for gen in range(1, num_gens+1):
@@ -367,8 +374,10 @@ class Nav_Tuning_DEAP_EA():
                     return_data = dict(self.reciever.recv_json(zmq.NOBLOCK))
             else:
                 print('Timeout on reciever socket occured!')
-                non_resolved_ind = fitnesses.index(float('Inf'))
-                self.sender.send_json(individuals[non_resolved_ind])
+                # resend all invalid individuals instead of just one of them
+                for i in range(len(fitnesses)):
+                    if fitnesses[i] == float('Inf'):
+                        self.sender.send_json(individuals[i])
                 continue
             
             ind = list(return_data['Genome'])
