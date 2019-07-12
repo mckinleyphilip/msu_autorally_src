@@ -30,7 +30,11 @@ class MoveBaseSeq():
 		
 		# Write command line arguments into class variables
 		self.debug = cmd_args.debug
-		
+                self.direction = cmd_args.direction
+                
+                # Let rosparams override command line arguments
+                if rospy.has_param('force_direction'):
+                    self.direction = rospy.get_param('force_direction')
 		
 		# List of goal positions
 		points = rospy.get_param('move_base_seq/p_seq')
@@ -42,14 +46,17 @@ class MoveBaseSeq():
 		self.pose_seq = list()
 		self.goal_cnt = 0
 		
-		# Create a sequence of goal poses by
-		#	 Unpacking(*) the sequence of point coordinates into a Point constructor
-		#	 Unpacking(*) the sequence of quaternions into a Quaternion constructor
-		#	 And feeding both into a Pose constructor
-
                 # RANDOMIZE DIRECTION
-                if random.random() < 0.5:
+                if self.direction not in ('clockwise', 'counterclockwise', 'counter-clockwise'):
+                    print('Using random direction...')
+                    if random.random() < 0.5:
+                        self.direction = 'clockwise'
+                    else:
+                        self.direction = 'counterclockwise'
+
+                if self.direction == 'clockwise':
                     print('moving clockwise')
+                    rospy.set_param('direction', -1)
                     
                     # reverse all points except last -- "complicated" because of duplicates
 
@@ -76,6 +83,12 @@ class MoveBaseSeq():
                 else:
                     # move counter-clockwise -- default order
                     print('moving counter-clockwise')
+                    rospy.set_param('direction', 1)
+
+		# Create a sequence of goal poses by
+		#	 Unpacking(*) the sequence of point coordinates into a Point constructor
+		#	 Unpacking(*) the sequence of quaternions into a Quaternion constructor
+		#	 And feeding both into a Pose constructor
 
                 for index, point in enumerate(points):
 			print("\tGoal: {}\nPos:\n{}\nQuat:\n{}\n".format(index, Point(*point),Quaternion(*quat_seq[index]) ) )
@@ -167,6 +180,8 @@ if __name__ == '__main__':
 	# Parse arguments
 	parser = argparse.ArgumentParser(description='Move base goal publisher node. Takes rosparams move_base/p_seq and move_base/quat_seq and loads them into a sequence of move_base goals that are published to the autorally')
 	parser.add_argument('-d', '--debug', action='store_true', help='Print extra output to terminal.')
+        parser.add_argument('-f', '--force_direction', type=str, dest='direction',
+        default='', help='Force direction of travel about the track')
 	args, unknown = parser.parse_known_args() # Only parse arguments defined above
 	
 	

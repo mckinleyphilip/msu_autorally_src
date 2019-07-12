@@ -6,7 +6,7 @@
 	<!-- Spawn the simulated platform model -->
 	<include file="$(find msu_autorally_helper)/launch/spawn_autorally_model.launch">
         <!-- Start configuration -->
-		<arg name="x" value="15.5"/>
+		<arg name="x" value="14.5"/>
 		<arg name="y" value="-14.5"/>
 		<arg name="z" value="0.0"/>
 		<arg name="roll" value="0.0"/>

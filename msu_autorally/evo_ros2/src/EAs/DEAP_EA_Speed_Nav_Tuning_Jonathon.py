@@ -26,11 +26,13 @@ import time
 import os, sys
 from os import listdir
 from os.path import isfile, join
-import json
+import json, yaml
 import collections
 import datetime
 
 import copy
+
+import math
 
 class Nav_Tuning_DEAP_EA():
     def __init__(self, cmd_args):
@@ -42,11 +44,16 @@ class Nav_Tuning_DEAP_EA():
         self.pop_size = 50
         self.num_generations = 25
         
-        self.genome_size = 18 # could make this automatic...
+        path_to_genome_config = '../../config/genome_mapping.yaml'
+        with open(path_to_genome_config) as ymlfile:
+            self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
+            #print('genome_config: %s' % self.genome_config)
+
+        self.genome_size = len(self.genome_config['GENOME_WEIGHTS'])
         self.tourn_size = 2
         
-        starting_run_number = 1
-        num_runs = 1
+        self.starting_run_number = 1
+        self.num_runs = 5
         
         # Running Params
         self.timeout = 500 * 1000
@@ -62,18 +69,42 @@ class Nav_Tuning_DEAP_EA():
         self.gen_start_time = 0
         self.gen_time_list = []
 
+        self.detailed_log = dict()
+        self.gen=-1
+
+    def network_wrapper(self, method, *args):
+        """
+        Try to implement something like this to reduce copied code between a full run and a
+        single evaluation.
+        """
+        try: 
+            self.setup_sockets()
+            signal.signal(signal.SIGINT, self.shutdown_handler)
+            
+            result = self.method(*args)
+            
+        except BaseException as e:
+            print(e)
+        finally:
+            self.sender.close()
+            self.reciever.close()
+            self.context.destroy()
+    
+        return result
+
+    def full_run(self):
         try:
             self.setup_sockets()
             signal.signal(signal.SIGINT, self.shutdown_handler)
             
-            print('About to start {} runs of experiment {}'.format(num_runs,
+            print('About to start {} runs of experiment {}'.format(self.num_runs,
                 self.experiment_name))
             print('Pop = {}, Generations = {}, IP addr = {}'.format(self.pop_size,
                 self.num_generations, self.ip_addr))
-            print('\tStarting at run #{}'.format(starting_run_number))
+            print('\tStarting at run #{}'.format(self.starting_run_number))
             raw_input('Press enter to run')
             
-            for i in range(starting_run_number, starting_run_number + num_runs):
+            for i in range(self.starting_run_number, self.starting_run_number + self.num_runs):
                 if self.gen_time_list:
                     avg_gen_time = np.mean(self.gen_time_list)
                 else:
@@ -82,7 +113,7 @@ class Nav_Tuning_DEAP_EA():
                     avg_gen_time = (600*self.num_generations*25 + 1200) / 26 
 
                 seconds_left = avg_gen_time * (self.num_generations+1) *\
-                    (starting_run_number+num_runs+1 - i)
+                    (self.starting_run_number+self.num_runs+1 - i)
                 time_left_str = seconds_to_time_str(seconds_left)
 
                 self.run_number = i
@@ -107,6 +138,67 @@ class Nav_Tuning_DEAP_EA():
                 
                 self.email_notification(json.dumps(self.email_log, indent=2))
                 print('Email notification sent!')
+        except BaseException as e:
+            print(e)
+        finally:
+            self.sender.close()
+            self.reciever.close()
+            self.context.destroy()
+
+    def single_eval(self, ind, use_raw_params=False):
+        if len(ind) != self.genome_size:
+            err_str = 'Specified individual has an invalid number of genomes: %d instead of %d'
+            err_str = err_str % (len(ind), self.genome_size)
+            raise ValueError(err_str)
+        
+        print('About to run one evaluation of the individual: %s' % ind)
+        _ = raw_input('Would you like to continue? (Press ENTER)')
+        
+        self.start_time = time.time()
+
+        try: 
+            self.setup_sockets()
+            signal.signal(signal.SIGINT, self.shutdown_handler)
+
+            # scale down individual according to genome weights
+            if not use_raw_params:
+                for i in range(len(ind)):
+                    ind[i] /= self.genome_config['GENOME_WEIGHTS'][i]
+            print('sending %s...' % ind)
+            self.sender.send_json(ind)
+
+            raw_fit, fitness = None, float('Inf')
+
+
+            while fitness == float('Inf'):
+                socks = dict(self.poller.poll(self.timeout))
+                if socks:
+                    if socks.get(self.reciever) == zmq.POLLIN:
+                        return_data = dict(self.reciever.recv_json(zmq.NOBLOCK))
+                else:
+                    print('Timeout on reciever socket occured!')
+                    non_resolved_ind = fitnesses.index(float('Inf'))
+                    self.sender.send_json(individuals[non_resolved_ind])
+                    continue
+                
+                ind = list(return_data['Genome'])
+                result = dict(return_data['Result'])
+                raw_fit, fitness = self.evaluate_result(ind, result)
+                
+                #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
+                raw_fit_str = '[%5.2f, %6.2f]' % tuple(raw_fit)
+                fit_str = '%.2f'%fitness
+
+                time_elapsed = time.time() - self.start_time
+                time_elapsed_str = seconds_to_time_str(time_elapsed)
+
+                out_str = '{} -- {} Time Elapsed: {}'.format(fit_str, raw_fit_str,
+                        time_elapsed_str)
+
+                print(out_str)
+                with open('single_eval_result.txt', 'w') as f:
+                    f.write(out_str)
+            
         except BaseException as e:
             print(e)
         finally:
@@ -180,7 +272,7 @@ class Nav_Tuning_DEAP_EA():
             print('No directory for run... Creating now.')
             os.makedirs(self.run_directory)
         else:
-            print('Directory exists, may end up writing over some files...')
+             print('Directory exists, may end up writing over some files...')
     
     def run(self):
         self.population = self.toolbox.population(n=self.pop_size)
@@ -313,7 +405,9 @@ class Nav_Tuning_DEAP_EA():
                             break
             num_evaluated += 1
             
-            raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
+            #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
+            #fit_str = '%.2f'%fitness
+            raw_fit_str = '[%5.2f, %6.2f, %1.0f]' % tuple(raw_fit)
             fit_str = '%.2f'%fitness
 
             time_elapsed = time.time() - self.gen_start_time
@@ -321,7 +415,7 @@ class Nav_Tuning_DEAP_EA():
 
             print('{:>2}/{}: {} -- {} Time Elapsed: {}'.format(num_evaluated,
                 len(individuals), fit_str, raw_fit_str, time_elapsed_str))
-        
+
         return fitnesses
 
     def evaluate_result(self, ind, result):
@@ -330,38 +424,86 @@ class Nav_Tuning_DEAP_EA():
         # Get rid of all 0s entry ???
         df = df.truncate(before=2)
         
-        # Speeds
-        avg_speed = df['Actual Speed'].mean()
-        max_speed = df['Actual Speed'].max()
-        
-        norm_avg_speed = avg_speed / 15
-        norm_max_speed = max_speed / 15
-        
-        # Waypoints
-        waypoints_achieved = df['Goal Status'].max()
-        norm_wp = waypoints_achieved / 4.0
-        
         # Raw Time
         time_elapsed = df['Time'].max()
+
+        # Progress
+        for d in df['Direction']:
+            if abs(d) == 1:
+                desired_direction = d
+                break
+
+        # Goal
+        goal_status = max(df['Goal Status'])
         
-        # Raw Dist
-        dx = np.diff(df['Pos X'])
-        dy = np.diff(df['Pos Y'])
-        d = np.hypot(dx, dy)
-        total_dist = np.sum(d)
+        prog_list = []
+        for x,y in zip(df['Pos X'], df['Pos Y']):
+            prog_list.append(pos_to_progress((x, y), desired_direction))
         
-        if norm_wp > 0.8:
-            norm_time_elapsed = 15.2 / time_elapsed
-            norm_dist = 152.67 / total_dist
-        
+        # For detecting errors in simulation...
+        coarseness = 50 # get progress once every 5 seconds
+        jump_bdry = coarseness/185.0
+        backwards_bdry = -5.0/185
+
+        coarse_prog = 0
+        coarse_diff = 0
+        jump_flag = False
+        backwards_flag = False
+        err_detected = False
+
+        prog_actual = [0.0]
+        for i in range(len(prog_list)):
+            p = prog_list[i]
+
+            # Update progress to current iff it is achieveable going forwards, otherwise repeats
+            if i > 0:
+                prog_diff = p - prog_actual[i-1]
+                if prog_diff < 0 or jump_bdry < prog_diff:
+                    prog_actual.append(prog_actual[i-1])
+                    #print('[%4d] Detected backwards or abnormal forward mvnt' % i)
+                else:
+                    prog_actual.append(p)
+
+            if (i % coarseness) == 0:
+                if (jump_flag or backwards_flag):
+                    if p - coarse_prog < backwards_flag:
+                        err_detected = True
+                    else:
+                        #print('Reseting err flags...')
+                        jump_flag = False
+                        backwards_flag = False
+
+                if p - coarse_prog > jump_bdry:
+                    jump_flag = True
+                    #print('Jump Detected!')
+                    #print('\t%.3f to %.3f -- note bdry at %f' % (coarse_prog, p, jump_bdry))
+                elif p - coarse_prog < backwards_bdry:
+                    backwards_flag = True
+                    #print('Significant Backwards Movement Detected!')
+                    #print('\t%.3f to %.3f -- note bdry at %f' % (coarse_prog, p, backwards_bdry))
+                    
+                coarse_prog = p
+
+        # Determine max progress from the last actual progress recorded
+        max_prog = prog_actual[-1]
+
+        if err_detected:
+            print('Err detected, max_prog = %.2f' % max_prog)
+            #max_prog = -1
+
+        prog_df = pd.DataFrame(data={'Progress': prog_actual})
+        df = df.join(prog_df)
+
+        raw_fit = [max_prog, time_elapsed, goal_status]
+        if max_prog > 0.95:
+            fit = 4 + (1 + 18.51 / time_elapsed) ** 2
         else:
-            norm_time_elapsed = time_elapsed / 300.0
-            norm_dist = total_dist / 444
-        
-        raw_fit = [avg_speed, max_speed, waypoints_achieved, time_elapsed, total_dist]
-        norm_fit = [norm_avg_speed * 2, norm_max_speed * 2, norm_wp * 3, norm_time_elapsed,
-                norm_dist]
-        fit = (sum(norm_fit),)
+            fit = (1 + max_prog) ** 2
+
+        #raw_fit = [avg_speed, max_speed, waypoints_achieved, time_elapsed, total_dist]
+        #norm_fit = [norm_avg_speed * 2, norm_max_speed * 2, norm_wp * 3, norm_time_elapsed,
+        #        norm_dist]
+        #fit = (sum(norm_fit),)
         
         # Add individual to detailed log
         if str(ind) not in self.detailed_log.keys():
@@ -372,7 +514,7 @@ class Nav_Tuning_DEAP_EA():
                     'dataFrame': df.to_json()
                     }
         
-        return raw_fit, fit
+        return raw_fit, (fit,)
 
     def create_run_log(self):
         self.run_log = collections.OrderedDict()
@@ -420,7 +562,58 @@ class Nav_Tuning_DEAP_EA():
         
         SERVER.sendmail(sender, self.email_reciever_list, msg.as_string())
         SERVER.quit()
-    
+
+def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23.48):
+    """
+    Returns the effective fraction of distance around the track dependent
+    on the intended direction (-1 for clockwise, 1 for counter clockwise).
+
+    Note that the track is defined by the last three parameters:
+        - ell : defines the length of the straitaway
+        - rad_inner : the inner radius of the annulus
+        - rad_outer : the outer radius of the annulus
+    and their default values are based on estimates via rviz.
+    """
+    rad_avg = (rad_inner + rad_outer) / 2
+    L = 2 * ell + 2 * math.pi * rad_avg
+
+    c = math.sqrt(2)/2
+    s = math.sqrt(2)/2
+
+    rot_pos = (c*raw_pos[0] + s*raw_pos[1], -s*raw_pos[0]+c*raw_pos[1])
+
+    # First assume counter clockwise (corrected after piecewise function)
+    if -ell/2 <= rot_pos[0] and rot_pos[0] <= ell/2: # in rectangle portion
+        if rot_pos[1] > 0: # in top portion
+            # completed bottom half and one turn
+            base_progress = ell/2 + math.pi*rad_avg
+            eff_progress = base_progress + (ell/2 - rot_pos[0])
+        else: # in bottom portion
+            if rot_pos[0] > 0:
+                eff_progress = rot_pos[0]
+            else:
+                # completed bottom half, two turns, and top
+                base_progress = 1.5*ell + 2*math.pi*rad_avg
+                eff_progress = base_progress + (ell/2 + rot_pos[0])
+    else: # in annulus
+        if rot_pos[0] > 0: # in right portion
+            # completed bottom half
+            base_progress = 0.5*ell
+            eff_theta = math.pi - math.atan2(rot_pos[0] + ell/2, rot_pos[1])
+        else: # in left portion
+            # completed bottom half, one turn, and top
+            base_progress = 1.5*ell + math.pi*rad_avg
+            eff_theta = -math.atan2(rot_pos[0] - ell/2, rot_pos[1])
+
+        eff_progress = base_progress + rad_avg*eff_theta
+
+    eff_progress /= L # normalize
+
+    if direction < 0:
+        eff_progress = 1 - eff_progress
+
+    return eff_progress
+
 def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
     int_sec = int(seconds)
     frac_sec = seconds - int_sec
@@ -446,6 +639,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Front end DEAP EA for nav tuning Study')
     parser.add_argument('-d', '--debug', action='store_true',
             help='Print extra output to terminal.')
+    parser.add_argument('-p', '--single_test_params', dest='single_params', metavar='N',
+            nargs='*', help='Define parameters to do a single evaluateion.')
+    parser.add_argument('--raw_params', action='store_true', dest='use_raw_params',
+            help='Use this flag to indicate that the above parameters need not be scaled down.')
     args, unknown = parser.parse_known_args()
 
     node = Nav_Tuning_DEAP_EA(cmd_args = args)
+
+    if args.single_params:
+        individual = [float(p) for p in args.single_params]
+        node.single_eval(individual, args.use_raw_params)
+    else:
+        node.full_run()

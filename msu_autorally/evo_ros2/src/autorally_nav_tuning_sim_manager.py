@@ -105,7 +105,8 @@ class AutorallySimManagerNode():
 					#print('{}/{}'.format(self.current_time, self.max_sim_time))
 					self.log_event() # Log events update current time
 					self.sleep_rate.sleep()
-				
+
+                                self.log_event() # make sure that the final results are stored as well...
 				result_msg = self.end_sim()
 				self.set_evo_ros2_state(6, msg = result_msg)
 				continue
@@ -117,13 +118,18 @@ class AutorallySimManagerNode():
 		except:
 			rospy.logerr('{} - Failed to get sim time!'.format(self.node_name))
 			
-		self.result_headers = ['Time', 'Goal Speed', 'Actual Speed', 'Goal Status', 'Pos X', 'Pos Y', 'Pos Z', 'Ori X', 'Ori Y', 'Ori Z', 'Ori W']
+		self.result_headers = ['Time', 'Goal Speed', 'Actual Speed', 'Goal Status', 'Pos X', 'Pos Y', 'Pos Z', 'Ori X', 'Ori Y', 'Ori Z', 'Ori W', 'Direction']
 		self.last_goal_speed = 0
 		self.last_actual_speed = 0
 		self.last_goal = 0
 		self.pos = [0,0,0]
 		self.ori = [0,0,0,0]
-		self.log = [[current_time],[self.last_goal_speed],[self.last_actual_speed], [self.last_goal], [self.pos[0]], [self.pos[1]], [self.pos[2]], [self.ori[0]], [self.ori[1]], [self.ori[2]], [self.ori[3]],]
+                if rospy.has_param('/direction'):
+                    self.dir = int(rospy.get_param('/direction'))
+                else:
+                    self.dir = 0
+                    rospy.logwarn('Failed to get direction on startup...')
+		self.log = [[current_time],[self.last_goal_speed],[self.last_actual_speed], [self.last_goal], [self.pos[0]], [self.pos[1]], [self.pos[2]], [self.ori[0]], [self.ori[1]], [self.ori[2]], [self.ori[3]], [self.dir]]
 		
 		
 	def log_event(self):
@@ -143,6 +149,13 @@ class AutorallySimManagerNode():
 		self.log[8].append(self.ori[1])
 		self.log[9].append(self.ori[2])
 		self.log[10].append(self.ori[3])
+
+                if rospy.has_param('/direction'):
+                    self.dir = int(rospy.get_param('/direction'))
+                else:
+                    self.dir = 0
+                    rospy.logwarn('Failed to get direction on log...')
+                self.log[11].append(self.dir)
 		
 	def model_states_cb(self, msg):
 		platform_name = "autoRallyPlatform"
@@ -154,8 +167,9 @@ class AutorallySimManagerNode():
 			
 		
 	def goal_status_cb(self, msg):
-		if msg.data % 2 == 0:
-			self.last_goal = float(msg.data/2)
+            if msg.data % 2 == 1:
+                self.last_goal = float((msg.data+1)/2)
+                print('last goal = %s' % self.last_goal)
 		
 	def wheel_speed_topic_cb(self, msg):
 		self.last_actual_speed = (msg.lfSpeed + msg.rfSpeed) / 2.0

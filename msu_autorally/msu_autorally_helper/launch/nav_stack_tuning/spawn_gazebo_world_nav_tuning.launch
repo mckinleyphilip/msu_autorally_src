@@ -4,6 +4,7 @@
 	<env name="GAZEBO_RESOURCE_PATH" value="$(find autorally_description)"/>
 	<arg name="namespace" default="autorally_platform"/>
 	<arg name="world_name" default="model://urdf/obstacle_sky_world2.world"/>
+	<!-- arg name="world_name" default="model://urdf/obstacle_sky_world2.world"/ -->
 	<arg name="cmd_timeout" default="0.5"/>
 	<arg name="gui" default="false"/>
 	<arg name="spawn_track" default="true"/>
