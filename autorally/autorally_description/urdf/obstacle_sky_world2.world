@@ -1,35 +1,32 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <sdf version="1.4">
-	<world name="default">
-		<scene>
-			<sky>
-				<clouds>
-					<speed>12</speed>
-				</clouds>
-			</sky>
-		<ambient>1.0 1.0 1.0 1.0</ambient>
-		<shadows>false</shadows>
-		</scene>
-
-		<!-- A global light source -->
-		<include>
-			<uri>model://urdf/models/sun</uri>
-		</include>
-		<!-- A ground plane -->
-		<include>
-			<uri>model://urdf/models/dirt_plane</uri>
-		</include>
-		
-	<physics type='ode'>
-		<max_step_size>0.0025</max_step_size>
-		<real_time_factor>0</real_time_factor>
-		<real_time_update_rate>1000</real_time_update_rate>
-		<gravity>0 0 -9.8</gravity>
-	</physics>
-	
-	<model name='unit_box'>
-      <pose frame=''>24.0285 -0.217301 0.5 0 -0 0</pose>
-      <link name='link'>
+  <world name="default">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+      <ambient>1.0 1.0 1.0 1.0</ambient>
+      <shadows>false</shadows>
+    </scene>
+    <!-- A global light source -->
+    <include>
+      <uri>model://urdf/models/sun</uri>
+    </include>
+    <!-- A ground plane -->
+    <include>
+      <uri>model://urdf/models/dirt_plane</uri>
+    </include>
+    <physics type="ode">
+      <max_step_size>0.0025</max_step_size>
+      <real_time_factor>0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+    <model name="unit_box">
+      <pose frame="">24.0285 -0.217301 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -41,7 +38,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -61,7 +58,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -78,9 +75,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_0'>
-      <pose frame=''>30.1684 1.48516 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_0">
+      <pose frame="">30.1684 1.48516 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -92,7 +89,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -112,7 +109,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -129,9 +126,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_1'>
-      <pose frame=''>28.8252 14.6816 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_1">
+      <pose frame="">28.8252 14.6816 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -143,7 +140,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -163,7 +160,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -180,9 +177,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_2'>
-      <pose frame=''>18.8858 27.6648 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_2">
+      <pose frame="">18.8858 27.6648 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -194,7 +191,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -214,7 +211,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -231,9 +228,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_3'>
-      <pose frame=''>18.6276 31.3367 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_3">
+      <pose frame="">18.6276 31.3367 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -245,7 +242,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -265,7 +262,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -282,9 +279,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_4'>
-      <pose frame=''>9.04714 28.6652 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_4">
+      <pose frame="">9.04714 28.6652 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -296,7 +293,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -316,7 +313,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -333,9 +330,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_5'>
-      <pose frame=''>18.5465 29.467 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_5">
+      <pose frame="">18.5465 29.467 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -347,7 +344,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -367,7 +364,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -384,9 +381,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_6'>
-      <pose frame=''>-2.94948 26.034 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_6">
+      <pose frame="">-2.94948 26.034 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -398,7 +395,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -418,7 +415,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -435,9 +432,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_7'>
-      <pose frame=''>-15.1341 12.9472 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_7">
+      <pose frame="">-15.1341 12.9472 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -449,7 +446,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -469,7 +466,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -486,9 +483,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_8'>
-      <pose frame=''>-13.8393 11.6488 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_8">
+      <pose frame="">-13.8393 11.6488 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -500,7 +497,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -520,7 +517,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -537,9 +534,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_9'>
-      <pose frame=''>-12.6605 10.4933 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_9">
+      <pose frame="">-12.6605 10.4933 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -551,7 +548,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -571,7 +568,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -588,9 +585,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder'>
-      <pose frame=''>-27.2372 -12.0342 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder">
+      <pose frame="">-27.2372 -12.0342 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -602,7 +599,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -623,7 +620,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -641,9 +638,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder_0'>
-      <pose frame=''>-28.1858 -11.9723 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder_0">
+      <pose frame="">-28.1858 -11.9723 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -655,7 +652,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -676,7 +673,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -694,9 +691,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder_1'>
-      <pose frame=''>-29.3387 -11.9241 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder_1">
+      <pose frame="">-29.3387 -11.9241 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -708,7 +705,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -729,7 +726,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -747,9 +744,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder_2'>
-      <pose frame=''>-26.6621 -26.8904 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder_2">
+      <pose frame="">-26.6621 -26.8904 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -761,7 +758,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -782,7 +779,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -800,9 +797,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder_3'>
-      <pose frame=''>-23.4809 -25.9018 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder_3">
+      <pose frame="">-23.4809 -25.9018 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -814,7 +811,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -835,7 +832,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -853,9 +850,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder_4'>
-      <pose frame=''>-15.8288 -26.3927 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder_4">
+      <pose frame="">-15.8288 -26.3927 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -867,7 +864,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -888,7 +885,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -906,9 +903,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_cylinder_5'>
-      <pose frame=''>-11.489 -30.5994 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_cylinder_5">
+      <pose frame="">-11.489 -30.5994 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -920,7 +917,7 @@
             <izz>0.125</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -941,7 +938,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <cylinder>
               <radius>0.5</radius>
@@ -959,9 +956,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_10'>
-      <pose frame=''>-22.6256 0.732576 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_10">
+      <pose frame="">-22.6256 0.732576 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -973,7 +970,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -993,7 +990,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1010,9 +1007,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_11'>
-      <pose frame=''>-31.6964 -0.052409 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_11">
+      <pose frame="">-31.6964 -0.052409 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -1024,7 +1021,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1044,7 +1041,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1061,9 +1058,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_12'>
-      <pose frame=''>-30.577 -0.911043 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_12">
+      <pose frame="">-30.577 -0.911043 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -1075,7 +1072,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1095,7 +1092,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1112,9 +1109,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_13'>
-      <pose frame=''>-29.2445 -1.66814 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_13">
+      <pose frame="">-29.2445 -1.66814 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -1126,7 +1123,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1146,7 +1143,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1163,9 +1160,9 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='unit_box_14'>
-      <pose frame=''>-28.3677 -2.16835 0.5 0 -0 0</pose>
-      <link name='link'>
+    <model name="unit_box_14">
+      <pose frame="">-28.3677 -2.16835 0.5 0 -0 0</pose>
+      <link name="link">
         <inertial>
           <mass>1</mass>
           <inertia>
@@ -1177,7 +1174,7 @@
             <izz>0.166667</izz>
           </inertia>
         </inertial>
-        <collision name='collision'>
+        <collision name="collision">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1197,7 +1194,7 @@
             </friction>
           </surface>
         </collision>
-        <visual name='visual'>
+        <visual name="visual">
           <geometry>
             <box>
               <size>1 1 1</size>
@@ -1214,7 +1211,5 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-
-	
-	</world>
+  </world>
 </sdf>

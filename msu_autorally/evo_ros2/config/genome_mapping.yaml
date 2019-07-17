@@ -37,10 +37,10 @@ GENOME_MAPPING: [
     '/autorally_move_base/local_costmap/inflation_layer/inflation_radius']
 GENOME_WEIGHTS: [100, 100, 100, 100, 100, 100, 100, 100, 
     100, 100, 100, 100, 100, 100, 100, 100, 100, 100] 
-#GENOME_WEIGHTS: [10, 10, 10, 10.0,
-#    2.5, 10, 1, # new
-#    100, 100, 100, 
-#    100, # new
-#    100, 100, 
-#    100, 100, 10, # new
-#    2.5, 2.5]
+OLD_GENOME_WEIGHTS: [10, 10, 10, 10.0,
+    2.5, 10, 1, # new
+    100, 100, 100, 
+    100, # new
+    100, 100, 
+    100, 100, 10, # new
+    2.5, 2.5]

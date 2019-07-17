@@ -39,15 +39,19 @@ class Nav_Tuning_DEAP_EA():
         self.debug = cmd_args.debug
         
         # EA Params
-        self.experiment_name = "nav_tuning_18params_rand_dir-no_speed_mult"
+        self.experiment_name = "nav-tuning_18params_empty_large-search"
         
-        self.pop_size = 50
+        self.pop_size = 100
         self.num_generations = 25
         
         path_to_genome_config = '../../config/genome_mapping.yaml'
         with open(path_to_genome_config) as ymlfile:
             self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
             #print('genome_config: %s' % self.genome_config)
+
+        for k in ('GENOME_WEIGHTS', 'OLD_GENOME_WEIGHTS'):
+            for i in range(len(self.genome_config[k])):
+                self.genome_config[k][i] = float(self.genome_config[k][i])
 
         self.genome_size = len(self.genome_config['GENOME_WEIGHTS'])
         self.tourn_size = 2
@@ -72,144 +76,152 @@ class Nav_Tuning_DEAP_EA():
         self.detailed_log = dict()
         self.gen=-1
 
-    def network_wrapper(self, method, *args):
+        self.full_run = self.network_wrapper(self._full_run_core)
+        self.single_genome = self.network_wrapper(self._single_genome_core)
+
+    def network_wrapper(self, method):
         """
-        Try to implement something like this to reduce copied code between a full run and a
-        single evaluation.
+        Call this method to wrap a simulation method with a network try catch block.
         """
-        try: 
-            self.setup_sockets()
-            signal.signal(signal.SIGINT, self.shutdown_handler)
+        def wrapped_method(*args):
+            try: 
+                self.setup_sockets()
+                signal.signal(signal.SIGINT, self.shutdown_handler)
             
-            result = self.method(*args)
+                result = method(*args)
             
-        except BaseException as e:
-            print(e)
-        finally:
-            self.sender.close()
-            self.reciever.close()
-            self.context.destroy()
+            except BaseException as e:
+                print(e)
+            finally:
+                self.sender.close()
+                self.reciever.close()
+                self.context.destroy()
     
-        return result
+            return result
+         
+        return wrapped_method
 
-    def full_run(self):
-        try:
-            self.setup_sockets()
-            signal.signal(signal.SIGINT, self.shutdown_handler)
+    def _full_run_core(self):
+        print('About to start {} runs of experiment {}'.format(self.num_runs,
+            self.experiment_name))
+        print('Pop = {}, Generations = {}, IP addr = {}'.format(self.pop_size,
+            self.num_generations, self.ip_addr))
+        print('\tStarting at run #{}'.format(self.starting_run_number))
+        raw_input('Press enter to run')
+        
+        for i in range(self.starting_run_number, self.starting_run_number + self.num_runs):
+            if self.gen_time_list:
+                avg_gen_time = np.mean(self.gen_time_list)
+            else:
+                # Static Estimate:
+                # observed avg: ~20 min / 50 evals (generations eval approx 3/5 pop_size)
+                avg_gen_time = (1200*self.pop_size/50 * (1 + self.num_generations*0.6)) /\
+                        (self.num_generations+1) 
+
+            seconds_left = avg_gen_time * (self.num_generations+1) *\
+                (self.starting_run_number+self.num_runs+1 - i)
+            time_left_str = seconds_to_time_str(seconds_left)
+
+            self.run_number = i
             
-            print('About to start {} runs of experiment {}'.format(self.num_runs,
-                self.experiment_name))
-            print('Pop = {}, Generations = {}, IP addr = {}'.format(self.pop_size,
-                self.num_generations, self.ip_addr))
-            print('\tStarting at run #{}'.format(self.starting_run_number))
-            raw_input('Press enter to run')
+            # Set up for run
+            self.detailed_log = dict()
+            self.setup_EA()
+            self.setup_dirs()
             
-            for i in range(self.starting_run_number, self.starting_run_number + self.num_runs):
-                if self.gen_time_list:
-                    avg_gen_time = np.mean(self.gen_time_list)
-                else:
-                    # Static Estimate:
-                    # observed avg: ~20 min / 50 evals (generations eval approx 3/5 pop_size)
-                    avg_gen_time = (1200*self.pop_size/50 * (1 + self.num_generations*0.6)) /\
-                            (self.num_generations+1) 
+            print('\nStarting run #{} of experiment {}: ETR {}'.format(self.run_number,
+                self.experiment_name, time_left_str))
+            
+            # Run
+            self.start_time = time.time()
+            self.run()
+            
+            # Final logging and notifications 
+            self.create_run_log()
+            print('Run log created.')
+            self.write_run_log()
+            print('Log saved!')
+            
+            self.email_notification(json.dumps(self.email_log, indent=2))
+            print('Email notification sent!')
 
-                seconds_left = avg_gen_time * (self.num_generations+1) *\
-<<<<<<< HEAD
-                    (self.starting_run_number+self.num_runs+1 - i)
-=======
-                    (starting_run_number+num_runs - i)
->>>>>>> 82e3080a841795f712d6f1983a28fe7cb3b7dd0c
-                time_left_str = seconds_to_time_str(seconds_left)
-
-                self.run_number = i
-                
-                # Set up for run
-                self.detailed_log = dict()
-                self.setup_EA()
-                self.setup_dirs()
-                
-                print('\nStarting run #{} of experiment {}: ETR {}'.format(self.run_number,
-                    self.experiment_name, time_left_str))
-                
-                # Run
-                self.start_time = time.time()
-                self.run()
-                
-                # Final logging and notifications 
-                self.create_run_log()
-                print('Run log created.')
-                self.write_run_log()
-                print('Log saved!')
-                
-                self.email_notification(json.dumps(self.email_log, indent=2))
-                print('Email notification sent!')
-        except BaseException as e:
-            print(e)
-        finally:
-            self.sender.close()
-            self.reciever.close()
-            self.context.destroy()
-
-    def single_eval(self, ind, use_raw_params=False):
+    def _single_genome_core(self, ind, param_type='default', sim_type='eval'):
         if len(ind) != self.genome_size:
             err_str = 'Specified individual has an invalid number of genomes: %d instead of %d'
             err_str = err_str % (len(ind), self.genome_size)
             raise ValueError(err_str)
-        
-        print('About to run one evaluation of the individual: %s' % ind)
+
+        # scale down individual
+        current_weights = self.genome_config['GENOME_WEIGHTS']
+        old_weights = self.genome_config['OLD_GENOME_WEIGHTS']
+
+        #print('old_weights: %s' % old_weights)
+        #print('current_weights: %s' % current_weights)
+
+        if param_type == 'default': # default is actual values
+            actual_ind = [v for v in ind]
+            for i in range(len(ind)):
+                ind[i] /= current_weights[i]
+        elif param_type == 'old': # scaled down but based on old weights
+            actual_ind = []
+            for i in range(len(ind)):
+                actual_ind.append(ind[i] * old_weights[i])
+                ind[i] *= old_weights[i] / current_weights[i]
+        elif param_type == 'current':
+            actual_ind = [ind[i]*current_weights[i] for i in range(len(ind))]
+        else:
+            raise TypeError('Unrecognized param type: %s' % param_type)
+
+        print('About to run one evaluation of the individual:\n%s' % actual_ind)
+        print('\tencoding:\n%s' % ind)
         _ = raw_input('Would you like to continue? (Press ENTER)')
         
         self.start_time = time.time()
 
-        try: 
-            self.setup_sockets()
-            signal.signal(signal.SIGINT, self.shutdown_handler)
 
-            # scale down individual according to genome weights
-            if not use_raw_params:
-                for i in range(len(ind)):
-                    ind[i] /= self.genome_config['GENOME_WEIGHTS'][i]
-            print('sending %s...' % ind)
+        if sim_type == 'eval':
+            num_sims = 4
+        else:
+            num_sims = 1
+
+        for i in range(num_sims):
+            print('sending ind...')
             self.sender.send_json(ind)
 
-            raw_fit, fitness = None, float('Inf')
+        raw_fit, fitnesses = None, [float('Inf')] * num_sims
 
 
-            while fitness == float('Inf'):
-                socks = dict(self.poller.poll(self.timeout))
-                if socks:
-                    if socks.get(self.reciever) == zmq.POLLIN:
-                        return_data = dict(self.reciever.recv_json(zmq.NOBLOCK))
-                else:
-                    print('Timeout on reciever socket occured!')
-                    non_resolved_ind = fitnesses.index(float('Inf'))
-                    self.sender.send_json(individuals[non_resolved_ind])
-                    continue
-                
-                ind = list(return_data['Genome'])
-                result = dict(return_data['Result'])
-                raw_fit, fitness = self.evaluate_result(ind, result)
-                
-                #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
-                raw_fit_str = '[%5.2f, %6.2f]' % tuple(raw_fit)
-                fit_str = '%.2f'%fitness
-
-                time_elapsed = time.time() - self.start_time
-                time_elapsed_str = seconds_to_time_str(time_elapsed)
-
-                out_str = '{} -- {} Time Elapsed: {}'.format(fit_str, raw_fit_str,
-                        time_elapsed_str)
-
-                print(out_str)
-                with open('single_eval_result.txt', 'w') as f:
-                    f.write(out_str)
+        while any([f == float('Inf') for f in fitnesses]):
+            socks = dict(self.poller.poll(self.timeout))
+            if socks:
+                if socks.get(self.reciever) == zmq.POLLIN:
+                    return_data = dict(self.reciever.recv_json(zmq.NOBLOCK))
+            else:
+                print('Timeout on reciever socket occured!')
+                non_resolved_ind = fitnesses.index(float('Inf'))
+                self.sender.send_json(individuals[non_resolved_ind])
+                continue
             
-        except BaseException as e:
-            print(e)
-        finally:
-            self.sender.close()
-            self.reciever.close()
-            self.context.destroy()
+            ind = list(return_data['Genome'])
+            result = dict(return_data['Result'])
+            raw_fit, fitness = self.evaluate_result(ind, result)
+
+            fitnesses[fitnesses.index(float('Inf'))] = fitness[0]
+
+            #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
+            raw_fit_str = '[%5.2f, %6.2f, %4.2f]' % tuple(raw_fit)
+            fit_str = '%.2f'%fitness
+
+            time_elapsed = time.time() - self.start_time
+            time_elapsed_str = seconds_to_time_str(time_elapsed)
+
+            out_str = '{} -- {} Time Elapsed: {}'.format(fit_str, raw_fit_str,
+                    time_elapsed_str)
+
+            print(out_str)
+
+        print('avg: %s' % (sum(fitnesses)/len(fitnesses)))
+        return actual_ind
 
     def shutdown_handler(self, sig, frame):
         print('\nShutdown handler called...')
@@ -451,8 +463,8 @@ class Nav_Tuning_DEAP_EA():
         
         # For detecting errors in simulation...
         coarseness = 50 # get progress once every 5 seconds
-        jump_bdry = coarseness/185.0
-        backwards_bdry = -5.0/185
+        jump_bdry = 0.2
+        backwards_bdry = -0.0005
 
         coarse_prog = 0
         coarse_diff = 0
@@ -475,18 +487,18 @@ class Nav_Tuning_DEAP_EA():
 
             if (i % coarseness) == 0:
                 if (jump_flag or backwards_flag):
-                    if p - coarse_prog < backwards_flag:
+                    if p - coarse_prog < backwards_bdry*coarseness:
                         err_detected = True
                     else:
                         #print('Reseting err flags...')
                         jump_flag = False
                         backwards_flag = False
 
-                if p - coarse_prog > jump_bdry:
+                if p - coarse_prog > jump_bdry*coarseness:
                     jump_flag = True
                     #print('Jump Detected!')
                     #print('\t%.3f to %.3f -- note bdry at %f' % (coarse_prog, p, jump_bdry))
-                elif p - coarse_prog < backwards_bdry:
+                elif p - coarse_prog < backwards_bdry*coarseness:
                     backwards_flag = True
                     #print('Significant Backwards Movement Detected!')
                     #print('\t%.3f to %.3f -- note bdry at %f' % (coarse_prog, p, backwards_bdry))
@@ -500,12 +512,12 @@ class Nav_Tuning_DEAP_EA():
             print('Err detected, max_prog = %.2f' % max_prog)
             #max_prog = -1
 
-        prog_df = pd.DataFrame(data={'Progress': prog_actual})
+        prog_df = pd.DataFrame(data={'Progress': prog_list, 'Actual Progress': prog_actual})
         df = df.join(prog_df)
 
         raw_fit = [max_prog, time_elapsed, goal_status]
         if max_prog > 0.95:
-            fit = 4 + (1 + 18.51 / time_elapsed) ** 2
+            fit = 4 + (1 + 80 / time_elapsed) ** 2
         else:
             fit = (1 + max_prog) ** 2
 
@@ -644,20 +656,53 @@ def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
     
     return result_str
 
-if __name__ == '__main__':
+def main():
+    if os.path.exists('saved_ind.yml'):
+        with open('saved_ind.yml') as yml_file:
+            saved_ind_list = yaml.load(yml_file, Loader=yaml.FullLoader)
+    else:
+        saved_ind_list = {}
+
     parser = argparse.ArgumentParser(description='Front end DEAP EA for nav tuning Study')
     parser.add_argument('-d', '--debug', action='store_true',
             help='Print extra output to terminal.')
-    parser.add_argument('-p', '--single_test_params', dest='single_params', metavar='N',
+    parser.add_argument('-g', '--genome', dest='genome', metavar='N',
             nargs='*', help='Define parameters to do a single evaluateion.')
-    parser.add_argument('--raw_params', action='store_true', dest='use_raw_params',
-            help='Use this flag to indicate that the above parameters need not be scaled down.')
+    parser.add_argument('--param_type', default='default', dest='param_type',
+            help='Use this flag to indicate how the above parameters need to be scaled down.')
+    parser.add_argument('--load', default='', dest='load',
+            help='Use a saved individual.')
+    parser.add_argument('--save_as', default='', dest='save_as',
+            help='Use this to identify this individual with a name to load later.')
+    parser.add_argument('--evaluate', action='store_true', dest='eval')
     args, unknown = parser.parse_known_args()
 
     node = Nav_Tuning_DEAP_EA(cmd_args = args)
 
-    if args.single_params:
-        individual = [float(p) for p in args.single_params]
-        node.single_eval(individual, args.use_raw_params)
+    if args.genome or args.load:
+        if args.load:
+            individual = saved_ind_list[args.load][:]
+        else:
+            individual = [float(p) for p in args.genome]
+
+        if args.eval:
+            sim_type = 'eval'
+        else:
+            sim_type = 'sim'
+
+        actual_ind = node.single_genome(individual, args.param_type, sim_type)
+
+        if args.save_as:
+            ind_name = args.save_as
+        else:
+            ind_name = '_'
+
+        saved_ind_list[ind_name] = actual_ind
+
+        with open('saved_ind.yml', 'w') as yml_file:
+            yml_file.write(yaml.dump(saved_ind_list))
     else:
         node.full_run()
+
+if __name__ == '__main__':
+    main()
