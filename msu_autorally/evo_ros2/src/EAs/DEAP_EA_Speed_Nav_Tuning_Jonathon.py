@@ -39,10 +39,10 @@ class Nav_Tuning_DEAP_EA():
         self.debug = cmd_args.debug
         
         # EA Params
-        self.experiment_name = "nav-tuning_18params_empty_large-search"
+        self.experiment_name = "TEST_delete-logs"
         
-        self.pop_size = 100
-        self.num_generations = 25
+        self.pop_size = 2
+        self.num_generations = 2
         self.elitism = True
 
         self.genome_weights_key = 'NARROW_GENOME_WEIGHTS'
@@ -65,7 +65,7 @@ class Nav_Tuning_DEAP_EA():
         self.timeout = 500 * 1000
         
         # Socket Communication Params
-        self.ip_addr = '35.9.128.222'
+        self.ip_addr = '127.0.0.1'
         self.send_port = 5023
         self.recv_port = 5033
         
@@ -191,7 +191,7 @@ class Nav_Tuning_DEAP_EA():
             print('sending ind...')
             self.sender.send_json(ind)
 
-        raw_fit, fitnesses = None, [float('Inf')] * num_sims
+        fitnesses = [float('Inf')] * num_sims
 
 
         while any([f == float('Inf') for f in fitnesses]):
@@ -356,19 +356,24 @@ class Nav_Tuning_DEAP_EA():
                 worst_ind = None
                 best_exists = False
                 for ind in offspring:
-                    if ind.fitnesses.valid:
+                    if ind.fitness.valid:
                         if ind is best_ind:
                             best_exists = True
                             print('Best found!')
                             break
-                        elif worst_ind is None or ind.fitnesses.values[0] < worst_ind.fitnesses.values[0]:
+                        elif worst_ind is None or ind.fitness.values[0] < worst_ind.fitness.values[0]:
                             worst_ind = ind
 
                 if not best_exists:
                     print('Best not found, replacing worst...')
                     worst_ind = best_ind
 
-            
+            # figure out a way to include avgs into subsequent generations:
+            # IDEAS:
+            #   - could use some moving avg (exponential)
+            #   - could use some fixed number of runs and avg those
+            #   - simply require three simulations and avg that result
+
             # Evalueate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             
