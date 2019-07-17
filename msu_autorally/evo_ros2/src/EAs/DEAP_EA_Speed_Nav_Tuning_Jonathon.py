@@ -43,6 +43,7 @@ class Nav_Tuning_DEAP_EA():
         
         self.pop_size = 100
         self.num_generations = 25
+        self.elitism = True
         
         path_to_genome_config = '../../config/genome_mapping.yaml'
         with open(path_to_genome_config) as ymlfile:
@@ -323,6 +324,9 @@ class Nav_Tuning_DEAP_EA():
         
         if hall_of_fame is not None:
             hall_of_fame.update(population)
+            
+            if self.elitism:
+                best_ind = hall_of_fame[0]
         
         record = stats.compile(population) if stats else {}
         logbook.record(gen=0, nevals=len(invalid_ind), **record)
@@ -345,6 +349,23 @@ class Nav_Tuning_DEAP_EA():
             
             # Vary the pool of individuals
             offspring = algorithms.varAnd(offspring, toolbox, cxpb, mutpb)
+
+            if self.elitism:
+                worst_ind = None
+                best_exists = False
+                for ind in offspring:
+                    if ind.fitnesses.valid:
+                        if ind is best_ind:
+                            best_exists = True
+                            print('Best found!')
+                            break
+                        elif worst_ind is None or ind.fitnesses.values[0] < worst_ind.fitnesses.values[0]:
+                            worst_ind = ind
+
+                if not best_exists:
+                    print('Best not found, replacing worst...')
+                    worst_ind = best_ind
+
             
             # Evalueate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -356,6 +377,9 @@ class Nav_Tuning_DEAP_EA():
             # Update hall_of_fame if it exists
             if hall_of_fame is not None:
                 hall_of_fame.update(offspring)
+
+                if self.elitism:
+                    best_ind = hall_of_fame[0]
             
             # Replace the current population
             population[:] = offspring
