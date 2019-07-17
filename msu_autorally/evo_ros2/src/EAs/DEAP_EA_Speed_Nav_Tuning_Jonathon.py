@@ -44,17 +44,18 @@ class Nav_Tuning_DEAP_EA():
         self.pop_size = 100
         self.num_generations = 25
         self.elitism = True
+
+        self.genome_weights_key = 'NARROW_GENOME_WEIGHTS'
         
         path_to_genome_config = '../../config/genome_mapping.yaml'
         with open(path_to_genome_config) as ymlfile:
             self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
-            #print('genome_config: %s' % self.genome_config)
 
-        for k in ('GENOME_WEIGHTS', 'OLD_GENOME_WEIGHTS'):
+        for k in ('GENOME_WEIGHTS', 'NARROW_GENOME_WEIGHTS'):
             for i in range(len(self.genome_config[k])):
                 self.genome_config[k][i] = float(self.genome_config[k][i])
 
-        self.genome_size = len(self.genome_config['GENOME_WEIGHTS'])
+        self.genome_size = len(self.genome_config[self.genome_weights_key])
         self.tourn_size = 2
         
         self.starting_run_number = 1
@@ -153,21 +154,22 @@ class Nav_Tuning_DEAP_EA():
             raise ValueError(err_str)
 
         # scale down individual
-        current_weights = self.genome_config['GENOME_WEIGHTS']
-        old_weights = self.genome_config['OLD_GENOME_WEIGHTS']
+        current_weights = self.genome_config[self.genome_weights_key]
 
-        #print('old_weights: %s' % old_weights)
+        narrow_weights = self.genome_config['NARROW_GENOME_WEIGHTS']
+
+        #print('narrow_weights: %s' % narrow_weights)
         #print('current_weights: %s' % current_weights)
 
         if param_type == 'default': # default is actual values
-            actual_ind = [v for v in ind]
+            actual_ind = ind[:]
             for i in range(len(ind)):
                 ind[i] /= current_weights[i]
-        elif param_type == 'old': # scaled down but based on old weights
+        elif param_type == 'narrow': # scaled down but based on old weights
             actual_ind = []
             for i in range(len(ind)):
-                actual_ind.append(ind[i] * old_weights[i])
-                ind[i] *= old_weights[i] / current_weights[i]
+                actual_ind.append(ind[i] * narrow_weights[i])
+                ind[i] *= narrow_weights[i] / current_weights[i]
         elif param_type == 'current':
             actual_ind = [ind[i]*current_weights[i] for i in range(len(ind))]
         else:
@@ -267,9 +269,9 @@ class Nav_Tuning_DEAP_EA():
         self.history = tools.History()
         
         # Decorate the variation operators
-        # NOTE: I could add bounds here for certain params
+        #  - added a decorator to ensure that the genes stay within the valid bounds
         self.toolbox.decorate('mate', self.history.decorator)
-        self.toolbox.decorate('mutate', self.history.decorator)
+        self.toolbox.decorate('mutate', checkBounds(0.0, 1.0), self.history.decorator)
         
         # Setup hall of fame and statistics
         self.hof = tools.HallOfFame(10)
@@ -607,6 +609,23 @@ class Nav_Tuning_DEAP_EA():
         
         SERVER.sendmail(sender, self.email_reciever_list, msg.as_string())
         SERVER.quit()
+
+def checkBounds(min_val, max_val):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            
+            offspring = func(*args, **kwargs)
+
+            for ind in offspring:
+                for i in range(len(ind)):
+                    if ind[i] > max_val:
+                        ind[i] = max_val
+                    elif ind[i] < min_val:
+                        ind[i] = min_val
+
+            return offspring
+        return wrapper
+    return decorator
 
 def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23.48):
     """

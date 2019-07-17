@@ -16,6 +16,7 @@ from evo_ros2.msg import EvoROS2State
 
 class Transporter():
 	def __init__(self, cmd_args):
+                self.genome_weights_key = 'NARROW_GENOME_WEIGHTS'
 		
 		# Init Node
 		self.node_name = 'transporter_node'
@@ -125,8 +126,8 @@ class Transporter():
 	
 	def parse_genome(self, raw_genome):
 		for index, element in enumerate(self.genome_mapping):
-			if rospy.has_param('GENOME_WEIGHTS'):
-				self.genome_weights = rospy.get_param('GENOME_WEIGHTS')
+			if rospy.has_param(self.genome_weights_key):
+				self.genome_weights = rospy.get_param(self.genome_weights_key)
 				self.current_genome[element] = raw_genome[index] * float(self.genome_weights[index])
 			else:
 				self.current_genome[element] = raw_genome[index]
