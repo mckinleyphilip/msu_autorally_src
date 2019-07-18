@@ -38,59 +38,71 @@ class Nav_Tuning_DEAP_EA():
     def __init__(self, cmd_args):
         self.debug = cmd_args.debug
         
-        # EA Params
+        # ------------------------------------
+        # Below are parameters to change
+        # before running.
+        # ------------------------------------
+        
+        # Config params
         self.experiment_name = "TEST_delete-logs"
-        
-        self.pop_size = 2
-        self.num_generations = 2
-        self.elitism = True
-
         self.genome_weights_key = 'NARROW_GENOME_WEIGHTS'
-        
         path_to_genome_config = '../../config/genome_mapping.yaml'
-        with open(path_to_genome_config) as ymlfile:
-            self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-        for k in ('GENOME_WEIGHTS', 'NARROW_GENOME_WEIGHTS'):
-            for i in range(len(self.genome_config[k])):
-                self.genome_config[k][i] = float(self.genome_config[k][i])
-
-        self.genome_size = len(self.genome_config[self.genome_weights_key])
+        # EA Params
+        self.pop_size = 2
+        self.num_generations = 0
+        self.elitism = True
         self.tourn_size = 2
         
-        self.starting_run_number = 1
-        self.num_runs = 5
-        
         # Running Params
-        self.timeout = 500 * 1000
+        self.starting_run_number = 1
+        self.num_runs = 1
         
         # Socket Communication Params
         self.ip_addr = '127.0.0.1'
         self.send_port = 5023
         self.recv_port = 5033
         
+        self.timeout = 500 * 1000 # ms
+        
         # Email Notification Params
         self.email_reciever_list = ['fleckjo1@msu.edu']
+
+        # ------------------------------------
+        # End parameters.
+        # ------------------------------------
+
+        # Extract genome config file and ensure all weights are floats
+        with open(path_to_genome_config) as ymlfile:
+            self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
+        for k in ('GENOME_WEIGHTS', 'NARROW_GENOME_WEIGHTS'):
+            for i in range(len(self.genome_config[k])):
+                self.genome_config[k][i] = float(self.genome_config[k][i])
+
+        self.genome_size = len(self.genome_config[self.genome_weights_key])
         
+        # Setup variables
         self.gen_start_time = 0
         self.gen_time_list = []
 
         self.detailed_log = dict()
         self.gen=-1
 
-        self.full_run = self.network_wrapper(self._full_run_core)
-        self.single_genome = self.network_wrapper(self._single_genome_core)
+        # Apply network decorator to run methods
+        self.full_run = self.network_decorator(self._full_run_core)
+        self.single_genome = self.network_decorator(self._single_genome_core)
 
-    def network_wrapper(self, method):
+    def network_decorator(self, method):
         """
-        Call this method to wrap a simulation method with a network try catch block.
+        Call this method to decorate a simulation method with a network try catch block.
         """
-        def wrapped_method(*args):
+        def wrapper(*args, **kwargs):
             try: 
                 self.setup_sockets()
                 signal.signal(signal.SIGINT, self.shutdown_handler)
-            
-                result = method(*args)
+
+                result = None
+                result = method(*args, **kwargs)
             
             except BaseException as e:
                 print(e)
@@ -101,9 +113,14 @@ class Nav_Tuning_DEAP_EA():
     
             return result
          
-        return wrapped_method
+        return wrapper
 
     def _full_run_core(self):
+        """
+        The core (does not include network try-catch) of managing a set of runs for this EA.
+        """
+
+        # Inform the user of important parameters and prompt to continue
         print('About to start {} runs of experiment {}'.format(self.num_runs,
             self.experiment_name))
         print('Pop = {}, Generations = {}, IP addr = {}'.format(self.pop_size,
@@ -111,7 +128,9 @@ class Nav_Tuning_DEAP_EA():
         print('\tStarting at run #{}'.format(self.starting_run_number))
         raw_input('Press enter to run')
         
+        # Loop for multiple runs
         for i in range(self.starting_run_number, self.starting_run_number + self.num_runs):
+            # Estimate run time remaining
             if self.gen_time_list:
                 avg_gen_time = np.mean(self.gen_time_list)
             else:
@@ -119,7 +138,6 @@ class Nav_Tuning_DEAP_EA():
                 # observed avg: ~20 min / 50 evals (generations eval approx 3/5 pop_size)
                 avg_gen_time = (1200*self.pop_size/50 * (1 + self.num_generations*0.6)) /\
                         (self.num_generations+1) 
-
             seconds_left = avg_gen_time * (self.num_generations+1) *\
                 (self.starting_run_number+self.num_runs+1 - i)
             time_left_str = seconds_to_time_str(seconds_left)
@@ -148,19 +166,25 @@ class Nav_Tuning_DEAP_EA():
             print('Email notification sent!')
 
     def _single_genome_core(self, ind, param_type='default', sim_type='eval'):
+        """
+        The core (doesn't contain network try-catch) of managing simulations of single genomes.
+        
+        This method supports different options for both the scale configuration for the genome
+        and different simulation types.  (eval is a small scale evaluation of a given genome,
+        intended to get an idea how different genomes from different runs compare).
+        """
+
+        # Make sure that the genome is the correct length
         if len(ind) != self.genome_size:
             err_str = 'Specified individual has an invalid number of genomes: %d instead of %d'
             err_str = err_str % (len(ind), self.genome_size)
             raise ValueError(err_str)
 
-        # scale down individual
+        # Load different weight lists
         current_weights = self.genome_config[self.genome_weights_key]
-
         narrow_weights = self.genome_config['NARROW_GENOME_WEIGHTS']
 
-        #print('narrow_weights: %s' % narrow_weights)
-        #print('current_weights: %s' % current_weights)
-
+        # scale genome and get the raw values intended
         if param_type == 'default': # default is actual values
             actual_ind = ind[:]
             for i in range(len(ind)):
@@ -170,17 +194,17 @@ class Nav_Tuning_DEAP_EA():
             for i in range(len(ind)):
                 actual_ind.append(ind[i] * narrow_weights[i])
                 ind[i] *= narrow_weights[i] / current_weights[i]
-        elif param_type == 'current':
+        elif param_type == 'current': # scaled down using current weights
             actual_ind = [ind[i]*current_weights[i] for i in range(len(ind))]
         else:
             raise TypeError('Unrecognized param type: %s' % param_type)
 
+        # Inform user of genome and prompt to continue
         print('About to run one evaluation of the individual:\n%s' % actual_ind)
         print('\tencoding:\n%s' % ind)
         _ = raw_input('Would you like to continue? (Press ENTER)')
         
         self.start_time = time.time()
-
 
         if sim_type == 'eval':
             num_sims = 4
@@ -192,7 +216,6 @@ class Nav_Tuning_DEAP_EA():
             self.sender.send_json(ind)
 
         fitnesses = [float('Inf')] * num_sims
-
 
         while any([f == float('Inf') for f in fitnesses]):
             socks = dict(self.poller.poll(self.timeout))
@@ -227,14 +250,18 @@ class Nav_Tuning_DEAP_EA():
         return actual_ind
 
     def shutdown_handler(self, sig, frame):
-        print('\nShutdown handler called...')
+        """
+        Asynchronous shutdown handler.
+        """
         self.sender.close()
         self.reciever.close()
         self.context.destroy()
-        print('Shutdown handler finished')
         sys.exit(0)
    
     def setup_sockets(self):
+        """
+        Sets up sender, reciever, and timeout variables for socket connections.
+        """
         self.context = zmq.Context()
         self.sender = self.context.socket(zmq.PUSH)
         self.sender.bind('tcp://{}:{}'.format(self.ip_addr, self.send_port))
@@ -251,6 +278,9 @@ class Nav_Tuning_DEAP_EA():
         print('Reciving Connection: tcp://{}:{}'.format(self.ip_addr, self.recv_port))
 
     def setup_EA(self):
+        """
+        Sets up EA parameters.
+        """
         creator.create('FitnessMax', base.Fitness, weights=(1.0,))
         creator.create('Individual', list, fitness=creator.FitnessMax)
         
@@ -282,6 +312,9 @@ class Nav_Tuning_DEAP_EA():
         self.stats.register('max', np.max)
 
     def setup_dirs(self):
+        """
+        Sets up directories to store log files.
+        """
         self.experiment_directory = 'logs/' + self.experiment_name
         if not os.path.isdir(self.experiment_directory):
             print('No directory for experiment... Creating now.')
@@ -295,6 +328,10 @@ class Nav_Tuning_DEAP_EA():
              print('Directory exists, may end up writing over some files...')
     
     def run(self):
+        """
+        Creates an initial population and then calls the eaSimpleCustom method with cx and mut
+        probabilities.
+        """
         self.population = self.toolbox.population(n=self.pop_size)
         self.history.update(self.population)
         
@@ -303,7 +340,7 @@ class Nav_Tuning_DEAP_EA():
         time_str = seconds_to_time_str(self.run_time)
         print('\n\nRun finished at {}\n\t Taking {}'.format(datetime.datetime.now(),
             time_str))
-    
+
     def eaSimpleCustom(self, cxpb, mutpb):
         population = self.population
         toolbox = self.toolbox
@@ -353,20 +390,27 @@ class Nav_Tuning_DEAP_EA():
             offspring = algorithms.varAnd(offspring, toolbox, cxpb, mutpb)
 
             if self.elitism:
-                worst_ind = None
+                worst_i = -1
                 best_exists = False
-                for ind in offspring:
+
+                for i in range(len(offspring)):
+                    ind = offspring[i]
                     if ind.fitness.valid:
-                        if ind is best_ind:
+                        genome_diff = sum([abs(ind[j]-best_ind[j]) for j in range(len(ind))])
+                        if genome_diff == 0.0:
                             best_exists = True
                             print('Best found!')
                             break
-                        elif worst_ind is None or ind.fitness.values[0] < worst_ind.fitness.values[0]:
-                            worst_ind = ind
+                        elif worst_i < 0 or ind.fitness.values[0] < offspring[worst_i].fitness.values[0]:
+                            worst_i = i 
 
                 if not best_exists:
-                    print('Best not found, replacing worst...')
-                    worst_ind = best_ind
+                    if worst_i > 0:
+                        print('Best not found, replacing worst...')
+                        offspring[worst_i] = best_ind
+                    else:
+                        print('Best not found, no-one to replace...')
+
 
             # figure out a way to include avgs into subsequent generations:
             # IDEAS:
@@ -468,7 +512,7 @@ class Nav_Tuning_DEAP_EA():
             print('{:>2}/{}: {} -- {} Time Elapsed: {}'.format(num_evaluated,
                 len(individuals), fit_str, raw_fit_str, time_elapsed_str))
 
-        return fitnesses
+        return fitnesses 
 
     def evaluate_result(self, ind, result):
         df = pd.DataFrame.from_dict(dict(result))
@@ -616,6 +660,10 @@ class Nav_Tuning_DEAP_EA():
         SERVER.quit()
 
 def checkBounds(min_val, max_val):
+    """
+    Returns decorator to be added to a mutate or mate function to gurantee that the bounds are 
+    satisfied.
+    """
     def decorator(func):
         def wrapper(*args, **kwargs):
             
@@ -646,9 +694,11 @@ def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23
     rad_avg = (rad_inner + rad_outer) / 2
     L = 2 * ell + 2 * math.pi * rad_avg
 
+    # Rotation is pi/4
     c = math.sqrt(2)/2
     s = math.sqrt(2)/2
 
+    # Get the position in a rotated coordinate fram to make distinctions easier
     rot_pos = (c*raw_pos[0] + s*raw_pos[1], -s*raw_pos[0]+c*raw_pos[1])
 
     # First assume counter clockwise (corrected after piecewise function)
@@ -656,14 +706,15 @@ def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23
         if rot_pos[1] > 0: # in top portion
             # completed bottom half and one turn
             base_progress = ell/2 + math.pi*rad_avg
-            eff_progress = base_progress + (ell/2 - rot_pos[0])
+            eff_dist = base_progress + (ell/2 - rot_pos[0])
         else: # in bottom portion
             if rot_pos[0] > 0:
-                eff_progress = rot_pos[0]
+                # no base progress
+                eff_dist = rot_pos[0]
             else:
                 # completed bottom half, two turns, and top
                 base_progress = 1.5*ell + 2*math.pi*rad_avg
-                eff_progress = base_progress + (ell/2 + rot_pos[0])
+                eff_dist = base_progress + (ell/2 + rot_pos[0])
     else: # in annulus
         if rot_pos[0] > 0: # in right portion
             # completed bottom half
@@ -674,9 +725,9 @@ def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23
             base_progress = 1.5*ell + math.pi*rad_avg
             eff_theta = -math.atan2(rot_pos[0] - ell/2, rot_pos[1])
 
-        eff_progress = base_progress + rad_avg*eff_theta
+        eff_dist = base_progress + rad_avg*eff_theta
 
-    eff_progress /= L # normalize
+    eff_progress = eff_dist / L # normalize
 
     if direction < 0:
         eff_progress = 1 - eff_progress
@@ -684,6 +735,14 @@ def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23
     return eff_progress
 
 def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
+    """
+    Converts an amount of seconds into a time string.
+    
+    If either no_hrs or no_min flag is set to True, then those units will not be used and the
+    time will be given only in seconds and any other units.
+    
+    The dec_precision argument determines how many decimals to incorperate in the seconds portion.
+    """
     int_sec = int(seconds)
     frac_sec = seconds - int_sec
     
