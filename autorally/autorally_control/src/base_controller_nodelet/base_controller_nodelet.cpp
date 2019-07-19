@@ -110,8 +110,8 @@ void base_controller_nodelet::speedCallback(const geometry_msgs::TwistPtr& msg)
 	
 	
 	// Handle Throttle
-	double speed_multiplier = 1.0; // used to be 1.5 -- JF
-	m_mostRecentSpeedCommand.data = speed_multiplier * float(msg->linear.x);
+	double speed_multiplier = 1.5; 
+	m_mostRecentSpeedCommand.data = float(msg->linear.x); // removed multiplier -- JF
 	
 	
 	// Handle Reverse
@@ -172,16 +172,20 @@ void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpe
     if(m_throttleMappings.interpolateKey(abs_goal_speed, p))
     {
       m_integralError += abs_goal_speed - abs_front_wheel_speed;
-      if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
-      {
-        m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
-      }
 
-      if (m_integralError < -(m_constantSpeedIMax / m_constantSpeedKI))
-      {
-        m_integralError = -(m_constantSpeedIMax / m_constantSpeedKI);
-      }
-
+      // changed code below to utilize Clamp function -- JF 7/19
+      m_integralError = Clamp(m_integralError, -(m_constantSpeedIMax / m_constantSpeedKI),
+              m_constantSpeedIMax / m_constantSpeedKI);
+      
+      //if (m_integralError > (m_constantSpeedIMax / m_constantSpeedKI))
+      //{
+      //  m_integralError = (m_constantSpeedIMax / m_constantSpeedKI);
+      //}
+      //if (m_integralError < -(m_constantSpeedIMax / m_constantSpeedKI))
+      //{
+      //m_integralError = -(m_constantSpeedIMax / m_constantSpeedKI);
+      //}
+      
       command->throttle = p +
                  m_constantSpeedKP*(abs_goal_speed - abs_front_wheel_speed);
       command->throttle += m_constantSpeedKI * m_integralError;
