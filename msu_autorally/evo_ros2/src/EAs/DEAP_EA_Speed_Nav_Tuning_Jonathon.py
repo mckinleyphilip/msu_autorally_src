@@ -82,6 +82,9 @@ class Nav_Tuning_DEAP_EA():
         self.genome_size = len(self.genome_config[self.genome_weights_key])
         
         # Setup variables
+        self.start_time = time.time()
+        self.run_start_time = 0
+        self.run_time_list = []
         self.gen_start_time = 0
         self.gen_time_list = []
 
@@ -89,7 +92,7 @@ class Nav_Tuning_DEAP_EA():
         self.gen=-1
 
         # Apply network decorator to run methods
-        self.full_run = self.network_decorator(self._full_run_core)
+        self.run_EA = self.network_decorator(self._run_EA_core)
         self.single_genome = self.network_decorator(self._single_genome_core)
 
     def network_decorator(self, method):
@@ -115,7 +118,7 @@ class Nav_Tuning_DEAP_EA():
          
         return wrapper
 
-    def _full_run_core(self):
+    def _run_EA_core(self):
         """
         The core (does not include network try-catch) of managing a set of runs for this EA.
         """
@@ -131,15 +134,19 @@ class Nav_Tuning_DEAP_EA():
         # Loop for multiple runs
         for i in range(self.starting_run_number, self.starting_run_number + self.num_runs):
             # Estimate run time remaining
-            if self.gen_time_list:
-                avg_gen_time = np.mean(self.gen_time_list)
+            if self.run_time_list:
+                seconds_left = np.mean(self.run_time_list)
             else:
-                # Static Estimate:
-                # observed avg: ~20 min / 50 evals (generations eval approx 3/5 pop_size)
-                avg_gen_time = (1200*self.pop_size/50 * (1 + self.num_generations*0.6)) /\
-                        (self.num_generations+1) 
-            seconds_left = avg_gen_time * (self.num_generations+1) *\
+                if self.gen_time_list:
+                    avg_gen_time = np.mean(self.gen_time_list)
+                else:
+                    # Static Estimate:
+                    # observed avg: ~20 min / 50 evals (generations eval approx 3/5 pop_size)
+                    avg_gen_time = (1200*self.pop_size/50 * (1 + self.num_generations*0.6)) /\
+                            (self.num_generations+1) 
+                seconds_left = avg_gen_time * (self.num_generations+1) *\
                 (self.starting_run_number+self.num_runs+1 - i)
+            
             time_left_str = seconds_to_time_str(seconds_left)
 
             self.run_number = i
@@ -153,8 +160,15 @@ class Nav_Tuning_DEAP_EA():
                 self.experiment_name, time_left_str))
             
             # Run
-            self.start_time = time.time()
-            self.run()
+            self.run_start_time = time.time() 
+            self.population = self.toolbox.population(n=self.pop_size)
+            self.history.update(self.population)
+            
+            self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
+            self.run_time_list.append(time.time() - self.run_start_time)
+            time_str = seconds_to_time_str(self.run_time_list[-1])
+            print('\n\nRun finished at {}\n\t Taking {}'.format(datetime.datetime.now(),
+                time_str))
             
             # Final logging and notifications 
             self.create_run_log()
@@ -165,8 +179,12 @@ class Nav_Tuning_DEAP_EA():
             self.email_notification(json.dumps(self.email_log, indent=2))
             print('Email notification sent!')
 
+        time_str = seconds_to_time_str(time.time() - self.start_time)
+        print('\n\n%d runs finished at {}\n\t Taking {}'.format(self.num_runs,
+            datetime.datetime.now(), time_str))
+
     def _single_genome_core(self, ind, param_type='default', sim_type='eval'):
-        """
+        """ 
         The core (doesn't contain network try-catch) of managing simulations of single genomes.
         
         This method supports different options for both the scale configuration for the genome
@@ -331,6 +349,9 @@ class Nav_Tuning_DEAP_EA():
         """
         Creates an initial population and then calls the eaSimpleCustom method with cx and mut
         probabilities.
+
+        Depreciated, seems unnecessary to seperate just this much code, either put more here
+        or delete...
         """
         self.population = self.toolbox.population(n=self.pop_size)
         self.history.update(self.population)
@@ -763,6 +784,27 @@ def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
     
     return result_str
 
+def get_key_tree(dict_obj):
+    key_tree = {}
+    for k in dict_obj.keys():
+        if type(dict_obj[k]) is dict:
+            key_tree[k] = get_key_tree(dict_obj[k])
+        elif type(dict_obj[k]) is list:
+            key_tree[k] = type(dict_obj[k])
+        else:
+            key_tree[k] = dict_obj[k]
+
+    return key_tree
+
+def print_key_tree(key_tree, indent=''):
+    for k in key_tree:
+        if type(key_tree[k]) is dict:
+            print('%s%s:' % (indent, k))
+            print_key_tree(key_tree[k], indent + '\t')
+        else:
+            print('%s%s: %s' % (indent, k, key_tree[k]))
+        
+
 def main():
     if os.path.exists('saved_ind.yml'):
         with open('saved_ind.yml') as yml_file:
@@ -777,8 +819,8 @@ def main():
             nargs='*', help='Define parameters to do a single evaluateion.')
     parser.add_argument('--param_type', default='default', dest='param_type',
             help='Use this flag to indicate how the above parameters need to be scaled down.')
-    parser.add_argument('--load', default='', dest='load',
-            help='Use a saved individual.')
+    parser.add_argument('--load', default='', nargs='*', dest='load',
+            help='Use a saved individual using a given list of keys.')
     parser.add_argument('--save_as', default='', dest='save_as',
             help='Use this to identify this individual with a name to load later.')
     parser.add_argument('--evaluate', action='store_true', dest='eval')
@@ -786,9 +828,16 @@ def main():
 
     node = Nav_Tuning_DEAP_EA(cmd_args = args)
 
+
+    print_key_tree(get_key_tree(saved_ind_list))
+
     if args.genome or args.load:
         if args.load:
-            individual = saved_ind_list[args.load][:]
+            saved_ind_tree = saved_ind_list
+            for k in args.load:
+                saved_ind_tree = saved_ind_tree[k]
+
+            individual = saved_ind_tree[:]
         else:
             individual = [float(p) for p in args.genome]
 
@@ -809,7 +858,7 @@ def main():
         with open('saved_ind.yml', 'w') as yml_file:
             yml_file.write(yaml.dump(saved_ind_list))
     else:
-        node.full_run()
+        node.run_EA()
 
 if __name__ == '__main__':
     main()
