@@ -3,7 +3,7 @@
 	<env name="GAZEBO_MODEL_PATH" value="$(find autorally_description)"/>
 	<env name="GAZEBO_RESOURCE_PATH" value="$(find autorally_description)"/>
 	<arg name="namespace" default="autorally_platform"/>
-	<arg name="world_name" default="$(find msu_autorally_helper)/tmp-storage/worlds/uneven-obstacle_world.world"/>
+	<arg name="world_name" default="$(find msu_autorally_helper)/tmp-storage/worlds/uneven-obstacle_test.world"/>
 	<!-- arg name="world_name" default="model://urdf/obstacle_sky_world2.world"/ -->
 	<arg name="cmd_timeout" default="0.5"/>
 	<arg name="gui" default="true"/>
@@ -15,13 +15,14 @@
 	<remap from="/$(arg namespace)/camera/left" to="/left_camera" />
 	<remap from="/$(arg namespace)/camera/right" to="/right_camera" />
 	
-	<group ns="$(arg namespace)">
+	<group> <!-- ns="$(arg namespace)" -->
 		<!-- Create the world. -->
-		<include file="$(find msu_autorally_helper)/tmp-storage/autoRallyTrackWorld_scaled.launch">
+		<include file="$(find autorally_gazebo)/launch/autoRallyTrackWorld.launch">
+        <!-- used to be ..._scaled.launch -->
 			<arg name="world_name" value="$(arg world_name)"/>
-			<arg name="namespace" value="$(arg namespace)" />
+			<!-- arg name="namespace" value="$(arg namespace)" /-->
 			<arg name="gui" value="$(arg gui)"/>
-			<arg name="spawn_track" value="$(arg spawn_track)"/>
+			<!-- arg name="spawn_track" value="$(arg spawn_track)"/-->
 		</include>
 	</group>
 	

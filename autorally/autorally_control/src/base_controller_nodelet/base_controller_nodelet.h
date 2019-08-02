@@ -83,6 +83,9 @@ class base_controller_nodelet : public nodelet::Nodelet
   double m_constantSpeedKD; ///< Scaler for the derivative component
   double m_constantSpeedKI; ///< Scaler for the integral component
   double m_constantSpeedIMax; ///< Maximum Integral Error
+
+  double m_lastError;
+  double m_derivativeError;
   double m_integralError;
 //  double m_throttleOffset;
 //  double m_safeSpeedMultiplier;
@@ -91,7 +94,8 @@ class base_controller_nodelet : public nodelet::Nodelet
   double m_accelerationRate;
   double m_frontWheelsSpeed;
   double m_backWheelsSpeed;
-  std_msgs::Float64 m_mostRecentSpeedCommand;
+  double m_mostRecentSpeedCommand;
+  double m_mostRecentYawCommand;
   bool m_reverse;
   double m_speedSetPoint;
   double m_throttleAccStart;

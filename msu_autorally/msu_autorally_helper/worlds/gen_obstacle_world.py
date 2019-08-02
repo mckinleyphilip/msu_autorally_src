@@ -15,15 +15,12 @@ class TemplateReader(object):
         Creates basic template reader with given filename (_template)
         """
         self._template = _template
-        self._lines = ''
-
-        #print('TemplateReader created with _template=%s'%self._template)
+        self._lines = '' 
 
     def _read_template(self):
         """
         Reads template file stores its lines.
         """
-        #print('TemplateReader instance trying to read with _template=%s'%self._template)
         with open(self._template) as template_file:
             self._lines = template_file.readlines() 
 
@@ -350,13 +347,14 @@ class WorldGenerator(TemplateReader):
 
         # create the appropriate number of obstacles
         for i in range(num_obstacles):
+            #print('Generating obstacle %d...' % i)
             chosen_type = random.choice(obstacle_types)
             rad_eff = self._type_map[chosen_type]['ref'].get_rad_eff()
             
             success = False
             cnt = 0
             while not success:
-                pt = choose_rand_pt_on_track(rad_eff)
+                pt = choose_rand_pt_on_track(r_buffer=rad_eff)
                 pose = (pt[0], pt[1], 0.5, 0, 0, 0)
                 new_obstacle = self._type_map[chosen_type]['constr'](pose,
                         _name='%s_%d'%(chosen_type, i))
@@ -365,7 +363,7 @@ class WorldGenerator(TemplateReader):
                 cnt += 1
 
             #if cnt > 1:
-            #    print('random rechoice innefficiency: %d' % (cnt-1))
+                #print('random rechoice innefficiency: %d' % (cnt-1))
             self.add_obstacle(new_obstacle)
 
     def build_world(self):
@@ -429,6 +427,12 @@ class WorldGenerator(TemplateReader):
 
         return new_gen
 
+def get_track_dimensions(track_type='scaled'):
+    if track_type == 'scaled':
+        return {'r_inner': 13.86, 'r_outer': 23.48, 'length': 34.08}
+    elif track_type == 'original':
+        return {'r_inner': 4.554215, 'r_outer': 7.762790, 'length': 11.486644}
+
 def choose_rand_pt_on_track(r_inner=13.86, r_outer=23.48, length=34.08, r_buffer=0):
     """
     Randomly choose a point on an oval track with given dimensions (uniform distribution based on
@@ -455,37 +459,42 @@ def choose_rand_pt_on_track(r_inner=13.86, r_outer=23.48, length=34.08, r_buffer
 
     if random.random() < p_boundary: # pt on straightaway
         # get location within straightaway rectangle 
-        rectangle_pos = (random.random()*l, random.random()*w, 0)
+        rectangle_pos = (random.random()*l, random.choice((0, w)))#random.random()*w)
         #print('x: %f, y: %f' % (rectangle_pos[0], rectangle_pos[1]))
 
         if random.random() < 0.5:
             # pt on bottom straightaway
-            pt = (-l/2 + rectangle_pos[0], -r_outer + rectangle_pos[1], 0) 
+            pt = (-l/2 + rectangle_pos[0], -r_o + rectangle_pos[1]) 
         else:
             # pt on top straightaway
-            pt = (-l/2 + rectangle_pos[0], r_inner + rectangle_pos[1], 0)
+            pt = (-l/2 + rectangle_pos[0], r_i + rectangle_pos[1])
+
+        #l = (rectangle_pos[0], rectangle_pos[1], pt[0], pt[1], r_i, r_o, r_buffer)
+        #print('(%6.2f, %6.2f) -- (%6.2f, %6.2f), r_i: %.2f r_o: %.2f -- %.2f' % l)
 
     else: # pt on curve
         # Note that polar coordinates stretch areas according to r -- thus to get true "trapazoidal"
         # distribution, take sqrt of num chosen uniformly between interval with squared endpoints
-        r = math.sqrt(random.uniform(r_i ** 2, r_o ** 2))
+        r = random.choice((r_i, r_o))#math.sqrt(random.uniform(r_i ** 2, r_o ** 2))
         theta = random.uniform(-math.pi/2, math.pi*3/2)
 
         #print('\t\t\t\tr: %f, theta: %f' % (r, theta))
         # get location within annulus
-        annulus_pos = (r*math.cos(theta), r*math.sin(theta), 0)
+        annulus_pos = (r*math.cos(theta), r*math.sin(theta))
 
         if theta < math.pi/2:
             # pt on right curve
-            pt = (l/2 + annulus_pos[0], annulus_pos[1], 0)
+            pt = (l/2 + annulus_pos[0], annulus_pos[1])
         else:
             # pt on left curve
-            pt = (-l/2 + annulus_pos[0], annulus_pos[1], 0)
+            pt = (-l/2 + annulus_pos[0], annulus_pos[1])
 
     # Now apply change of basis equivalent to the eigth rotation back to track bases
     #   -- note the rotation needed is a counter-clockwise rotation by pi/4, henc
-    pt = (pt[0]-pt[1], pt[0]+pt[1], 0)
-    pt = tuple(x*math.sqrt(2)/2 for x in pt)
+    c = math.sqrt(2)/2
+    s = math.sqrt(2)/2
+
+    pt = (c*pt[0] - s*pt[1], c*pt[0] + s*pt[1], 0)
 
     return pt
 
@@ -493,10 +502,12 @@ def dist(pt_1, pt_2, p=2):
     """
     Computes the p-normed distance between two points (use p=2 for Euclident dist)
     """
-    pow_dist = 0
+    p = float(p)
+    pow_dist = 0.0
     for i in range(len(pt_1)):
         pow_dist += abs(pt_1[i] - pt_2[i]) ** p
-    return (pow_dist) ** (1/p)
+    dist = pow_dist ** (1/p)
+    return dist
 
 def is_number(s):
     try:

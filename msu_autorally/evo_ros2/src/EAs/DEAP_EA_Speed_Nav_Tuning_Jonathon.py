@@ -34,7 +34,9 @@ import copy
 
 import math
 
-class Nav_Tuning_DEAP_EA():
+from simulation_tools import SocketZMQDevice
+
+class Nav_Tuning_DEAP_EA(SocketZMQDevice):
     def __init__(self, cmd_args):
         self.debug = cmd_args.debug
         
@@ -44,19 +46,21 @@ class Nav_Tuning_DEAP_EA():
         # ------------------------------------
         
         # Config params
-        self.experiment_name = "TEST_delete-logs"
+        self.experiment_name = "TEST" #"nav-tuning_18params_uneven-track_narrow-search_elitism_avg2_pop100"
         self.genome_weights_key = 'NARROW_GENOME_WEIGHTS'
         path_to_genome_config = '../../config/genome_mapping.yaml'
 
         # EA Params
-        self.pop_size = 2
-        self.num_generations = 0
+        self.pop_size = 5
+        self.num_generations = 2
         self.elitism = True
         self.tourn_size = 2
         
+        self.evals_to_avg = 2 # new
+        
         # Running Params
         self.starting_run_number = 1
-        self.num_runs = 1
+        self.num_runs = 5
         
         # Socket Communication Params
         self.ip_addr = '127.0.0.1'
@@ -94,30 +98,7 @@ class Nav_Tuning_DEAP_EA():
         # Apply network decorator to run methods
         self.run_EA = self.network_decorator(self._run_EA_core)
         self.single_genome = self.network_decorator(self._single_genome_core)
-
-    def network_decorator(self, method):
-        """
-        Call this method to decorate a simulation method with a network try catch block.
-        """
-        def wrapper(*args, **kwargs):
-            try: 
-                self.setup_sockets()
-                signal.signal(signal.SIGINT, self.shutdown_handler)
-
-                result = None
-                result = method(*args, **kwargs)
-            
-            except BaseException as e:
-                print(e)
-            finally:
-                self.sender.close()
-                self.reciever.close()
-                self.context.destroy()
     
-            return result
-         
-        return wrapper
-
     def _run_EA_core(self):
         """
         The core (does not include network try-catch) of managing a set of runs for this EA.
@@ -180,7 +161,7 @@ class Nav_Tuning_DEAP_EA():
             print('Email notification sent!')
 
         time_str = seconds_to_time_str(time.time() - self.start_time)
-        print('\n\n%d runs finished at {}\n\t Taking {}'.format(self.num_runs,
+        print('\n\n{} runs finished at {}\n\t Taking {}'.format(self.num_runs,
             datetime.datetime.now(), time_str))
 
     def _single_genome_core(self, ind, param_type='default', sim_type='eval'):
@@ -248,7 +229,7 @@ class Nav_Tuning_DEAP_EA():
             
             ind = list(return_data['Genome'])
             result = dict(return_data['Result'])
-            raw_fit, fitness = self.evaluate_result(ind, result)
+            raw_fit, fitness, result_df = self.evaluate_result(ind, result)
 
             fitnesses[fitnesses.index(float('Inf'))] = fitness[0]
 
@@ -266,34 +247,6 @@ class Nav_Tuning_DEAP_EA():
 
         print('avg: %s' % (sum(fitnesses)/len(fitnesses)))
         return actual_ind
-
-    def shutdown_handler(self, sig, frame):
-        """
-        Asynchronous shutdown handler.
-        """
-        self.sender.close()
-        self.reciever.close()
-        self.context.destroy()
-        sys.exit(0)
-   
-    def setup_sockets(self):
-        """
-        Sets up sender, reciever, and timeout variables for socket connections.
-        """
-        self.context = zmq.Context()
-        self.sender = self.context.socket(zmq.PUSH)
-        self.sender.bind('tcp://{}:{}'.format(self.ip_addr, self.send_port))
-        
-        # setup the socket to read responses on
-        self.reciever = self.context.socket(zmq.PULL)
-        self.reciever.bind('tcp://{}:{}'.format(self.ip_addr, self.recv_port))
-        
-        # setup ZMQ Poller
-        self.poller = zmq.Poller()
-        self.poller.register(self.reciever, zmq.POLLIN)
-        
-        print('Sending Connection: tcp://{}:{}'.format(self.ip_addr, self.send_port))
-        print('Reciving Connection: tcp://{}:{}'.format(self.ip_addr, self.recv_port))
 
     def setup_EA(self):
         """
@@ -357,8 +310,8 @@ class Nav_Tuning_DEAP_EA():
         self.history.update(self.population)
         
         self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
-        self.run_time = time.time() - self.start_time
-        time_str = seconds_to_time_str(self.run_time)
+        run_time = time.time() - self.start_time
+        time_str = seconds_to_time_str(run_time)
         print('\n\nRun finished at {}\n\t Taking {}'.format(datetime.datetime.now(),
             time_str))
 
@@ -464,17 +417,19 @@ class Nav_Tuning_DEAP_EA():
         
         return population, logbook
 
-    def custom_eval_fit_mapping(self, individuals):
-        fitnesses = [float('Inf') for i in range(len(individuals))]
+    def custom_eval_fit_mapping(self, individuals): 
+        fitnesses = [[] for i in range(len(individuals))]
         print('{} individuals need to be evaluated.'.format(len(individuals)))
         
         # Send out individuals to be evauluated
         for ind in individuals:
-            self.sender.send_json(ind)
+            # Modifications to implement avging
+            for i in range(self.evals_to_avg):
+                self.sender.send_json(ind)
         
         # While there are fitnesses not yet evaluated, recv results
         num_evaluated = 0
-        while any(fit == float('Inf') for fit in fitnesses):
+        while any(len(fit) < self.evals_to_avg for fit in fitnesses):
             
             socks = dict(self.poller.poll(self.timeout))
             if socks:
@@ -484,13 +439,23 @@ class Nav_Tuning_DEAP_EA():
                 print('Timeout on reciever socket occured!')
                 # resend all invalid individuals instead of just one of them
                 for i in range(len(fitnesses)):
-                    if fitnesses[i] == float('Inf'):
-                        self.sender.send_json(individuals[i])
+                    if len(fitnesses[i]) < self.evals_to_avg:
+                        for k in range(self.evals_to_avg - len(fitnesses[i])):
+                            self.sender.send_json(individuals[i])
                 continue
             
             ind = list(return_data['Genome'])
             result = dict(return_data['Result'])
-            raw_fit, fitness = self.evaluate_result(ind, result)
+            raw_fit, fitness, result_df = self.evaluate_result(ind, result)
+
+            # Add individual to detailed log
+            if str(ind) not in self.detailed_log.keys():
+                self.detailed_log[str(ind)] = {
+                        'gen': self.gen,
+                        'fitness': fitness,
+                        'rawFitness': raw_fit,
+                        'dataFrame': result_df.to_json()
+                        }
             
             # Try to get the index of the individual
             try:
@@ -500,8 +465,8 @@ class Nav_Tuning_DEAP_EA():
                 continue
             
             while True:
-                if fitnesses[index] == float('Inf'):
-                    fitnesses[index] = fitness
+                if len(fitnesses[index]) < self.evals_to_avg:
+                    fitnesses[index].append(fitness)
                     break
                 else:
                     if index > len(individuals):
@@ -524,7 +489,8 @@ class Nav_Tuning_DEAP_EA():
             
             #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
             #fit_str = '%.2f'%fitness
-            raw_fit_str = '[%5.2f, %6.2f, %1.0f]' % tuple(raw_fit)
+            raw_fit_str = '[%5.2f, %6.2f, %1.0f] (%d -- %d)' % (raw_fit[0], raw_fit[1],
+                    raw_fit[2], index, len(fitnesses[index]))
             fit_str = '%.2f'%fitness
 
             time_elapsed = time.time() - self.gen_start_time
@@ -533,28 +499,34 @@ class Nav_Tuning_DEAP_EA():
             print('{:>2}/{}: {} -- {} Time Elapsed: {}'.format(num_evaluated,
                 len(individuals), fit_str, raw_fit_str, time_elapsed_str))
 
-        return fitnesses 
+        # avg fitnesses recorded
+        avg_fitnesses = []
+        for i in range(len(fitnesses)):
+            f_list = fitnesses[i]
+            avg_fitnesses.append((np.mean(f_list),))
+
+        return avg_fitnesses
 
     def evaluate_result(self, ind, result):
-        df = pd.DataFrame.from_dict(dict(result))
+        result_df = pd.DataFrame.from_dict(dict(result))
         
         # Get rid of all 0s entry ???
-        df = df.truncate(before=2)
+        result_df = result_df.truncate(before=2)
         
         # Raw Time
-        time_elapsed = df['Time'].max()
+        time_elapsed = result_df['Time'].max()
 
         # Progress
-        for d in df['Direction']:
+        for d in result_df['Direction']:
             if abs(d) == 1:
                 desired_direction = d
                 break
 
         # Goal
-        goal_status = max(df['Goal Status'])
+        goal_status = max(result_df['Goal Status'])
         
         prog_list = []
-        for x,y in zip(df['Pos X'], df['Pos Y']):
+        for x,y in zip(result_df['Pos X'], result_df['Pos Y']):
             prog_list.append(pos_to_progress((x, y), desired_direction))
         
         # For detecting errors in simulation...
@@ -609,7 +581,7 @@ class Nav_Tuning_DEAP_EA():
             #max_prog = -1
 
         prog_df = pd.DataFrame(data={'Progress': prog_list, 'Actual Progress': prog_actual})
-        df = df.join(prog_df)
+        result_df = result_df.join(prog_df)
 
         raw_fit = [max_prog, time_elapsed, goal_status]
         if max_prog > 0.95:
@@ -622,16 +594,8 @@ class Nav_Tuning_DEAP_EA():
         #        norm_dist]
         #fit = (sum(norm_fit),)
         
-        # Add individual to detailed log
-        if str(ind) not in self.detailed_log.keys():
-            self.detailed_log[str(ind)] = {
-                    'gen': self.gen,
-                    'fitness': fit,
-                    'rawFitness': raw_fit,
-                    'dataFrame': df.to_json()
-                    }
         
-        return raw_fit, (fit,)
+        return raw_fit, (fit,), result_df
 
     def create_run_log(self):
         self.run_log = collections.OrderedDict()
@@ -643,7 +607,7 @@ class Nav_Tuning_DEAP_EA():
         self.run_log['experiment_name'] = self.experiment_name
         self.run_log['run_number'] = self.run_number
         self.run_log['run_date'] = str(datetime.datetime.now())
-        self.run_log['running_time'] = (self.run_time)
+        self.run_log['running_time'] = (self.run_time_list[-1])
         self.run_log['best_ind'] = self.hof[0]
         self.run_log['best_ind_fitness'] = self.hof[0].fitness.values
         self.run_log['summary_log'] = self.summary_log
@@ -803,7 +767,6 @@ def print_key_tree(key_tree, indent=''):
             print_key_tree(key_tree[k], indent + '\t')
         else:
             print('%s%s: %s' % (indent, k, key_tree[k]))
-        
 
 def main():
     if os.path.exists('saved_ind.yml'):
@@ -829,12 +792,14 @@ def main():
     node = Nav_Tuning_DEAP_EA(cmd_args = args)
 
 
-    print_key_tree(get_key_tree(saved_ind_list))
+    #print_key_tree(get_key_tree(saved_ind_list))
 
     if args.genome or args.load:
         if args.load:
             saved_ind_tree = saved_ind_list
             for k in args.load:
+                if type(saved_ind_tree) is list:
+                    k = int(k)
                 saved_ind_tree = saved_ind_tree[k]
 
             individual = saved_ind_tree[:]
