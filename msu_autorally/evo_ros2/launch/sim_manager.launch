@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-	<node name = "sim_manager" pkg="evo_ros2" type="autorally_sim_manager_2.py" output="screen"/>
+	<node name = "sim_manager" pkg="evo_ros2" type="autorally_PID_sim_manager.py" output="screen"/>
 
 </launch>

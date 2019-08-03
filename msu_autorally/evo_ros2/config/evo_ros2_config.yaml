@@ -4,6 +4,7 @@
 # Common Params
 #SERVER_IP_ADDR: '35.9.28.201'
 SERVER_IP_ADDR: '35.9.128.222'
+SERVER_IP_ADDR: '127.0.0.1'
 GENOME_PORT: 5023
 RESULT_PORT: 5033
 DEBUG: True
@@ -16,13 +17,13 @@ ROS_GAZEBO_WORLD_PROPERTIES_SERVICE: '/autorally_platform/gazebo/get_world_prope
 # Software Manager
 software_manager:
    # Launch files: ['pkg', 'launch_file.launch']
-   WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world_nav_tuning.launch']
-   PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform_nav_tuning.launch']
-   SIM_MANAGER_LAUNCH_FILE: ['evo_ros2', 'nav_sim_manager.launch']
+   WORLD_LAUNCH_FILE: ['msu_autorally_helper', 'spawn_gazebo_world_PID_tuning.launch']
+   PLATFORM_LAUNCH_FILE: ['msu_autorally_helper','spawn_autorally_platform_PID_tuning.launch']
+   SIM_MANAGER_LAUNCH_FILE: ['evo_ros2', 'sim_manager.launch']
    
 
  # Simulation Manager Script
 sim_manager:
-   MISSION_LAUNCH_FILE: ['msu_autorally_helper','way_point_publisher.launch']
+   MISSION_LAUNCH_FILE: ['msu_autorally_helper','twist_signal_pub.launch']
    UTILITY_MONITORS_LAUNCH_FILE: ['evo_ros2','utility_monitors.launch']
    MAX_SIM_TIME: 180 # simulation seconds a simulation is allowed to run before ending 

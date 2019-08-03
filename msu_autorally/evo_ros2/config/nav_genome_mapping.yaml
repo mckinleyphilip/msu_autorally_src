@@ -1,0 +1,46 @@
+# Genome Mapping for list of floats from Evo Search Algorithm
+# GAS 08-16-2018
+
+#GENOME_MAPPING: ['/ConstantSpeedController/IMax', '/ConstantSpeedController/KD', '/ConstantSpeedController/KI', '/ConstantSpeedController/KP']
+#GENOME_MAPPING: ['/autorally_move_base/global_costmap/inflation_layer/inflation_radius', 
+#    '/autorally_move_base/local_costmap/inflation_layer/inflation_radius',
+#    '/autorally_move_base/TebLocalPlannerROS/min_turning_radius',
+#    '/autorally_move_base/TebLocalPlannerROS/weight_max_vel_x',
+#    '/autorally_move_base/TebLocalPlannerROS/weight_max_vel_theta',
+#    '/autorally_move_base/TebLocalPlannerROS/weight_acc_lim_x',
+#    '/autorally_move_base/TebLocalPlannerROS/weight_kinematics_turning_radius',
+#    '/autorally_move_base/TebLocalPlannerROS/weight_obstacle',
+#    '/autorally_move_base/TebLocalPlannerROS/max_vel_theta',
+#    '/autorally_move_base/TebLocalPlannerROS/acc_lim_x',
+#    '/autorally_move_base/TebLocalPlannerROS/acc_lim_theta']
+#GENOME_WEIGHTS: [2.5, 2.5, 10.0, 100.0, 100.0, 100.0, 100.0, 100.0, 10.0, 10.0, 10.0]
+
+
+GENOME_MAPPING: [
+    '/autorally_move_base/TebLocalPlannerROS/acc_lim_x',
+    '/autorally_move_base/TebLocalPlannerROS/acc_lim_theta',
+    '/autorally_move_base/TebLocalPlannerROS/max_vel_theta',
+    '/autorally_move_base/TebLocalPlannerROS/min_turning_radius',
+    '/autorally_move_base/TebLocalPlannerROS/min_obstacle_dist', # new
+    '/autorally_move_base/TebLocalPlannerROS/inflation_dist', # new
+    '/autorally_move_base/TebLocalPlannerROS/penalty_epsilon', # new
+    '/autorally_move_base/TebLocalPlannerROS/weight_max_vel_x',
+    '/autorally_move_base/TebLocalPlannerROS/weight_max_vel_theta',
+    '/autorally_move_base/TebLocalPlannerROS/weight_acc_lim_x',
+    '/autorally_move_base/TebLocalPlannerROS/weight_acc_lim_theta', # new
+    '/autorally_move_base/TebLocalPlannerROS/weight_kinematics_turning_radius',
+    '/autorally_move_base/TebLocalPlannerROS/weight_obstacle',
+    '/autorally_move_base/TebLocalPlannerROS/weight_viapoint', # new
+    '/autorally_move_base/TebLocalPlannerROS/weight_inflation', # new
+    '/autorally_move_base/TebLocalPlannerROS/weight_adapt_factor', # new
+    '/autorally_move_base/global_costmap/inflation_layer/inflation_radius', 
+    '/autorally_move_base/local_costmap/inflation_layer/inflation_radius']
+GENOME_WEIGHTS: [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 
+    100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100] 
+NARROW_GENOME_WEIGHTS: [10.0, 10.0, 10.0, 10.0,
+    2.5, 10.0, 1.0, # new
+    100.0, 100.0, 100.0, 
+    100.0, # new
+    100.0, 100.0, 
+    100.0, 100.0, 10.0, # new
+    2.5, 2.5]
