@@ -110,7 +110,7 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
 
 
         // Handle Throttle
-        double speed_multiplier = 1.5; 
+        //double speed_multiplier = 1.5; 
         m_mostRecentSpeedCommand = msg->linear.x; // removed multiplier -- JF
         m_mostRecentYawCommand = msg->angular.z;
 
@@ -125,29 +125,6 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
             m_reverse = false;
         }
 
-        // Handle Steering
-        // angle (rads) = atan(wheelbase * wz / wx)
-        // If current velocity is zero, set steering to zero.
-        // If current wheel speed is fast, use that when calculating steering
-        // Otherwise, use commanded wheel speed
-        // Thanks DataSpeed!
-        // Assume that we cannot turn more than 45 deg (pi/8 rads)
-        // 0.5588 is measured wheelbase)
-        /*double omega = 0.0;
-          if(std::abs(msg->linear.x) > 1e-2 or std::abs(m_frontWheelsSpeed) > 1e-2)
-          {
-          omega = std::atan(0.5588*msg->angular.z/(m_frontWheelsSpeed > 0.5 ? m_frontWheelsSpeed : msg->linear.x))/(3.14/8);
-          }
-          m_steering_command = Clamp(- omega,-1.0,1.0); */
-
-        // Since max angle here is assumed to be 45 deg, only apply atan if in range
-        //double angle = 0.0;
-        //double tan_angle = 0.5588*msg->angular.z/m_frontWheelsSpeed;
-        //if (std::abs(tan_angle) >= 1)
-        //    angle = -(tan_angle > 1 ? PI/4 : -PI/4);
-        //else
-        //    angle = -std::atan(0.5588*msg->angular.z/m_frontWheelsSpeed);
-        //m_steering_command = Clamp(angle / (PI/4), -1.0, 1.0);
     }
 
     double base_controller_nodelet::Clamp(double num, double min, double max)
@@ -164,18 +141,36 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
         m_frontWheelsSpeed = 0.5*(msg->lfSpeed + msg->rfSpeed);
         //m_backWheelsSpeed = 0.2*m_backWheelsSpeed + 0.4*(msg->lbSpeed + msg->rbSpeed);
 
+        // Handle Steering
+        // angle (rads) = atan(wheelbase * wz / wx)
+        // If current velocity is zero, set steering to zero.
+        // If current wheel speed is fast, use that when calculating steering
+        // Otherwise, use commanded wheel speed
+        // Thanks DataSpeed!
+        // Assume that we cannot turn more than 45 deg (pi/8 rads)
+        // 0.5588 is measured wheelbase)
+        /*double omega = 0.0;
+          if(std::abs(msg->linear.x) > 1e-2 or std::abs(m_frontWheelsSpeed) > 1e-2)
+          {
+          omega = std::atan(0.5588*msg->angular.z/(m_frontWheelsSpeed > 0.5 ? m_frontWheelsSpeed : msg->linear.x))/(3.14/8);
+          }
+          m_steering_command = Clamp(- omega,-1.0,1.0); */
+
         // -JF-
         // Max angle (from xacro robot description) is 21 deg
         // wheelbase measured to be 0.5588 m
         // moved steering calculation here to take advantage of most recent speed measurement
         double angle = 0.0;
+        double wheelbase = 0.5588; // meters
         double max_angle = 21 * DEGTORAD;
-        double tan_angle = 0.5588*m_mostRecentYawCommand/std::abs(m_frontWheelsSpeed);
-        // don't bother sending through atan if angle would be grater than PI/4
-        if (std::abs(tan_angle) >= 1)
-            angle = tan_angle > 1 ? PI/4 : -PI/4;
+        // to avoid dividing by zero, check to see if the wheelspeed is less than what is 
+        // required to achieve requested yaw (given max angle) and set it to max_angle,
+        // otherwise do the calculation
+        if (std::abs(m_frontWheelsSpeed) <=
+                std::tan(max_angle) * std::abs(wheelbase*m_mostRecentYawCommand))
+            angle = m_mostRecentYawCommand > 0 ? max_angle : -max_angle;
         else
-            angle = std::atan(tan_angle);
+            angle = std::atan(wheelbase*m_mostRecentYawCommand/std::abs(m_frontWheelsSpeed));
         m_steering_command = Clamp(angle / max_angle, -1.0, 1.0);
         // -JF-
 
@@ -189,14 +184,14 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
         double abs_goal_speed = std::abs(m_mostRecentSpeedCommand);
         double abs_front_wheel_speed = std::abs(m_frontWheelsSpeed);
 
-        // braking
+        // braking -- disabled JF
         double speed_diff = abs_goal_speed - abs_front_wheel_speed;
-        if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand) == (0 > m_frontWheelsSpeed)) || -0.1 < abs_goal_speed < 0.1)
+        //if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand) == (0 > m_frontWheelsSpeed)) || -0.1 < abs_goal_speed < 0.1)
             //if (!((0 > m_mostRecentSpeedCommand) == (0 > m_frontWheelsSpeed)) )
-        {
+        //{
             //command->frontBrake = std::max(0.0, std::min(1.0, std::abs(speed_diff)));
-            command->frontBrake = 0.0;
-        }
+        //    command->frontBrake = 0.0;
+        //}
 
 
         if (abs_goal_speed > 0.1 && abs_goal_speed < 99)

@@ -381,7 +381,7 @@ class AutoRallyCtrlr(object):
                                 #rospy.loginfo("%s in control of throttle", cmd);
                                 if self.chassisCmds[cmd].throttle >= 0.0:
                                     speed = self.rear_axle_max_effort*self.chassisCmds[cmd].throttle
-                                else:
+                                else: # investigate throttle braking
                                     speed = self.rear_axle_brake_effort*self.chassisCmds[cmd].throttle
                                 
                                 accel = 0.0
@@ -429,10 +429,15 @@ class AutoRallyCtrlr(object):
                 self._left_front_axle_cmd_pub.publish(frontBrake)
             if self._right_front_axle_cmd_pub:
                 self._right_front_axle_cmd_pub.publish(frontBrake)
+            # Changed axle publishers to reflect values set by _ctrl_axles -JF
+            # returned this to original version ... worked better in simulation ... not sure
+            # what _ctrl_axles actually does in
             if self._left_rear_axle_cmd_pub:
                 self._left_rear_axle_cmd_pub.publish(speed)
+                #self._left_rear_axle_cmd_pub.publish(self._left_rear_ang_vel)
             if self._right_rear_axle_cmd_pub:
                 self._right_rear_axle_cmd_pub.publish(speed)
+                #self._right_rear_axle_cmd_pub.publish(self._right_rear_ang_vel)
 
             try:
               self._sleep_timer.sleep()

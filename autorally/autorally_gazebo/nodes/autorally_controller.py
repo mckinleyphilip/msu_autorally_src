@@ -239,7 +239,7 @@ class AutoRallyCtrlr(object):
       # _joint_dist_div_2 is the distance between the steering joints,
       # divided by two.
       tfl = tf.TransformListener()
-      ls_pos = self._get_link_pos(tfl, left_steer_link_name)
+      ls_pos = self._get_link_pos(tfl, left_steer_link_nme)
       rs_pos = self._get_link_pos(tfl, right_steer_link_name)
       self._joint_dist_div_2 = numpy.linalg.norm(ls_pos - rs_pos) / 2
       lrw_pos = self._get_link_pos(tfl, left_rear_link_name)
@@ -293,7 +293,7 @@ class AutoRallyCtrlr(object):
       self.left_rear_name, self.left_rear_dia = self.getJointStateWheelParams('left', 'rear')
       self.right_rear_name, self.right_rear_dia = self.getJointStateWheelParams('right', 'rear')
 
-      self.wheelSpeedFront = 0.0;
+      self.wheelSpeedFront = 0.0
 
       #don't set up callback until params are initialized
       self.wheelSpeedsPub = rospy.Publisher(self._vehicle_prefix + '/wheelSpeeds', wheelSpeeds, queue_size=1)
@@ -321,10 +321,10 @@ class AutoRallyCtrlr(object):
       delta_t = t - last_time
       last_time = t
 
-      frontBrake = 0.0;
-      speed = 0.0;
+      frontBrake = 0.0
+      speed = 0.0
       chassisSt = chassisState()
-      chassisSt.runstopMotionEnabled = self.getrunstop();
+      chassisSt.runstopMotionEnabled = self.getrunstop()
       if (self._cmd_timeout > 0.0 and
         t - self._last_cmd_time > self._cmd_timeout):
         # Too much time has elapsed since the last command. Stop the
@@ -343,8 +343,8 @@ class AutoRallyCtrlr(object):
           accel = 0.0
 
           if not chassisSt.runstopMotionEnabled:
-            chassisSt.throttle = 0.0;
-            chassisSt.throttleCommander = 'runstop';
+            chassisSt.throttle = 0.0
+            chassisSt.throttleCommander = 'runstop'
             foundThrottle = True
 
           for cmd,priority in self.commandPriorities:
@@ -354,7 +354,7 @@ class AutoRallyCtrlr(object):
                  (rospy.Time.now()-self.chassisCmds[cmd].header.stamp) < \
                     rospy.Duration.from_sec(0.2) and\
                  not foundSteering:
-                #rospy.loginfo("%s in control of steering", cmd);
+                #rospy.loginfo("%s in control of steering", cmd)
                 steer_ang = -math.radians(25)*self.chassisCmds[cmd].steering
                 steer_ang_vel = 0.0
                 chassisSt.steering = self.chassisCmds[cmd].steering
@@ -366,7 +366,7 @@ class AutoRallyCtrlr(object):
                     rospy.Duration.from_sec(0.2) and\
                  not foundThrottle:
 
-                #rospy.loginfo("%s in control of throttle", cmd);
+                #rospy.loginfo("%s in control of throttle", cmd)
                 if self.chassisCmds[cmd].throttle >= 0.0:
                   speed = self.rear_axle_max_effort*self.chassisCmds[cmd].throttle
                 else:

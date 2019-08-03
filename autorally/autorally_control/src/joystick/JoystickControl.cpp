@@ -114,7 +114,8 @@ void JoystickControl::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
   if(steeringEnabled_)
   {
-    chassis_command_.steering = -steeringDamping_*joy->axes[steeringAxis_];
+    // removed negative from steering
+    chassis_command_.steering = steeringDamping_*joy->axes[steeringAxis_];
   } else
   {
     chassis_command_.steering = -10.0;
@@ -125,9 +126,10 @@ void JoystickControl::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
     chassis_command_.throttle = throttleDamping_*joy->axes[throttleAxis_];
 
+    // disabled braking command -- backwards should just mean backwards -JF
     if(chassis_command_.throttle < 0.0)
     {
-      chassis_command_.frontBrake = fabs(chassis_command_.throttle);
+      chassis_command_.frontBrake = 0.0; //fabs(chassis_command_.throttle);
     } else
     {
       chassis_command_.frontBrake = 0.0;
