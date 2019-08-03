@@ -5,6 +5,8 @@ import yaml, json
 import argparse
 import matplotlib.pyplot as plt
 import zmq
+from sklearn.metrics import mean_squared_error
+import pandas as pd
 
 class SocketZMQDevice():
     def __init__(self, ip_addr, send_port, recv_port, timeout):
@@ -71,27 +73,26 @@ class SocketZMQDevice():
         print('Sending Connection: tcp://{}:{}'.format(self.ip_addr, self.send_port))
         print('Receiving Connection: tcp://{}:{}'.format(self.ip_addr, self.recv_port))
 
-
-def evaluate_result(ind, result):
-    df = pd.DataFrame.from_dict(dict(result))
+def evaluate_nav_result(ind, result):
+    result_df = pd.DataFrame.from_dict(dict(result))
     
     # Get rid of all 0s entry ???
-    df = df.truncate(before=2)
+    result_df = result_df.truncate(before=2)
     
     # Raw Time
-    time_elapsed = df['Time'].max()
+    time_elapsed = result_df['Time'].max()
 
     # Progress
-    for d in df['Direction']:
+    for d in result_df['Direction']:
         if abs(d) == 1:
             desired_direction = d
             break
 
     # Goal
-    goal_status = max(df['Goal Status'])
+    goal_status = max(result_df['Goal Status'])
     
     prog_list = []
-    for x,y in zip(df['Pos X'], df['Pos Y']):
+    for x,y in zip(result_df['Pos X'], result_df['Pos Y']):
         prog_list.append(pos_to_progress((x, y), desired_direction))
     
     # For detecting errors in simulation...
@@ -146,7 +147,7 @@ def evaluate_result(ind, result):
         #max_prog = -1
 
     prog_df = pd.DataFrame(data={'Progress': prog_list, 'Actual Progress': prog_actual})
-    df = df.join(prog_df)
+    result_df = result_df.join(prog_df)
 
     raw_fit = [max_prog, time_elapsed, goal_status]
     if max_prog > 0.95:
@@ -160,7 +161,19 @@ def evaluate_result(ind, result):
     #fit = (sum(norm_fit),)
     
     
-    return raw_fit, (fit,)
+    return raw_fit, (fit,), result_df
+
+def evaluate_PID_result(ind, result):
+    result_df = pd.DataFrame.from_dict(dict(result))
+    
+    # Get rid of all 0s entry ???
+    result_df = result_df.truncate(before=2)
+    result_df['Error'] = result_df['Actual Speed'] - result_df['Goal Speed']
+
+    fitness_val = mean_squared_error(result_df['Goal Speed'], result_df['Actual Speed'])
+    
+    return fitness_val, (fitness_val,), result_df
+
 
 def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23.48):
     """

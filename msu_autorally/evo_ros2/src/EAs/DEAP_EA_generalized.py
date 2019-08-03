@@ -34,7 +34,7 @@ import copy
 
 import math
 
-from simulation_tools import SocketZMQDevice
+from simulation_tools import SocketZMQDevice, evaluate_nav_result, evaluate_PID_result
 
 class Nav_Tuning_DEAP_EA(SocketZMQDevice):
     def __init__(self, cmd_args):
@@ -47,7 +47,8 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         
         # Config params
         self.experiment_name = "TEST" #"nav-tuning_18params_uneven-track_narrow-search_elitism_avg2_pop100"
-        self.genome_weights_key = 'NARROW_GENOME_WEIGHTS'
+        self.genome_weights_key = 'GENOME_WEIGHTS'
+        # note this path is relative....
         path_to_genome_config = '../../config/genome_mapping.yaml'
 
         # EA Params
@@ -57,6 +58,9 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         self.tourn_size = 2
         
         self.evals_to_avg = 2 # new
+
+        # put fitness calculator here
+        self.evaluate_result = evaluate_PID_result
         
         # Running Params
         self.starting_run_number = 1
@@ -79,7 +83,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # Extract genome config file and ensure all weights are floats
         with open(path_to_genome_config) as ymlfile:
             self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
-        for k in ('GENOME_WEIGHTS', 'NARROW_GENOME_WEIGHTS'):
+        for k in ('GENOME_WEIGHTS',): #, 'NARROW_GENOME_WEIGHTS'):
             for i in range(len(self.genome_config[k])):
                 self.genome_config[k][i] = float(self.genome_config[k][i])
 
@@ -166,6 +170,8 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
 
     def _single_genome_core(self, ind, param_type='default', sim_type='eval'):
         """ 
+        DEPRICATED -- will be removing this soon!
+
         The core (doesn't contain network try-catch) of managing simulations of single genomes.
         
         This method supports different options for both the scale configuration for the genome
@@ -233,8 +239,9 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
 
             fitnesses[fitnesses.index(float('Inf'))] = fitness[0]
 
-            #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
-            raw_fit_str = '[%5.2f, %6.2f, %4.2f]' % tuple(raw_fit)
+            raw_fit_str = '' #'[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
+            #fit_str = '%.2f'%fitness
+            raw_fit_str = '%s (%d -- %d)' % (raw_fit_str, index, len(fitnesses[index]))
             fit_str = '%.2f'%fitness
 
             time_elapsed = time.time() - self.start_time
@@ -263,6 +270,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         
         # Setup Evolution Alg operators
         self.toolbox.register('mate', tools.cxTwoPoint)
+        #std of 1 seems really large.... --JF
         self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
         self.toolbox.register('select', tools.selTournament, tournsize=self.tourn_size)
         
@@ -446,7 +454,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
             
             ind = list(return_data['Genome'])
             result = dict(return_data['Result'])
-            raw_fit, fitness, result_df = self.evaluate_result(ind, result)
+            raw_fit, fitness, modified_df = self.evaluate_result(ind, result)
 
             # Add individual to detailed log
             if str(ind) not in self.detailed_log.keys():
@@ -454,7 +462,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
                         'gen': self.gen,
                         'fitness': fitness,
                         'rawFitness': raw_fit,
-                        'dataFrame': result_df.to_json()
+                        'dataFrame': modified_df.to_json()
                         }
             
             # Try to get the index of the individual
@@ -487,10 +495,9 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
                             break
             num_evaluated += 1
             
-            #raw_fit_str = '[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
+            raw_fit_str = '' #'[%5.2f, %4.2f, %4.2f, %6.2f, %6.2f]' % tuple(raw_fit)
             #fit_str = '%.2f'%fitness
-            raw_fit_str = '[%5.2f, %6.2f, %1.0f] (%d -- %d)' % (raw_fit[0], raw_fit[1],
-                    raw_fit[2], index, len(fitnesses[index]))
+            raw_fit_str = '%s (%d -- %d)' % (raw_fit_str, index, len(fitnesses[index]))
             fit_str = '%.2f'%fitness
 
             time_elapsed = time.time() - self.gen_start_time
@@ -507,7 +514,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
 
         return avg_fitnesses
 
-    def evaluate_result(self, ind, result):
+    def old_evaluate_result(self, ind, result):
         result_df = pd.DataFrame.from_dict(dict(result))
         
         # Get rid of all 0s entry ???
