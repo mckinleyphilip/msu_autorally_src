@@ -1,5 +1,5 @@
 # Genome Mapping for list of floats from Evo Search Algorithm
 # GAS 08-16-2018
 
-GENOME_MAPPING: ['/base_controller_nodelet/IMax', '/base_controller_nodelet/KD', '/base_controller_nodelet/KI', '/base_controller_nodelet/KP']
+GENOME_MAPPING: ['/Base_controller_nodelet/IMax', '/Base_controller_nodelet/KD', '/Base_controller_nodelet/KI', '/Base_controller_nodelet/KP']
 GENOME_WEIGHTS: [10.0, 10.0, 10.0, 10.0]
