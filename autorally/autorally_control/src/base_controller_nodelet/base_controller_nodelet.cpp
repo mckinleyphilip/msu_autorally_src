@@ -84,6 +84,7 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
                 this);
         m_chassisCommandPub = nh.advertise<autorally_msgs::chassisCommand>
             ("base_controller_nodelet/chassisCommand", 1);
+        m_speedEstPub = nh.advertise<std_msgs::Float64>("base_controller_nodelet/speedEst", 1);
 
         if(!nhPvt.getParam("speedCommander", m_speedCommander) ||
                 !nhPvt.getParam("accelerationRate", m_accelerationRate) ||
@@ -141,6 +142,11 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
     {
         m_frontWheelsSpeed = 0.5*(msg->lfSpeed + msg->rfSpeed);
         m_lastSpeedEst = (1-0.25) * m_lastSpeedEst + 0.25 * m_frontWheelsSpeed;
+
+        std_msgs::Float64Ptr speedEst(new std_msgs::Float64);
+        speedEst->data = m_lastSpeedEst;
+
+        m_speedEstPub.publish(speedEst);
         //m_backWheelsSpeed = 0.2*m_backWheelsSpeed + 0.4*(msg->lbSpeed + msg->rbSpeed);
 
         // Handle Steering

@@ -74,6 +74,7 @@ class base_controller_nodelet : public nodelet::Nodelet
   ros::Subscriber m_speedCommandSub;
   ros::Subscriber m_wheelSpeedsSub;
   ros::Publisher m_chassisCommandPub; ///<Publisher for chassisCommands
+  ros::Publisher m_speedEstPub;
   ros::Timer m_controlTimer;
   ros::Timer m_controlEnableTimer;
   std::string m_speedCommander;

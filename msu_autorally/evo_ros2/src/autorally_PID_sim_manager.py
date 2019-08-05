@@ -19,6 +19,7 @@ from gazebo_msgs.srv import GetWorldProperties
 from evo_ros2.msg import EvoROS2State
 from evo_ros2.msg import LogEvent
 from evo_ros2.msg import Float64Array
+from std_msgs.msg import Float64
 
 from autorally_msgs.msg import wheelSpeeds
 from geometry_msgs.msg import Twist
@@ -53,7 +54,7 @@ class AutorallySimManagerNode():
         self.prepare_log()
         
         # Sent up monitored topics
-        self.wheel_speed_topic = rospy.Subscriber('/wheelSpeeds', wheelSpeeds, self.wheel_speed_topic_cb)
+        self.wheel_speed_topic = rospy.Subscriber('/base_controller_nodelet/speedEst', Float64, self.speed_est_topic_cb)
         self.goal_speed_topic = rospy.Subscriber('/cmd_vel', Twist, self.goal_speed_topic_cb)
         
         
@@ -126,8 +127,8 @@ class AutorallySimManagerNode():
         self.log[2].append(self.last_actual_speed)
         
         
-    def wheel_speed_topic_cb(self, msg):
-        self.last_actual_speed = (msg.lfSpeed + msg.rfSpeed) / 2.0
+    def speed_est_topic_cb(self, msg):
+        self.last_actual_speed = msg.data
     
     def goal_speed_topic_cb(self, msg):
         self.last_goal_speed = msg.linear.x
