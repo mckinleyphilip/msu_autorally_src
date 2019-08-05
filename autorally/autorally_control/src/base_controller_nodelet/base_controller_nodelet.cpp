@@ -54,7 +54,8 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
         m_backWheelsSpeed(0.0),
         m_lastError(0.0),
         m_derivativeError(0.0),
-        m_integralError(0.0)
+        m_integralError(0.0),
+        m_lastSpeedEst(0.0)
     {}
 
     base_controller_nodelet::~base_controller_nodelet()
@@ -139,6 +140,7 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
     void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)
     {
         m_frontWheelsSpeed = 0.5*(msg->lfSpeed + msg->rfSpeed);
+        m_lastSpeedEst = (1-0.25) * m_lastSpeedEst + 0.25 * m_frontWheelsSpeed;
         //m_backWheelsSpeed = 0.2*m_backWheelsSpeed + 0.4*(msg->lbSpeed + msg->rbSpeed);
 
         // Handle Steering
@@ -158,10 +160,10 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
 
         // -JF-
         // Max angle (from xacro robot description) is 21 deg
-        // wheelbase measured to be 0.5588 m
+        // wheelbase measured to be 0.5588 m -> autorally desc says 0.570 m
         // moved steering calculation here to take advantage of most recent speed measurement
         double angle = 0.0;
-        double wheelbase = 0.5588; // meters
+        double wheelbase = 0.570; // meters
         double max_angle = 21 * DEGTORAD;
         // to avoid dividing by zero, check to see if the wheelspeed is less than what is 
         // required to achieve requested yaw (given max angle) and set it to max_angle,
@@ -184,8 +186,8 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
         double abs_goal_speed = std::abs(m_mostRecentSpeedCommand);
         double abs_front_wheel_speed = std::abs(m_frontWheelsSpeed);
 
+        double speed_diff = abs_goal_speed - std::abs(m_lastSpeedEst); //abs_front_wheel_speed;
         // braking -- disabled JF
-        double speed_diff = abs_goal_speed - abs_front_wheel_speed;
         //if (speed_diff < 0 || !((0 > m_mostRecentSpeedCommand) == (0 > m_frontWheelsSpeed)) || -0.1 < abs_goal_speed < 0.1)
             //if (!((0 > m_mostRecentSpeedCommand) == (0 > m_frontWheelsSpeed)) )
         //{

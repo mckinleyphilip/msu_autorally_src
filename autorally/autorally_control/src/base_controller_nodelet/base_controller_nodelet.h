@@ -90,6 +90,7 @@ class base_controller_nodelet : public nodelet::Nodelet
 //  double m_throttleOffset;
 //  double m_safeSpeedMultiplier;
 
+  double m_lastSpeedEst;
   bool m_controlEnabled;
   double m_accelerationRate;
   double m_frontWheelsSpeed;
