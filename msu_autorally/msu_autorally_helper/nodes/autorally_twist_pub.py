@@ -40,7 +40,10 @@ class AutorallyTwistCmd():
         result.angular.y = 0
         result.angular.z = 0
 
-        signal_live = t < 30
+        
+        signal_live = t < 60
+        if t >= 30:
+            t -= 30
         if signal_live:
             if (0 <= t and t < 1):
                 result.linear.x = t*max_linear
@@ -69,7 +72,8 @@ class AutorallyTwistCmd():
                 elif (26 <= t and t < 29):
                     result.angular.z = -max_angular
                 else:
-                    result.angular.z = -(1-(t-29))*max_angular
+                    result.angular.z = -(30-t)*max_angular
+                    result.linear.x = (30-t)*0.5*max_linear
         
         return result, signal_live
 

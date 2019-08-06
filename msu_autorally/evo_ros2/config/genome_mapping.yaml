@@ -2,4 +2,4 @@
 # GAS 08-16-2018
 
 GENOME_MAPPING: ['/Base_controller_nodelet/IMax', '/Base_controller_nodelet/KD', '/Base_controller_nodelet/KI', '/Base_controller_nodelet/KP']
-GENOME_WEIGHTS: [10.0, 10.0, 10.0, 10.0]
+GENOME_WEIGHTS: [1.0, 1.0, 1.0, 1.0]
