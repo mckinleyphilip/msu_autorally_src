@@ -46,28 +46,29 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # ------------------------------------
         
         # Config params
-        self.experiment_name = "TEST" #"nav-tuning_18params_uneven-track_narrow-search_elitism_avg2_pop100"
+        self.experiment_name = 'PID-tuning_new-signal_mutstd-01_pop50'
         self.genome_weights_key = 'GENOME_WEIGHTS'
         # note this path is relative....
         path_to_genome_config = '../../config/genome_mapping.yaml'
 
         # EA Params
-        self.pop_size = 5
-        self.num_generations = 2
+        self.pop_size = 50
+        self.num_generations = 25
         self.elitism = True
         self.tourn_size = 2
         
-        self.evals_to_avg = 2 # new
+        self.evals_to_avg = 1 # new
 
         # put fitness calculator here
         self.evaluate_result = evaluate_PID_result
+        self.fitness_min_or_max = 'min'
         
         # Running Params
         self.starting_run_number = 1
         self.num_runs = 5
         
         # Socket Communication Params
-        self.ip_addr = '127.0.0.1'
+        self.ip_addr = '35.9.128.222'
         self.send_port = 5023
         self.recv_port = 5033
         
@@ -260,7 +261,11 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         Sets up EA parameters.
         """
         creator.create('FitnessMax', base.Fitness, weights=(1.0,))
-        creator.create('Individual', list, fitness=creator.FitnessMax)
+        creator.create('FitnessMin', base.Fitness, weights=(-1.0,))
+        if self.fitness_min_or_max in ('min', 'Min'):
+            creator.create('Individual', list, fitness=creator.FitnessMin)
+        else:
+            creator.create('Individual', list, fitness=creator.FitnessMax)
         
         self.toolbox = base.Toolbox()
         self.toolbox.register('attr_float', random.random)
@@ -271,7 +276,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # Setup Evolution Alg operators
         self.toolbox.register('mate', tools.cxTwoPoint)
         #std of 1 seems really large.... --JF
-        self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
+        self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=0.1, indpb=0.2)
         self.toolbox.register('select', tools.selTournament, tournsize=self.tourn_size)
         
         # Setup EA history
