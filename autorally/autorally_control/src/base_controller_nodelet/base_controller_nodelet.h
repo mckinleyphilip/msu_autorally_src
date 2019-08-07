@@ -84,6 +84,7 @@ class base_controller_nodelet : public nodelet::Nodelet
   double m_constantSpeedKD; ///< Scaler for the derivative component
   double m_constantSpeedKI; ///< Scaler for the integral component
   double m_constantSpeedIMax; ///< Maximum Integral Error
+  double m_alpha;
 
   double m_lastError;
   double m_derivativeError;
