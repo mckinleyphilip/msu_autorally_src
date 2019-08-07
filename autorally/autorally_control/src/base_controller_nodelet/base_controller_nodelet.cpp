@@ -91,7 +91,8 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
                 !nhPvt.getParam("KP", m_constantSpeedKP) ||
                 !nhPvt.getParam("KD", m_constantSpeedKD) ||
                 !nhPvt.getParam("KI", m_constantSpeedKI) ||
-                !nhPvt.getParam("IMax", m_constantSpeedIMax))
+                !nhPvt.getParam("IMax", m_constantSpeedIMax) ||
+                !nhPvt.getParam("alpha", m_alpha))
         {
             NODELET_ERROR("Could not get all base_controller_nodelet params");
         }
@@ -141,7 +142,7 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
     void base_controller_nodelet::wheelSpeedsCallback(const autorally_msgs::wheelSpeedsConstPtr& msg)
     {
         m_frontWheelsSpeed = 0.5*(msg->lfSpeed + msg->rfSpeed);
-        m_lastSpeedEst = (1-0.25) * m_lastSpeedEst + 0.25 * m_frontWheelsSpeed;
+        m_lastSpeedEst = (1-m_alpha) * m_lastSpeedEst + m_alpha * m_frontWheelsSpeed;
 
         std_msgs::Float64Ptr speedEst(new std_msgs::Float64);
         speedEst->data = m_lastSpeedEst;
@@ -260,6 +261,7 @@ PLUGINLIB_DECLARE_CLASS(autorally_control, base_controller_nodelet, autorally_co
         nhPvt.getParam("KD", m_constantSpeedKD);
         nhPvt.getParam("KI", m_constantSpeedKI);
         nhPvt.getParam("IMax", m_constantSpeedIMax);
+        nhPvt.getParam("alpha", m_alpha);
 
     }
 

@@ -7,11 +7,12 @@
     <param name="speedCommander" value="OCS" />
 
     <param name="controlEnabled" value="true" />
-    <param name="KP" value="0.7188801125834188" />
-    <param name="KD" value="1.244295400759123" />
+    <param name="KP" value="0.1" />
+    <param name="KD" value="1.0" />
     <param name="accelerationRate" value="0.0" />
-    <param name="KI" value="0.09175407739115371" />
-    <param name="IMax" value="0.20265782426571877" />
+    <param name="KI" value="0.01" />
+    <param name="IMax" value="0.1" />
+    <param name="alpha" value="0.25" />
 
   </node>
   
