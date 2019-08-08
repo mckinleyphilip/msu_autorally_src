@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <node name="twist_signal_publisher_node" pkg="msu_autorally_helper"
-        type="autorally_twist_pub.py" output="screen"/>
+        type="twist_signal_pub.py" output="screen"/>
+    <node name="autorally_twist_pub" pkg="msu_autorally_helper"
+        type="autorally_twist_pub.py" output="screen" />
 </launch>

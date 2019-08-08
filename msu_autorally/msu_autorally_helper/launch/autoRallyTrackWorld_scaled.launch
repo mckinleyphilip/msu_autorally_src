@@ -41,7 +41,7 @@
   
   <group if="$(arg spawn_track)">
   <node name="spawn_track" pkg="gazebo_ros" type="spawn_model"
-        args="-file $(find msu_autorally_helper)/tmp-storage/models/autoRallyTrack_scaled.urdf -urdf -model track
+        args="-file $(find msu_autorally_helper)/models/autoRallyTrack_scaled.urdf -urdf -model track
               -gazebo_namespace /$(arg namespace)/gazebo
               -x 0 -y 0 -z 0.0762
               -R 0 -P 0 -Y 0.785398"/>

@@ -116,7 +116,6 @@ def setup_parser():
 
     return parser 
 
-
 def fix_fitness(obj):
     if type(obj) is dict:
         for k in obj.keys():
@@ -151,7 +150,6 @@ def print_key_tree(key_tree, indent=''):
         else:
             print('%s%s: %s' % (indent, k, key_tree[k]))
         
-
 def main():
     parser = setup_parser()
     args = parser.parse_args()

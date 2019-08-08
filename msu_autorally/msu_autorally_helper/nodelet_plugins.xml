@@ -22,3 +22,10 @@
   </class>
 </library>
 
+<library path="lib/libbase_controller_nodelet">
+  <class name="msu_autorally_helper/base_controller_nodelet" type="msu_autorally_helper::base_controller_nodelet" base_class_type="nodelet::Nodelet">
+    <description>
+    Drive a robot using twist commands with a PID throttle control and Ackerman based steering.
+    </description>
+  </class>    
+</library>

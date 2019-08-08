@@ -21,7 +21,7 @@
 	<arg name="pitch" default="0.0"/>
 	<arg name="yaw" default="0.785398"/>
 
-	<include file="$(find msu_autorally_helper)/tmp-storage/autoRallyPlatform_MSU.launch">
+	<include file="$(find msu_autorally_helper)/launch/autoRallyPlatform_MSU.launch">
 		<arg name="namespace" value="$(arg namespace)"/>
 	</include>
 

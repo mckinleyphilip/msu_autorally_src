@@ -46,32 +46,35 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # ------------------------------------
         
         # Config params
-        self.experiment_name = 'PID-tuning_new-signal_mutstd-01_pop50'
+        self.experiment_name = 'TEST'
         self.genome_weights_key = 'GENOME_WEIGHTS'
         # note this path is relative....
         path_to_genome_config = '../../config/genome_mapping.yaml'
 
         # EA Params
-        self.pop_size = 50
-        self.num_generations = 25
+        self.pop_size = 10
+        self.num_generations = 2
         self.elitism = True
         self.tourn_size = 2
         
         self.evals_to_avg = 1 # new
+        
+        self.mate_pb = 0.5 # pb of mating
+        self.mut_pb = 0.05 # pb of each gene being mutated
+        self.mut_std = 0.1 # std of mutation (each gene in [0, 1))
 
-        # put fitness calculator here
+        # put fitness calculator here -- define it in a separate file
         self.evaluate_result = evaluate_PID_result
         self.fitness_min_or_max = 'min'
         
         # Running Params
         self.starting_run_number = 1
-        self.num_runs = 5
+        self.num_runs = 1
         
         # Socket Communication Params
-        self.ip_addr = '35.9.128.222'
+        self.ip_addr = '127.0.0.1'
         self.send_port = 5023
         self.recv_port = 5033
-        
         self.timeout = 500 * 1000 # ms
         
         # Email Notification Params
@@ -84,9 +87,10 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # Extract genome config file and ensure all weights are floats
         with open(path_to_genome_config) as ymlfile:
             self.genome_config = yaml.load(ymlfile, Loader=yaml.FullLoader)
-        for k in ('GENOME_WEIGHTS',): #, 'NARROW_GENOME_WEIGHTS'):
-            for i in range(len(self.genome_config[k])):
-                self.genome_config[k][i] = float(self.genome_config[k][i])
+        for k in self.genome_config.keys():
+            if 'WEIGHTS' in k:
+                for i in range(len(self.genome_config[k])):
+                    self.genome_config[k][i] = float(self.genome_config[k][i])
 
         self.genome_size = len(self.genome_config[self.genome_weights_key])
         
@@ -150,7 +154,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
             self.population = self.toolbox.population(n=self.pop_size)
             self.history.update(self.population)
             
-            self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
+            self.ending_pop, self.summary_log = self.eaSimpleCustom()
             self.run_time_list.append(time.time() - self.run_start_time)
             time_str = seconds_to_time_str(self.run_time_list[-1])
             print('\n\nRun finished at {}\n\t Taking {}'.format(datetime.datetime.now(),
@@ -188,7 +192,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
 
         # Load different weight lists
         current_weights = self.genome_config[self.genome_weights_key]
-        narrow_weights = self.genome_config['NARROW_GENOME_WEIGHTS']
+        narrow_weights = None #self.genome_config['NARROW_GENOME_WEIGHTS']
 
         # scale genome and get the raw values intended
         if param_type == 'default': # default is actual values
@@ -276,7 +280,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # Setup Evolution Alg operators
         self.toolbox.register('mate', tools.cxTwoPoint)
         #std of 1 seems really large.... --JF
-        self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=0.1, indpb=0.2)
+        self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=self.mut_std, indpb=self.mut_pb)
         self.toolbox.register('select', tools.selTournament, tournsize=self.tourn_size)
         
         # Setup EA history
@@ -322,13 +326,13 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         self.population = self.toolbox.population(n=self.pop_size)
         self.history.update(self.population)
         
-        self.ending_pop, self.summary_log = self.eaSimpleCustom(cxpb=0.5, mutpb=0.2)
+        self.ending_pop, self.summary_log = self.eaSimpleCustom()
         run_time = time.time() - self.start_time
         time_str = seconds_to_time_str(run_time)
         print('\n\nRun finished at {}\n\t Taking {}'.format(datetime.datetime.now(),
             time_str))
 
-    def eaSimpleCustom(self, cxpb, mutpb):
+    def eaSimpleCustom(self):
         population = self.population
         toolbox = self.toolbox
         stats = self.stats
@@ -374,29 +378,8 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
             offspring = toolbox.select(population, len(population))
             
             # Vary the pool of individuals
-            offspring = algorithms.varAnd(offspring, toolbox, cxpb, mutpb)
+            offspring = algorithms.varAnd(offspring, toolbox, self.mate_pb, 1.0)
 
-            if self.elitism:
-                worst_i = -1
-                best_exists = False
-
-                for i in range(len(offspring)):
-                    ind = offspring[i]
-                    if ind.fitness.valid:
-                        genome_diff = sum([abs(ind[j]-best_ind[j]) for j in range(len(ind))])
-                        if genome_diff == 0.0:
-                            best_exists = True
-                            print('Best found!')
-                            break
-                        elif worst_i < 0 or ind.fitness.values[0] < offspring[worst_i].fitness.values[0]:
-                            worst_i = i 
-
-                if not best_exists:
-                    if worst_i > 0:
-                        print('Best not found, replacing worst...')
-                        offspring[worst_i] = best_ind
-                    else:
-                        print('Best not found, no-one to replace...')
 
 
             # figure out a way to include avgs into subsequent generations:
@@ -407,11 +390,12 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
 
             # Evalueate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-            
+            print('#%d offspring, #%d of which are invalid' % (len(offspring), len(invalid_ind)))
+
             fitnesses = self.custom_eval_fit_mapping(invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
-            
+
             # Update hall_of_fame if it exists
             if hall_of_fame is not None:
                 hall_of_fame.update(offspring)
@@ -419,12 +403,49 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
                 if self.elitism:
                     best_ind = hall_of_fame[0]
             
+            if self.elitism:
+                worst_i = -1
+                best_exists = False
+
+                for i in range(len(offspring)):
+                    ind = offspring[i]
+                    genome_diff = sum([abs(ind[j]-best_ind[j]) for j in range(len(ind))])
+                    if genome_diff == 0.0:
+                        best_exists = True
+                        print('Best found at index=%d!'%(i,))
+                        break
+                    elif worst_i < 0 or \
+                            ind.fitness.values[0] < offspring[worst_i].fitness.values[0]:
+                        worst_i = i 
+
+                if not best_exists:
+                    if worst_i >= 0:
+                        print('Best not found, replacing worst...')
+                        offspring[worst_i] = best_ind
+                    else:
+                        print('Best not found, no-one to replace...')
+            
             # Replace the current population
             population[:] = offspring
+            valid_cnt = 0
+            for ind in population:
+                if ind.fitness.valid:
+                    valid_cnt += 1
+            print('%d population, %d of which are valid' % (len(population), valid_cnt))
             
             # Append stats and logs
             record = stats.compile(population) if stats else {}
+            valid_cnt = 0
+            for ind in population:
+                if ind.fitness.valid:
+                    valid_cnt += 1
+            print('%d population, %d of which are valid' % (len(population), valid_cnt))
             logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+            valid_cnt = 0
+            for ind in population:
+                if ind.fitness.valid:
+                    valid_cnt += 1
+            print('%d population, %d of which are valid' % (len(population), valid_cnt))
 
             self.gen_time_list.append(time.time() - self.gen_start_time)
         
@@ -519,96 +540,6 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
 
         return avg_fitnesses
 
-    def old_evaluate_result(self, ind, result):
-        result_df = pd.DataFrame.from_dict(dict(result))
-        
-        # Get rid of all 0s entry ???
-        result_df = result_df.truncate(before=2)
-        
-        # Raw Time
-        time_elapsed = result_df['Time'].max()
-
-        # Progress
-        for d in result_df['Direction']:
-            if abs(d) == 1:
-                desired_direction = d
-                break
-
-        # Goal
-        goal_status = max(result_df['Goal Status'])
-        
-        prog_list = []
-        for x,y in zip(result_df['Pos X'], result_df['Pos Y']):
-            prog_list.append(pos_to_progress((x, y), desired_direction))
-        
-        # For detecting errors in simulation...
-        coarseness = 50 # get progress once every 5 seconds
-        jump_bdry = 0.2
-        backwards_bdry = -0.0005
-
-        coarse_prog = 0
-        coarse_diff = 0
-        jump_flag = False
-        backwards_flag = False
-        err_detected = False
-
-        prog_actual = [0.0]
-        for i in range(len(prog_list)):
-            p = prog_list[i]
-
-            # Update progress to current iff it is achieveable going forwards, otherwise repeats
-            if i > 0:
-                prog_diff = p - prog_actual[i-1]
-                if prog_diff < 0 or jump_bdry < prog_diff:
-                    prog_actual.append(prog_actual[i-1])
-                    #print('[%4d] Detected backwards or abnormal forward mvnt' % i)
-                else:
-                    prog_actual.append(p)
-
-            if (i % coarseness) == 0:
-                if (jump_flag or backwards_flag):
-                    if p - coarse_prog < backwards_bdry*coarseness:
-                        err_detected = True
-                    else:
-                        #print('Reseting err flags...')
-                        jump_flag = False
-                        backwards_flag = False
-
-                if p - coarse_prog > jump_bdry*coarseness:
-                    jump_flag = True
-                    #print('Jump Detected!')
-                    #print('\t%.3f to %.3f -- note bdry at %f' % (coarse_prog, p, jump_bdry))
-                elif p - coarse_prog < backwards_bdry*coarseness:
-                    backwards_flag = True
-                    #print('Significant Backwards Movement Detected!')
-                    #print('\t%.3f to %.3f -- note bdry at %f' % (coarse_prog, p, backwards_bdry))
-                    
-                coarse_prog = p
-
-        # Determine max progress from the last actual progress recorded
-        max_prog = prog_actual[-1]
-
-        if err_detected:
-            print('Err detected, max_prog = %.2f' % max_prog)
-            #max_prog = -1
-
-        prog_df = pd.DataFrame(data={'Progress': prog_list, 'Actual Progress': prog_actual})
-        result_df = result_df.join(prog_df)
-
-        raw_fit = [max_prog, time_elapsed, goal_status]
-        if max_prog > 0.95:
-            fit = 4 + (1 + 80 / time_elapsed) ** 2
-        else:
-            fit = (1 + max_prog) ** 2
-
-        #raw_fit = [avg_speed, max_speed, waypoints_achieved, time_elapsed, total_dist]
-        #norm_fit = [norm_avg_speed * 2, norm_max_speed * 2, norm_wp * 3, norm_time_elapsed,
-        #        norm_dist]
-        #fit = (sum(norm_fit),)
-        
-        
-        return raw_fit, (fit,), result_df
-
     def create_run_log(self):
         self.run_log = collections.OrderedDict()
         
@@ -677,60 +608,6 @@ def checkBounds(min_val, max_val):
         return wrapper
     return decorator
 
-def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23.48):
-    """
-    Returns the effective fraction of distance around the track dependent
-    on the intended direction (-1 for clockwise, 1 for counter clockwise).
-
-    Note that the track is defined by the last three parameters:
-        - ell : defines the length of the straitaway
-        - rad_inner : the inner radius of the annulus
-        - rad_outer : the outer radius of the annulus
-    and their default values are based on estimates via rviz.
-    """
-    rad_avg = (rad_inner + rad_outer) / 2
-    L = 2 * ell + 2 * math.pi * rad_avg
-
-    # Rotation is pi/4
-    c = math.sqrt(2)/2
-    s = math.sqrt(2)/2
-
-    # Get the position in a rotated coordinate fram to make distinctions easier
-    rot_pos = (c*raw_pos[0] + s*raw_pos[1], -s*raw_pos[0]+c*raw_pos[1])
-
-    # First assume counter clockwise (corrected after piecewise function)
-    if -ell/2 <= rot_pos[0] and rot_pos[0] <= ell/2: # in rectangle portion
-        if rot_pos[1] > 0: # in top portion
-            # completed bottom half and one turn
-            base_progress = ell/2 + math.pi*rad_avg
-            eff_dist = base_progress + (ell/2 - rot_pos[0])
-        else: # in bottom portion
-            if rot_pos[0] > 0:
-                # no base progress
-                eff_dist = rot_pos[0]
-            else:
-                # completed bottom half, two turns, and top
-                base_progress = 1.5*ell + 2*math.pi*rad_avg
-                eff_dist = base_progress + (ell/2 + rot_pos[0])
-    else: # in annulus
-        if rot_pos[0] > 0: # in right portion
-            # completed bottom half
-            base_progress = 0.5*ell
-            eff_theta = math.pi - math.atan2(rot_pos[0] + ell/2, rot_pos[1])
-        else: # in left portion
-            # completed bottom half, one turn, and top
-            base_progress = 1.5*ell + math.pi*rad_avg
-            eff_theta = -math.atan2(rot_pos[0] - ell/2, rot_pos[1])
-
-        eff_dist = base_progress + rad_avg*eff_theta
-
-    eff_progress = eff_dist / L # normalize
-
-    if direction < 0:
-        eff_progress = 1 - eff_progress
-
-    return eff_progress
-
 def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
     """
     Converts an amount of seconds into a time string.
@@ -759,26 +636,6 @@ def seconds_to_time_str(seconds, dec_precision=0, no_hrs=False, no_min=False):
         result_str += '%.{}f'.format(dec_precision) % (int_sec + float_sec)
     
     return result_str
-
-def get_key_tree(dict_obj):
-    key_tree = {}
-    for k in dict_obj.keys():
-        if type(dict_obj[k]) is dict:
-            key_tree[k] = get_key_tree(dict_obj[k])
-        elif type(dict_obj[k]) is list:
-            key_tree[k] = type(dict_obj[k])
-        else:
-            key_tree[k] = dict_obj[k]
-
-    return key_tree
-
-def print_key_tree(key_tree, indent=''):
-    for k in key_tree:
-        if type(key_tree[k]) is dict:
-            print('%s%s:' % (indent, k))
-            print_key_tree(key_tree[k], indent + '\t')
-        else:
-            print('%s%s: %s' % (indent, k, key_tree[k]))
 
 def main():
     if os.path.exists('saved_ind.yml'):
@@ -823,6 +680,7 @@ def main():
         else:
             sim_type = 'sim'
 
+        print('starting individual genome...')
         actual_ind = node.single_genome(individual, args.param_type, sim_type)
 
         if args.save_as:
