@@ -280,7 +280,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
         # Setup Evolution Alg operators
         self.toolbox.register('mate', tools.cxTwoPoint)
         #std of 1 seems really large.... --JF
-        self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=self.mut_std, indpb=self.mut_pb)
+        self.toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=self.mut_std, indpb=2*self.mut_pb)
         self.toolbox.register('select', tools.selTournament, tournsize=self.tourn_size)
         
         # Setup EA history
@@ -378,7 +378,7 @@ class Nav_Tuning_DEAP_EA(SocketZMQDevice):
             offspring = toolbox.select(population, len(population))
             
             # Vary the pool of individuals
-            offspring = algorithms.varAnd(offspring, toolbox, self.mate_pb, 1.0)
+            offspring = algorithms.varAnd(offspring, toolbox, self.mate_pb, 0.5)
 
 
 
