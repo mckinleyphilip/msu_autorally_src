@@ -174,7 +174,6 @@ def evaluate_PID_result(ind, result):
     
     return fitness_val, (fitness_val,), result_df
 
-
 def pos_to_progress(raw_pos, direction, ell=34.08, rad_inner=13.86, rad_outer=23.48):
     """
     Returns the effective fraction of distance around the track dependent
