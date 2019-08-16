@@ -1,0 +1,37 @@
+session_name: robo6
+windows:
+- window_name: robo6_1
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh jared@35.9.28.161
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh jared@35.9.28.162
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh jared@35.9.28.163
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh jared@35.9.28.164
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on
+- window_name: robo6_2
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh jared@35.9.28.165
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh jared@35.9.28.166
+      - roslaunch evo_ros2 evo_ros2.launch
+    - shell_command:
+      - ssh jared@35.9.28.167
+      - roslaunch evo_ros2 evo_ros2.launch
+  options_after:
+    synchronize-panes: on

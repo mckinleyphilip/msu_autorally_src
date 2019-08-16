@@ -1,0 +1,60 @@
+session_name: robo8
+windows:
+- window_name: robo8_1
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh jared@35.9.28.183
+    - shell_command:
+      - ssh jared@35.9.28.184
+    - shell_command:
+      - ssh jared@35.9.28.185
+    - shell_command:
+      - ssh jared@35.9.28.186
+  options_after:
+    synchronize-panes: on
+- window_name: robo8_2
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh jared@35.9.28.187
+    - shell_command:
+      - ssh jared@35.9.28.188
+    - shell_command:
+      - ssh jared@35.9.28.189
+    - shell_command:
+      - ssh jared@35.9.28.190
+  options_after:
+    synchronize-panes: on
+- window_name: robo8_3
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh jared@35.9.28.191
+    - shell_command:
+      - ssh jared@35.9.28.192
+    - shell_command:
+      - ssh jared@35.9.28.193
+    - shell_command:
+      - ssh jared@35.9.28.194
+  options_after:
+    synchronize-panes: on
+- window_name: robo8_4
+  layout: tiled
+  shell_command_before:
+    - pwd
+  panes:
+    - shell_command:
+      - ssh jared@35.9.28.195
+    - shell_command:
+      - ssh jared@35.9.28.196
+    - shell_command:
+      - ssh jared@35.9.28.197
+  options_after:
+    synchronize-panes: on
