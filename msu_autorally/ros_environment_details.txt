@@ -162,7 +162,7 @@ tf2-ros==0.5.18
 tf2-sensor-msgs==0.5.18
 tornado==5.1
 traitlets==4.3.2
-Twisted==18.7.0
+Twisted==22.2.0
 unique-id==1.0.5
 wcwidth==0.1.7
 webencodings==0.5.1
