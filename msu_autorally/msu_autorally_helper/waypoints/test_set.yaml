@@ -1,5 +1,0 @@
-# Test set of waypoints for working with the move_base waypoint publishing and logging nodes
-move_base_seq:
-  p_seq: [[-1,-24,0],[26.6,23.2,0],[5.0,29.0,0],[-29.3,-2.72,0],[1.67,-23.7,0]]
-  quat_seq: [[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]]
-
